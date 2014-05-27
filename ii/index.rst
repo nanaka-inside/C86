@@ -17,10 +17,12 @@ Immutable Infrastructureの最適解を探る
   * 結局どうなるのよ、自動化して。恩恵はあるの？
 * serfとかdokkerとかansibleとかいうけど実際使えてる？
 * それじゃあそれぞれ解説しましょうか
+  * と思ったけどテスト大事だよね！serverspecのお話からやっていく
+    * それから、chefやansibleをプラがブルに使っていく話
   * chefつらぽよ。chefについてはvol.4でやったのでそっちを参照
   * ansibleどう？
     * 使い方を解説
-  * Vagrantとか使ったことないけど実際どうなの？どうやったら使える？
+  * Vagrantとか使ったことないけど実際どうなの？どういう環境で動作するの？どの辺がうれしい？
   * hostsの書き換えどうしてる？
   * 監視ツールに自動で突っ込んでほしいよねー
   * CI as a Serviceが現段階でのゴールのような気がする
@@ -53,7 +55,8 @@ Immutable Infrastructure とは
  * vagrant
  * fluentd
  * Serf
-
+ * serverspec
+ * mackerel.io
 
 一方我々は...
 --------------------
