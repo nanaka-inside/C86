@@ -10,6 +10,6 @@
    clearpage.rst
    rosylilly/index.rst
    clearpage.rst
-   inokinn/index.rst
+   irimo/index.rst
    clearpage.rst
 
