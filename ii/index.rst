@@ -92,7 +92,7 @@ Immutable Infrastructure の利点
 chef辛いという話を聞く。ansibleに鞍替えしてみたい誘惑に駆られる。
 が、結局、構築したものがきちんと動いているかどうか確かめる必要がある。だから構築されているサーバに対してserverspecでテストを書くところから始めた。
 
-
+ここからserverspecの実践を始める。
 
 
 
@@ -114,6 +114,8 @@ chef辛いという話を聞く。ansibleに鞍替えしてみたい誘惑に駆
  * docker
  * vagrant
  * fluentd
+   * ログをどうするかの話
+   * じゃあDBどうすんのよ。頑張れ！！！
  * Serf
    * hostsを書き換える例
  * serverspec
