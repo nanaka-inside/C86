@@ -33,6 +33,10 @@ Immutable Infrastructureの最適解を探る
     * それから、chefやansibleをプラがブルに使っていく話
 
   * chefつらぽよ。chefについてはvol.4でやったのでそっちを参照
+
+    * chef辛かったのでrpm化してみたけどphpのrpmを作るのがつらぽよ
+    * プロジェクトごとにconfigureオプション違うし、コマンドラインでやったほうが早げ
+
   * ansibleどう？
 
     * 使い方を解説
@@ -79,16 +83,20 @@ Immutable Infrastrucure(以下、IIと略します)は、今年のインフラ�
 発端
 ^^^^^
 
-Kief Morris [#iikief]_ が2013年6月に「ImmutableServer」 [#iiims]_ というエントリを上げ、その10日後、CHad Fowler [#iichad]_ が「サーバを捨ててコードを焼き付けろ！」 [#iitys]_ というエントリをあげています [#iihottan]_ 。
+Kief Morris氏 [#iikief]_ が2013年6月に「ImmutableServer」 [#iiims]_ というエントリを上げ、その10日後、CHad Fowler氏 [#iichad]_ が「サーバを捨てて、コードを焼き付けろ！」 [#iitys]_ というエントリを上げています [#iihottan]_ 。
+
 
 .. [#iikief] http://kief.com/ https://twitter.com/kief
 .. [#iiims] http://martinfowler.com/bliki/ImmutableServer.html
 .. [#iichad] https://twitter.com/chadfowler
-.. [#iitys] http://chadfowler.com/blog/2013/06/23/immutable-deployments/
-.. [#iihottan] このへんの流れは、 Junichi Niino氏の「Immutable Infrastructure（イミュータブルインフラストラクチャ）と捨ててしまえるコンポーネント」 チャド・ファウラー氏　http://www.publickey1.jp/blog/14/immutable_infrastructure.html　を参考にしました。っていうかほぼそのまま
+.. [#iitys] 邦題は@naoya氏の「Immutable Infrastructure Conference #1」の発言から引用。「Trash Your Servers and Burn Your Code: Immutable Infrastructure and Disposable Components」http://chadfowler.com/blog/2013/06/23/immutable-deployments/
+.. [#iihottan] このへんの流れは、 Junichi Niino氏の「『Immutable Infrastructure（イミュータブルインフラストラクチャ）と捨ててしまえるコンポーネント』 チャド・ファウラー氏」http://www.publickey1.jp/blog/14/immutable_infrastructure.html　を参考にしました。っていうかほぼそのまま
+
 
 II以前の世界
 ^^^^^^^^^^^
+
+[TODO]発端ページで有用な文章があるのでこの章いらないかも。まっしろわーるどはつかいたけどまあ。
 
 本番や開発環境のミドルウエアをアップデートしたり、プラグインをインストールしたり、設定を変更したり、ユーザを追加したり、OSの設定を変更したりしますよね。例えば：
 
@@ -193,14 +201,9 @@ pull requiestをIRCなどのツールで自動化して作成し、Pull Request�
 Blue-Green Deployment
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IIを語る上では避けて通れないキーワードです。
+IIを語る上では避けて通れないキーワードです。IIとは違う概念というか方法。
 
-
-
-
-hoge
-^^^^^^^^^^^^^^
-
+[TODO]例の画像を突っ込んで解説
 
 
 Immutable Infrastructure の利点
@@ -333,6 +336,59 @@ mackerelを取り上げる。
  
   * serverspec
   * mackerel.io
+  * AMIをコピーするという運用
+
+壮大なメモ
+----------
+
+ * PhenixServer : http://martinfowler.com/bliki/PhoenixServer.html
+
+   * フェニックスサーバ。認証監査をしようと思った
+   * 今動いている本番環境を再度構築しなおすことになる
+   * 定期的にサーバを焼き払ったほうがいい
+   * サーバは灰の中から不死鳥のように蘇る。だからフェニックスサーバという
+   * 構成のズレ、アドホックな変更でサーバの設定が漂流する。SnowflakeServersにいきつく
+   * このような漂流に対向するためにpuppetやchefをつかってサーバを同期し直す。
+   * netflixはランダムにサーバを落として大丈夫か試している（ひー
+
+ * SnowflakeServer : http://martinfowler.com/bliki/SnowflakeServer.html
+
+   * スノーフレークサーバ。雪のかけらサーバという存在
+   * OSやアプリケーションにパッチを当てたりする必要がある
+   * 設定を調査すると、サーバによって微妙に違う
+   * スキー場にとっては良いが、データセンターではよくない
+   * スノーフレークサーバは再現が難しい
+   * 本番での障害を開発環境で再現させても調査できない
+
+     * 参考文献・目に見えるOpsハンドブック　http://www.amazon.com/gp/product/0975568604
+     * 芸術家はスノーフレークを好むのだそうだ　http://tatiyants.com/devops-is-ruining-my-craft/
+
+       * （サーバ含めそのなかのアプリケーションも工業製品なんだよ！！！わかったか！！！（横暴
+       * （昔はひとつのサーバでなんとか出来たけど、今はアクセスも増えてサーバも増えたので芸術品はいらない！！
+       * （どーどー落ち着けー、なーー
+
+   * スノーフレークのディスクイメージを造ればいいじゃんという議論
+   * だがこのディスクイメージはミスや不要な設定も一緒に入っている
+   * しかもそれを変更することもある。壊れやすさの真の理由となる（雪だけに
+   * 理解や修正がしにくくなる。変更したら影響がどこに及ぶかわからない
+   * そんなわけで古代のOSの上に重要なソフトウエアが動作している理由である
+   * スノーフレークを避けるためにはpuppetやchefを使って動作の確認のとれたサーバを保持すること
+   * レシピを使用すつと、簡単に再構築できる。または、イメージデータを作れる
+   * 構成はテキストファイルだから変更はバージョン管理される
+
+   * nologinにしてchefなどからレシピを実行すれば、変更はすべてログに残り監査に対して有効
+   * 構成の違いによるバグを減らし、全く同じ環境をつくれる。また、環境の違いに起因するバグを減らせる
+
+     * 継続的デリバリーの本に言及する　あっ
+
+ * ConfigurationSynchronization : http://martinfowler.com/bliki/ConfigurationSynchronization.html
+
+   * まだ読んでない
+
+ * ImmutableServer : http://martinfowler.com/bliki/ImmutableServer.html
+
+   * やっともどってこれた。この文章からスノーフレークとフェニックスサーバに飛んでいる
+   * 
 
 
 結論
