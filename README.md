@@ -3,7 +3,7 @@ C86
 
 * thin book of nanaka inside press vol.5
 * 2014/08/17 C86で頒布
-* 「第7開発セクション」のサークルは抽選漏れになりました。委託先
+* 「第7開発セクション」のサークルは抽選漏れになりました。委託先は決まっております。追って告知します
 
 
 schedule
@@ -57,5 +57,9 @@ member
   * Minecraft MOD 入門
 
 * @binzume
+
+  * 未定
+
+* @saiten
 
   * 未定
