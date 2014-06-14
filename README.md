@@ -1,7 +1,10 @@
 C86
 ===
 
-thin book of nanaka inside press vol.5
+* thin book of nanaka inside press vol.5
+* 2014/08/17 C86で頒布
+* 「第7開発セクション」のサークルは抽選漏れになりました。委託先
+
 
 schedule
 ---------
@@ -16,12 +19,43 @@ schedule
 
 member
 --------
+
 * @Omegamega
+
+  * できね！家庭用3Dプリンタ
+
 * @syucream
+
+  * 今すぐ試そうHTTP/2
+
 * @tkzwtks
+
+  * バランスwiiボードで健康管理
+
 * @irimo
+
+  * 風水プログラミング
+
 * @richmikan
+
+  * コマンド活かせば言語は要らぬ！「シェルスクリプト Webアプリ『即席』作成術」
+
 * @rosylilly
+
+  * AWSをコード化する
+
 * @sisidovski
+
+  * 待ちくたびれたよ！ 解説 Socket.IO 1.0
+
 * @tboffice
+
+  * Immutable Infrastructureの最適解を探る
+
+* @mtgto
+
+  * Minecraft MOD 入門
+
 * @binzume
+
+  * 未定

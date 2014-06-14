@@ -2,11 +2,15 @@
 .. toctree::
    :maxdepth: 3
 
+   richmikan/index.rst
+   clearpage.rst
    omegamega/index.rst
    clearpage.rst
    binzume/index.rst
    clearpage.rst
    mtgto/index.rst
+   clearpage.rst
+   tkzwtks/index.rst
    clearpage.rst
    saiten/index.rst
    clearpage.rst
@@ -15,8 +19,6 @@
    irimo/index.rst
    clearpage.rst
    44_10/index.rst
-   clearpage.rst
-   richmikan/index.rst
    clearpage.rst
    syucream/index.rst
    

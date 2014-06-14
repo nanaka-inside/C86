@@ -1,4 +1,4 @@
-minecraftで何か
+Minecraft MOD 入門
 ==================
 
 hoge
