@@ -3,5 +3,5 @@
    :maxdepth: 3
 
    clearpage
-   ii/index.rst
+   tboffice/index.rst
    clearpage.rst
