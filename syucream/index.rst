@@ -62,6 +62,30 @@ curl
 Wireshark
 """"""""""
 
+みんな大好きネットワークアナライザの Wireshark も、開発版では HTTP/2 をサポートしています。
+通常通り解析対象のインタフェースを選択し、フィルタとして "http2" を入力します。
+するとアラ不思議！やり取りされている HTTP/2 フレームの種類とその内容が判別できます。
+
+下図は実際に開発版 Wireshark で HTTP/2 フレームをキャプチャしてみた図です。
+Magic Octet（HTTP/2通信開始時に送られる 24 ビットの固定の文字列）、 SETTINGS フレーム、 HEADERS フレームがやり取りされているのが分かります。
+HEADERS フレームは HPACK という独自の圧縮形式で圧縮されているのですが、それをうまく展開し内容が確認できているのが分かります。
+
+.. figure:: img/wireshark_dev.jpg
+
+   開発版 Wireshark で HTTP/2 フレームを覗き見ているシーン
+
+Wireshark の HTTP/2 対応は残念ながら正式にサポートされている訳ではなく、利用したい場合は下記 URL の git リポジトリからコードを取得して自前でビルドする必要があります。
+
+::
+
+   https://code.wireshark.org/review/wireshark
+
+Mac OS X を利用している場合、 Homebrew で HEAD 版を入れてしまうのが手っ取り早いかも知れません。
+
+::
+
+   brew install wireshark -HEAD
+
 h2load
 """""""
 
