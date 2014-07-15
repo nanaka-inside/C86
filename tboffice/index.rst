@@ -370,6 +370,8 @@ CI as a Service
 参考文献
 --------
 「継続的デリバリー 信頼できるソフトウェアリリースのためのビルド・テスト・デプロイメントの自動化」アスキー・メディアワークス,2012
+「WEB+DB PRESS vol.81」技術評論社,2014
+
 
 IIやる人はこれだけは最低限みておけリンク
 ------------------------------------
@@ -454,3 +456,14 @@ IIやる人はこれだけは最低限みておけリンク
     * http://techblog.netflix.com/2013/03/ami-creation-with-aminator.html
     * AMIを作るツール　https://github.com/Netflix/aminator#readme
 
+
+* WEB+DB PRESS 81からメモ
+
+  - IIデメリット　サーバが立ち上がった状態からの変更を禁じているのでちょっとした変更を入れるのにもサーバを作りなおす必要がある
+  - サーバの生成廃棄コストが頻繁にあると運用コストが増大する
+  - サーバの作成や廃棄が簡単なクラウドを使うのが楽
+  - ホストの生成廃棄プロセスをAPIでやれると楽。LBとかもAPIでやれると楽
+  - クラスタ監視ツールにmackerel.ioを使おう
+  - dokku , flynn, apache mesos, Surf
+  - pakker
+  - BGDepではLBをAPIで変更できると楽
