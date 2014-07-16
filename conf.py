@@ -196,7 +196,7 @@ latex_elements = {
 \fancypagestyle{normal}{
 \fancyhf{}
 \fancyhead[LE,RO]{\nouppercase{\rightmark}}
-\fancyfoot[LE,RO]{thin books ◆ \thepage}
+\fancyfoot[LE,RO]{ななかInside PRESS Vol.5 ◆ \thepage}
 }
 \fancypagestyle{plain}{
 \fancyhf{}
