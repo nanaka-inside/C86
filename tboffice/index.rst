@@ -240,64 +240,132 @@ Serverspecのチュートリアルをクリアするといくつかファイル�
 
 .. code-block::ruby
 
-  require 'spec_helper'
-  
-  describe package('httpd') do
-    it { should be_installed }
-  end
-  
-  describe service('httpd') do
-    it { should be_enabled   }
-    it { should be_running   }
-  end
-  
-  describe port(80) do
-    it { should be_listening }
-  end
-  
-  describe file('/etc/httpd/conf/httpd.conf') do
-    it { should be_file }
-    its(:content) { should match /ServerName www.example.jp/ }
-  end
+   require 'spec_helper'
+   
+   describe package('httpd') do
+     it { should be_installed }
+   end
+   
+   describe service('httpd') do
+     it { should be_enabled   }
+     it { should be_running   }
+   end
+   
+   describe port(80) do
+     it { should be_listening }
+   end
+   
+   describe file('/etc/httpd/conf/httpd.conf') do
+     it { should be_file }
+     its(:content) { should match /ServerName www.example.jp/ }
+   end
 
-やってることはフィーリングでなんとかして下さい。え？なんとかならない？しょうがないにゃあ。このファイルの例では、httpdに関連したファイルで、パッケージがインストールされているか、httpdがOS起動時に起動しているか、プロセスが上がっているか、80番ポートをlistenしているかなどをチェックします。
+やってることはフィーリングでなんとかして下さい。え？なんとかならない？しょうがないにゃあ。このspecファイルは、httpdに関連したファイルで、パッケージがインストールされているか、httpdがOS起動時に起動しているか、プロセスが上がっているか、80番ポートをlistenしているかなどをチェックします。なお、localhostにsshで入れる設定であれば、自分自身もテストできます [#iijibun]_ 。
 
-ただし、チュートリアルで作ったテストは、1つのサーバに対応しています。複数のサーバをまとめてチェックするものがないかなーと探していたらありました [#iiscd]_ [#iiscdbun]_ 。
+チュートリアルで作ったこのテスト(specファイル)は、1つのサーバに対応しています。複数のサーバをまとめてチェックするものがないかなーと探していたらありました [#iiscd]_ [#iiscdbun]_ 。使ってみましょう。
 
-.. code-block:: bash
+.. code-block:: sh
 
    $ git clone git@github.com:dwango/serverspecd.git
    $ cd serverspecd
-   $ bundle 
+   $ bundle
 
 hosts.ymlにホスト名とチェックするrolesを書いて、attributes.ymlにroleに与えるパラメーターを書きます。
+たとえば自分が所有しているvpsにテストをかけてみましょう。まずは、sshでノンパスで入るために``.ssh/config``を設定。公開鍵は別途登録して下さい。
 
-たとえば自分が所有しているvpsにテストをかけてみましょう。ssh/configから書き始める
+.. code-block:: conf
+
+   Host nico
+     HostName        niko.example.com
+     Port            2525
+     User            nico_yazawa
+     IdentityFile    ~/.ssh/id_rsa
+     User            nico
+
+attributes.yml.templateとhosts.yml.templateをリネームしてhosts.ymlを変更。こんな感じ。
+
+.. code-block:: sh
+
+   $ cp attributes.yml.template attributes.yml
+   $ cp hosts.yml.template hosts.yml
+   $ cat hosts.yml
+   nico:
+     :roles:
+        - os
+   maki:
+     :roles:
+        - os
+        - network
+
+設定を見てみましょう。サーバの一覧が並びます。
+
+.. code-block:: sh
+
+   % rake -T                              
+   (in /home/chiba/repo/serverspecd)
+   rake serverspec       # Run serverspec to all hosts
+   rake serverspec:maki  # Run serverspec to maki
+   rake serverspec:niko  # Run serverspec to niko
+
+テスト実行してみます。成功したテストは ``.``  、失敗したテストは ``F`` で表示されます。失敗したテストの理由が表示されます。どんなコマンドを実行したか出るので、デバックするときに使います。
+
+.. code-block:: sh
+
+   $ rake serverspec:niko
+   (in /home/chiba/repo/serverspecd)
+   /usr/local/bin/ruby -S rspec spec/os/os_spec.rb
+   .FFFFFFFFF..FF...F.F....FFFFFF........F.........FF..FF..FFFF....F....F..F.......FF....F...FFFFF......FFF
+   
+   Failures:
+   (以下略)
+
+なお、attributes.ymlのosのセクションにパラメータが、テストは ``spec/os/os_spec.rb`` にあります。phpやmysqlのテストも同梱したので、使いたい人は使ってやって下さい。
+
+Serverspecで重要なのは、何をテストするかということです。なるべく重複するテストの数を少なくするのがおすすめです。これをチェックすれば、複数の項目がチェックできるテストが良いです。
+応用としては、開発サーバや本番サーバのSAN値 [#iisanti]_ のチェックをしてみましょう。
+具体的には、Jenkins [#iijenkins]_ おじさんを使って1日1回程度テストを回して、入ってはいけないパッケージを見つけたり、別のサーバへの疎通ができているかをチェックしましょう [#iiscn]_ 。
+テストを書くのはだるいですが、一度やっておけば、バグや障害を検出することができますので、是非やりましょう。
 
 .. [#iiscurl] http://serverspec.org/
 .. [#iirspec] http://rspec.info/
 .. [#iiscd] https://github.com/dwango/serverspecd 「d」とついているからといって、デーモンではありません
-.. [#iiscdbun] bundleコマンドがなければ、``gem install bundler`` でインストールして下さい。``gem`` がなかったらrubyをインストールして下さい。
-
-* 重要な点
-
-  * 何をチェックするのか考えないといけない
-  * だるいけど重要
-
-* 概要
-* 使ってみる
-* 利点
-
-    * 本番サーバのSAN値検証に使えるので、jenkinsおじさんで１日１回まわす
-    * zabbixとかと連携してみるとおもしろい？そんなことないか
+.. [#iiscdbun] bundleコマンドがなければ、``gem install bundler`` でインストールして下さい。``gem`` がなかったらrubyをインストールして下さい
+.. [#iijibun] 自分自身といっても人ではなく、サーバのことです。自分のテストは健康診断にでも行って下さい(執筆時期が丁度そんな時期)
+.. [#iisanti] SAN値とは、正気度を表すパラメーターのことである - http://dic.nicovideo.jp/a/san値
+.. [#iijenkins] http://jenkins-ci.org/ Jenkins CI。継続的デリバリーには必須のアイテム。トリガーを設定してテストなどを実行できるソフトウエアです。実行の結果がわかりやすいです
+.. [#iiscn] スイッチやロードバランサの設定がいつのまにか変わっていて疎通できない！(・ω・＼)SAN値!(／・ω・)／ピンチ!なんてことがないように
 
 
-構築にはansible
+構築にはAnsible
 ^^^^^^^^^^^^^^^
 
-* chefにつかれたあなたへ
-* あ、windowsは捨ててください。サポートしてないんで
-* さてansible
+構築を自動で行ってくれるソフトウエアといえば chef が有名になってきました。 chefについては、弊サークルが前回頒布した「ななかInside PRESS vol.4」で特集をしているのでご覧ください。
+同じものを取り上げても面白くないので、ポストchefになりつつある [#iiann]_ Ansible [#iiansible]_ を取り上げます。さきほど取り上げた、IIの三層の「Configuration」の部分のソフトウエアです。
+なお、ここではLinux上でのAnsibleを解説します。Ansible 1.7からWindowsもサポートされたようなので、必要であればドキュメント [#iianwin]_ をご覧ください。
+
+.. [#iiann] 脳内調べ
+.. [#iiansible] http://www.ansible.com/home
+.. [#iianwin] http://docs.ansible.com/intro_windows.html
+
+Ansibleの利点として、「数時間で自動化できてとってもシンプル！」「構築先のサーバはノンパスsshで入れるようにしておけばOK！」「パワフル」[#iianpo]_ 
+さて、何ができるかよくわからないまま使ってみましょう。対象のホストへsshでノンパスでログインできるようにしておけば準備完了。
+
+.. [#iianpo] どの辺がパワフルなのか実はよーわからん
+
+* Ansibleのインストール
+
+Amazon EC2では、これでインストール完了。最新版のAnsibleがインストールされます。
+
+.. code-block:: sh
+
+   $ sudo easy_install pip
+   $ sudo pip install ansible
+
+なお、``python-simplejson``パッケージが必要なので、CentOSの古いバージョンでやるときには注意してください。EPELが入っているなら、`` sudo yum install ansible``でインストールできます。pipなら、``sudo easy_install simplejson``でいけるはず。
+ [#iiansdo]_ 。
+
+.. [#iiansdo] DigitalOcenan の CentOS 7 では、``yum install -y gcc python-devel`` してから ``sudo easy_install pip && sudo pip install ansible && sudo easy_install simplejson``という感じで ``ansible`` コマンドが起動はしました
+
 
   * ansibleとは
   * 使ってみる
@@ -393,6 +461,10 @@ CI as a Service
 -------
 
 * 本当にやりたいことは何だ？
+
+  * 実際には運用に入ったサーバを作って壊す富豪的な環境ってあんまりないよね　お金もかかるし。オンプレミスだったらそんな余裕はないはず
+  * 運用に入ったサーバの変更を安全にやるためにはどうする
+  
 * 現在進行形でみんな手探り状態
 * おじさんのchef疲れ
 * やりたいことを実現するためのツールが乱立している
