@@ -130,7 +130,7 @@ Wireshark
 Magic Octet（HTTP/2通信開始時に送られる 24 ビットの固定の文字列）、 SETTINGS フレーム、 HEADERS フレームがやり取りされているのが分かります。
 HEADERS フレームは HPACK という独自の圧縮形式で圧縮されているのですが、それをうまく展開し内容が確認できているのが分かります。
 
-.. figure:: img/wireshark_dev.jpg
+.. figure:: img/wireshark_dev.eps
 
    開発版 Wireshark で HTTP/2 フレームを覗き見ているシーン
 
