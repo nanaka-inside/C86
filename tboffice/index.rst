@@ -219,8 +219,8 @@ IIの三層
 
 .. [#iizansaya] 残念さやかちゃん。まえがきでこのネタを使おうと準備してたけど結局使えなかったのでここで満を持して登場!!
 
-なんでServerspecから始めるのかだって？それは重要だからです。サーバのデプロイはchefでもAnsibleでもbashスクリプトでも手動でコマンドを打てばできるからです。
-問題はそのあと、誰がどうやってそのサーバが正しくセットアップできているか調べるのか？それにはServerspecを使いましょう。
+なんでServerspecから始めるのかだって？それはそこそこ重要で取っ付きやすいからです。サーバのデプロイはchefでもAnsibleでもbashスクリプトでも手動でコマンドを打てば構築はできます。
+問題はそのあとです。誰がどうやって、そのサーバが正しくセットアップできているか調べるのか？それにはServerspecを使いましょう。
 
 .. tip::
 
@@ -235,8 +235,56 @@ IIの三層
 動作確認するためにServerspec
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Serverspecとは、ssh経由でOSの内部の状態をチェックすることができます。
+Serverspec [#iiscurl]_ とは、ruby製のツールで、Rspec [#iirspec]_ を拡張したものです。ssh経由でOSの内部の状態をチェックすることができます。さっそく具体例を見ていきましょう。
+Serverspecのチュートリアルをクリアするといくつかファイルが出来ます。そのとき、テストを記述するspecファイルもサンプルとして一緒に作成されます。
 
+.. code-block::ruby
+
+  require 'spec_helper'
+  
+  describe package('httpd') do
+    it { should be_installed }
+  end
+  
+  describe service('httpd') do
+    it { should be_enabled   }
+    it { should be_running   }
+  end
+  
+  describe port(80) do
+    it { should be_listening }
+  end
+  
+  describe file('/etc/httpd/conf/httpd.conf') do
+    it { should be_file }
+    its(:content) { should match /ServerName www.example.jp/ }
+  end
+
+やってることはフィーリングでなんとかして下さい。え？なんとかならない？しょうがないにゃあ。このファイルの例では、httpdに関連したファイルで、パッケージがインストールされているか、httpdがOS起動時に起動しているか、プロセスが上がっているか、80番ポートをlistenしているかなどをチェックします。
+
+ただし、チュートリアルで作ったテストは、1つのサーバに対応しています。複数のサーバをまとめてチェックするものがないかなーと探していたらありました [#iiscd]_ [#iiscdbun]_ 。
+
+.. code-block:: bash
+
+   $ git clone git@github.com:dwango/serverspecd.git
+   $ cd serverspecd
+   $ bundle 
+
+hosts.ymlにホスト名とチェックするrolesを書いて、attributes.ymlにroleに与えるパラメーターを書きます。
+
+たとえば自分が所有しているvpsにテストをかけてみましょう。ssh/configから書き始める
+
+.. [#iiscurl] http://serverspec.org/
+.. [#iirspec] http://rspec.info/
+.. [#iiscd] https://github.com/dwango/serverspecd 「d」とついているからといって、デーモンではありません
+.. [#iiscdbun] bundleコマンドがなければ、``gem install bundler`` でインストールして下さい。``gem`` がなかったらrubyをインストールして下さい。
+
+* 重要な点
+
+  * 何をチェックするのか考えないといけない
+  * だるいけど重要
+
+* 概要
 * 使ってみる
 * 利点
 
