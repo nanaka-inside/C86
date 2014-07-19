@@ -111,6 +111,24 @@ nghttp2 をインストールできている場合、下記のようなコマン
 
    nghttp で -v オプションを付与してリクエストを投げた際の出力
 
+curl
+"""""
+
+curl では 7.33.0 以降から HTTP/2 リクエストが送れるようになりました。
+--http2 オプションを付与することで明示的に HTTP/2 リクエストを送ることができます。
+
+curl の HTTP/2 処理は nghttp2 を利用して実装されており、自前で curl をビルドする際には事前に nghttp2 をインストールしておく必要があります。
+curl についても本稿では Dockerfile を用意しました。
+
+::
+
+   $ docker build https://raw.githubusercontent.com/syucream/h2dockerfiles/master/curl/Dockerfile
+
+実際に curl で --http2 オプションを付けてリクエストを投げた結果は下記のようになります。
+
+〜〜ここに出力結果を貼る〜〜
+
+
 Google Chrome Canary
 """""""""""""""""""""
 
@@ -151,11 +169,6 @@ X-Firefox-Spdy ヘッダの内容に下図のような "h2-<ドラフト番号>"
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 著名なネットワークユーティリティも HTTP/2 のサポートを開始し始めてみます。
-
-curl
-"""""
-
-curl 開発版でも HTTP/2 をサポートしています。
 
 Wireshark
 """"""""""
