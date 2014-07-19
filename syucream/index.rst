@@ -114,16 +114,21 @@ nghttp2 をインストールできている場合、下記のようなコマン
 Google Chrome Canary
 """""""""""""""""""""
 
-Google Chrome Canary [*]_ は Google Chrome のナイトリービルド版のような立ち位置であり、実験的に搭載された数多くの機能を試すことができます。
+Google Chrome Canary [*]_ は Google Chrome のナイトリービルド版であり、実験的に搭載された数多くの機能を試すことができます。
 HTTP/2 もこの実験的な機能に含まれており、設定を有効にすることで手軽に利用を開始できます。
 
 Google Chrome Canary をダウンロードしたら、 chrome://flags にアクセスして試験運用機能の設定画面を開き、「SPDY/4 を有効にする」という項目を有効にしましょう。
 これだけですぐに HTTP/2 通信が利用可能になります。
 
-・・・とは言っても、これだけでは HTTP/2 通信できているかいまいち判別が付きません。
+しかしこれだけでは実際に HTTP/2 通信できているかはいまいち判別が付きません。
 そこで SPDY indicator なる Chrome 拡張を導入してみましょう。
-これを導入することで HTTP/2 通信が使用できている際に、下図のようにアドレスバーの右側に青い稲妻のアイコンが現れるようになります。
+この拡張を導入することで HTTP/2 通信が使用できている際に、下図のようにアドレスバーの右側に青い稲妻のアイコンが現れるようになります。
 
+〜〜ここに図を貼る〜〜
+
+また、 chrome://net-internals/#spdy で現在張られている HTTP/2 （と SPDY ）セッションの情報を確認することもできます。
+
+〜〜ここに図を貼る〜〜
 
 .. [*] https://www.google.com/intl/en/chrome/browser/canary.html
 
@@ -132,8 +137,13 @@ Google Chrome Canary をダウンロードしたら、 chrome://flags にアク�
 Firefox Nightly Build
 """""""""""""""""""""""
 
-Firefox Nightly Build [*]_ も Google Chrome Canary と同様、試験的に HTTP/2 をサポートしています。
+Firefox Nightly Build [*]_ は Firefox のナイトリービルド版であり、 Google Chrome Canary と同様試験的に HTTP/2 をサポートしています。
 こちらもデフォルトでは HTTP/2 が有効になっていないので、 about:config を開き network.http.spdy.enabled.http2draft と security.ssl.enable_alpn の設定値を true にしておきましょう。
+
+HTTP/2 通信できているか確認するには、 Firebug の Net タブから閲覧出来るレスポンスヘッダの内容からできます。
+X-Firefox-Spdy ヘッダの内容に下図のような "h2-<ドラフト番号>" が含まれていれば HTTP/2 通信ができています。
+
+〜〜ここに図を貼る〜〜
 
 .. [*] http://nightly.mozilla.org/
 
