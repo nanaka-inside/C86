@@ -50,10 +50,17 @@ nghttp2
 """"""""
 
 nghttp2 [*]_ は @tatsuhiro-t 氏によって開発が進められている C 実装の HTTP/2 ライブラリです。
-HTTP/2 の仕様の変更に迅速に対応しており、仕様の網羅性も高く、後述の curl, Wireshark の HTTP/2 実装として使用されています。
+HTTP/2 の仕様の変更に迅速に対応しており、仕様の網羅性も高く、後述の curl, Wireshark でも使用されています。
 
 GitHub の nghttp2 リポジトリにはクライアント (nghttp) とサーバ (nghttpd) 、プロキシ (nghttpx)、ベンチマークツール (h2load) が存在します。
 ./configure 実行時に --enable-app オプションを付与することでこれらがビルドされるようになります。
+詳細なビルド方法については README の記述を参照してください。
+
+またビルドするのが面等な方のために Dockerfile を用意しました。 docker build してご利用ください
+
+::
+
+   $ docker build https://raw.githubusercontent.com/syucream/h2dockerfiles/master/nghttp2/Dockerfile
 
 nghttp2 サーバをインストールした後は、下記コマンドで実行できます。
 
@@ -69,13 +76,18 @@ Apache Traffic Server
 """"""""""""""""""""""
 
 Apache Traffic Server (以下、ATS)は Apache のトップレベルプロジェクトの一つとして開発が進められている、オープンソースのキャッシュ・プロキシサーバです。
-ATS は現状正式に HTTP/2 をサポートしている訳ではないのですが、筆者に馴染み深いソフトウェアであり、かつ最近 HTTP/2  サポートに向けた活動が見られるので記述します。
+ATS は現状では正式に HTTP/2 をサポートしている訳ではないのですが、筆者に馴染み深いソフトウェアであり、かつ最近 HTTP/2  サポートに向けた活動が見られているので記述します。
 
 ATS の HTTP/2 対応は、 ATS の開発を管理する JIRA 上のチケットで議論が進められています。 [*]_
-初期は先述の nghttp2 を利用した HTTP/2 対応パッチが投稿されていましたが、議論の結果外部ライブラリに依存しない方針で対応を再検討されています。
+初期は先述の nghttp2 を利用した HTTP/2 対応パッチが投稿されており、仕様の draft-12 で動作が確認できていました。
+ただし現状では議論の結果、このパッチはマージされず外部ライブラリに依存しない方針で対応を再検討されています。
 
-nghttp2 を利用したパッチは現状でも動作は確認できます。
-〜〜〜ここに Dockerfile について書く〜〜〜
+一応、上記パッチを当てた ATS を簡単に動作させるための Dockerfile も用意しています。
+もしご興味がある方がいらっしゃれば、 docker build してご利用ください。
+
+::
+
+   $ docker build https://raw.githubusercontent.com/syucream/h2dockerfiles/master/nghttp2/Dockerfile
 
 .. [*] https://issues.apache.org/jira/browse/TS-2729
 
@@ -85,7 +97,7 @@ nghttp2 を利用したパッチは現状でも動作は確認できます。
 nghttp2
 """""""""
 
-先述の nghttp2 はクライアントの実装も持っています。
+先述の通り、 nghttp2 はクライアントの実装 (nghttp) も持っています。
 nghttp2 をうまくインストールできている場合、下記のようなコマンドを実行することで HTTP/2 サーバと通信ができるはずです。
 
 ::
@@ -94,6 +106,8 @@ nghttp2 をうまくインストールできている場合、下記のような
 
 -v オプションを付けることにより、 verbose モードでコマンド実行ができます。
 この状態では下図に示す通り、送受信している HTTP/2 フレームの種類や内容、 HTTP レスポンスボディが確認できます。
+
+〜〜ここに図を書く〜〜
 
 Google Chrome Canary
 """""""""""""""""""""
