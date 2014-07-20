@@ -52,14 +52,14 @@ HTTP/2 は基本的にドメイン毎に1本のTCPコネクションを張り、
 また、リクエスト毎にストリームと呼ばれる論理的なコネクションを張り、その上でリクエストが処理されます。
 ストリームにはそれぞれ一意のIDが振られ、どのリクエストがどのレスポンスに対応するか判別可能になっているため、 HTTP/1.1 で発生するような HOL Blocking が発生しません。
 
-2. に書いた通り、 HTTP/2 では 独自の圧縮形式 HPACK [*]_ によって HTTP ヘッダを圧縮してやり取りします。
+2. に書いた通り、 HTTP/2 では 独自の圧縮形式 HPACK [#]_ によって HTTP ヘッダを圧縮してやり取りします。
 HPACK は よく使用される HTTP ヘッダ（ステータスコードの組み合わせや Content-Type など）をインデックスで指定可能にする、以前送ったヘッダをインデックスで再参照可能にする、ヘッダの名前と値をハフマン符号化するなどすることでサイズを削減します。
 
 その他、 3. の通り HTTP/2 では先述のストリームに優先度を設定することが可能だったり、 
 サーバ側でウインドウサイズを設定し、これを超えるリクエストをクライアント側で送らないようにすることで 4, のフローコントロールを実現したり、
 クライアントからのリクエストに対してサーバがレスポンスを返すのでは無く、サーバが自発的にクライアントに必要だと思われるコンテンツを配信するサーバプッシュという機能がサポートされます。
 
-.. [*] http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07
+.. [#] http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07
 
 HTTP/2 の実装例
 ^^^^^^^^^^^^^^^^^
@@ -67,9 +67,9 @@ HTTP/2 の実装例
 現在未だ仕様策定中で、仕様の修正も頻繁に入っている HTTP/2 ですが、 既にいくつかの実装が存在します。
 仕様自体にまだ Last Call がかかっていない都合、多くの実装が試験的に機能提供しているという状態です。
 
-よく知られた実装については、 HTTP/2 の仕様策定について議論するための GitHub のリポジトリの Wiki に記載されています。 [*]_ 
+よく知られた実装については、 HTTP/2 の仕様策定について議論するための GitHub のリポジトリの Wiki に記載されています。 [#]_ 
 
-.. [*] https://github.com/http2/http2-spec/wiki/Implementations
+.. [#] https://github.com/http2/http2-spec/wiki/Implementations
 
 HTTP/2 実装を動かしてみる
 --------------------------
@@ -89,7 +89,7 @@ HTTP/2 を試してみたいけど、 HTTP/2 を解釈可能なサーバとク�
 nghttp2
 """"""""
 
-nghttp2 [*]_ は @tatsuhiro-t 氏によって開発が進められている C 実装の HTTP/2 ライブラリです。
+nghttp2 [#]_ は @tatsuhiro-t 氏によって開発が進められている C 実装の HTTP/2 ライブラリです。
 HTTP/2 の仕様の変更に迅速に対応しており、仕様の網羅性も高く、後述の curl, Wireshark でも使用されています。
 
 GitHub の nghttp2 リポジトリにはクライアント (nghttp) とサーバ (nghttpd) 、プロキシ (nghttpx)、ベンチマークツール (h2load) が存在します。
@@ -109,7 +109,7 @@ nghttp2 サーバをインストールした後は、下記コマンドで実行
    # http 通信のみの場合
    $ nghttpd --no-tls 8080
 
-.. [*] https://github.com/tatsuhiro-t/nghttp2
+.. [#] https://github.com/tatsuhiro-t/nghttp2
 
 
 Apache Traffic Server
@@ -118,7 +118,7 @@ Apache Traffic Server
 Apache Traffic Server (以下、ATS)は Apache のトップレベルプロジェクトの一つとして開発が進められている、オープンソースのキャッシュ・プロキシサーバです。
 ATS は現状では正式に HTTP/2 をサポートしている訳ではないのですが、筆者に馴染み深いソフトウェアであり、かつ最近 HTTP/2  サポートに向けた活動が見られているので記述します。
 
-ATS の HTTP/2 対応は、 ATS の開発を管理する JIRA 上のチケットで議論が進められています。 [*]_
+ATS の HTTP/2 対応は、 ATS の開発を管理する JIRA 上のチケットで議論が進められています。 [#]_
 初期は先述の nghttp2 を利用した HTTP/2 対応パッチが投稿されており、仕様の draft-12 で動作が確認できていました。
 ただし現状では議論の結果、このパッチはマージされず外部ライブラリに依存しない方針で対応を再検討されています。
 
@@ -129,7 +129,7 @@ ATS の HTTP/2 対応は、 ATS の開発を管理する JIRA 上のチケット
 
    $ docker build https://raw.githubusercontent.com/syucream/h2dockerfiles/master/nghttp2/Dockerfile
 
-.. [*] https://issues.apache.org/jira/browse/TS-2729
+.. [#] https://issues.apache.org/jira/browse/TS-2729
 
 クライアントを動かしてみる
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -172,7 +172,7 @@ curl についても本稿では Dockerfile を用意しました。
 Google Chrome Canary
 """""""""""""""""""""
 
-Google Chrome Canary [*]_ は Google Chrome のナイトリービルド版であり、実験的に搭載された数多くの機能を試すことができます。
+Google Chrome Canary [#]_ は Google Chrome のナイトリービルド版であり、実験的に搭載された数多くの機能を試すことができます。
 HTTP/2 もこの実験的な機能に含まれており、設定を有効にすることで手軽に利用を開始できます。
 
 Google Chrome Canary をダウンロードしたら、 chrome://flags にアクセスして試験運用機能の設定画面を開き、「SPDY/4 を有効にする」という項目を有効にしましょう。
@@ -188,14 +188,14 @@ Google Chrome Canary をダウンロードしたら、 chrome://flags にアク�
 
 〜〜ここに図を貼る〜〜
 
-.. [*] https://www.google.com/intl/en/chrome/browser/canary.html
+.. [#] https://www.google.com/intl/en/chrome/browser/canary.html
 
-.. [*] https://chrome.google.com/webstore/detail/spdy-indicator/mpbpobfflnpcgagjijhmgnchggcjblin
+.. [#] https://chrome.google.com/webstore/detail/spdy-indicator/mpbpobfflnpcgagjijhmgnchggcjblin
 
 Firefox Nightly Build
 """""""""""""""""""""""
 
-Firefox Nightly Build [*]_ は Firefox のナイトリービルド版であり、 Google Chrome Canary と同様試験的に HTTP/2 をサポートしています。
+Firefox Nightly Build [#]_ は Firefox のナイトリービルド版であり、 Google Chrome Canary と同様試験的に HTTP/2 をサポートしています。
 こちらもデフォルトでは HTTP/2 が有効になっていないので、 about:config を開き network.http.spdy.enabled.http2draft と security.ssl.enable_alpn の設定値を true にしておきましょう。
 
 HTTP/2 通信できているか確認するには、 Firebug の Net タブから閲覧出来るレスポンスヘッダの内容からできます。
@@ -203,7 +203,7 @@ X-Firefox-Spdy ヘッダの内容に下図のような "h2-<ドラフト番号>"
 
 〜〜ここに図を貼る〜〜
 
-.. [*] http://nightly.mozilla.org/
+.. [#] http://nightly.mozilla.org/
 
 周辺ツールを使ってみる
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -235,10 +235,7 @@ Mac OS X を利用している場合、 Homebrew で HEAD 版を入れてしま�
 
 ::
 
-   brew install wireshark -HEAD
-
-h2load
-"""""""
+   $ brew install wireshark -HEAD
 
 まとめ
 -------
@@ -247,10 +244,10 @@ HTTP/2 の実装をできるだけ簡単に試す方法、いかがでしたで�
 本稿で HTTP/2 に興味を抱いて頂ける、もしくは既存の実装を試して HTTP/2 の特徴やメリットを体感して頂ければ幸いです。
 
 もし HTTP/2 の仕様について疑問がある、運用していくことを想定した際に不安な点があるなど気になった点がありましたらぜひシェアしてみましょう。
-HTTP/2 は仕様の策定が GitHub 上で共有されており、議論に簡単に参加できるようになっています。 [*]_
-また日本でもコミュニティの活発が盛んで、現在 http2 勉強会 [*]_ がたまに開催されており、 Twitter 上でも #http2study ハッシュタグ付きのツイートで気軽に情報が共有できる状態になっています。
+HTTP/2 は仕様の策定が GitHub 上で共有されており、議論に簡単に参加できるようになっています。 [#]_
+また日本でもコミュニティの活発が盛んで、現在 http2 勉強会 [#]_ がたまに開催されており、 Twitter 上でも #http2study ハッシュタグ付きのツイートで気軽に情報が共有できる状態になっています。
 
-.. [*] https://github.com/http2/http2-spec
+.. [#] https://github.com/http2/http2-spec
 
-.. [*] http://connpass.com/series/457/
+.. [#] http://connpass.com/series/457/
 
