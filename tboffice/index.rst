@@ -363,17 +363,27 @@ Serverspecで重要なのは、何をテストするかということです。�
 Ansibleとは
 """"""""""""""""""""
 
-Michael DeHaan [#iiansmpd]_ 氏が作ったソフトウエアです [#iiansgithub]_ 。Cobblerに関わった人でもあります。Ansibleの哲学については、本人がGoogle Groupsに投稿したメッセージ「Ansible philosophy for those new to the list == keep it simple」 [#iiansp]_ をお読み下さい。
+Michael DeHaan [#iiansmpd]_ 氏が作ったソフトウエアです [#iiansgithub]_ 。Cobbler [#iianscobb]_ に関わった人でもあります。
+
+.. figure:: img/mpdehaan.eps
+  :scale: 70%
+  :alt: mpdehaan
+  :align: center
+
+  Michael DeHaan氏のアイコン
+
+Ansibleの哲学については、本人がGoogle Groupsに投稿したメッセージ「Ansible philosophy for those new to the list == keep it simple」 [#iiansp]_ をお読み下さい。
 
 .. [#iiansmpd] https://github.com/mpdehaan
 .. [#iiansgithub] https://github.com/mpdehaan/ansible
+.. [#iianscobb] http://www.cobblerd.org/
 .. [#iiansp] https://groups.google.com/forum/#!topic/ansible-project/5__74pUPcuw
 
 Ansibleの仕組みは、1台のControl Machine(CM)から複数のManaged Node(MN)へsshで接続を行います。CMでコマンドを実行すると、MNでCMで指定されたコマンドが実行されます。
 Ansibleのwebサイトによると、「数時間で自動化できてとってもシンプル！」「構築先のサーバはノンパスsshで入れるようにしておけばOK！」「パワフル」[#iianpo]_ だそうです。
-準備は、対象のホストへsshでノンパスでログインできるようにしておけばOK。あとノンパスsudoもつけてね。
+準備は、対象のホストへsshでノンパスでログインできるようにしておけばOK。あと、ノンパスsudoもつけてね。
 
-Ansibleという言葉をALCのサイトで引いてみると、[#iiansalc]_ 「アンシブル◆光の速さより速く、瞬間的にコミュニケーションができるデバイス。ウルシュラ・ル・グインやオースン・スコット・カードのサイエンス・フィクションより。」だそうです。早そうですね(適当)
+Ansibleという言葉をALCのサイトで引いてみると[#iiansalc]_ 「アンシブル◆光の速さより速く、瞬間的にコミュニケーションができるデバイス。ウルシュラ・ル・グインやオースン・スコット・カードのサイエンス・フィクションより。」だそうです。早そうですね(適当)
 
 .. [#iianpo] どの辺がパワフルなのか実はよーわからん
 .. [#iiansalc] http://eow.alc.co.jp/search?q=ansible&ref=sa
@@ -545,14 +555,17 @@ pingに対してpongが帰ってきました。成功です。うまくいかな
 
 .. [#iiansvvv] ansible all -m ping 
 
-お気づきですか？rootで入れるのであれば、MNサーバ側で実行したコマンドをansibleでやれそうですね。
+お気づきですか？rootで入れるのであれば、MNサーバ側で実行したコマンドをAnsibleのPlaybookにできそうですね。
 
 
-必殺！アドホックコマンド投げつけ
-""""""""""""""""""""""""""""""
+出没！アドホックコマンド投げつけック天国
+""""""""""""""""""""""""""""""""""""
 
+タイトル無理やり過ぎないですかね。ええ。筆者もそう思っています [#iiansnande]_ 。
+
+.. [#iiansnande] じゃあ、なんでつけたし
 Ansibleといえば、Inventry とか Playbook とかなんですが、後回しにしますね。ここでは、アドホックコマンド [#iiansad]_ に手を出してみましょう。サーバを作ったんだけど壊せなくて、本番サーバに更新を加えることが一度や二度、いや、もっとあったかな。
-対象となっているサーバに、泥臭くコマンドを投げ込む方法を実践してみましょう。例えば、OSのディストリビューションを見てみましょう。
+対象となっているサーバに、泥臭くコマンドを投げ込む方法を実践してみましょう。一例として、OSのディストリビューションを見てみましょう。
 
 .. code-block:: sh
    
@@ -564,7 +577,7 @@ Ansibleといえば、Inventry とか Playbook とかなんですが、後回し
    nozomi | success | rc=0 >>
    Ubuntu 14.04 LTS \n \l
 
-nozomiに対して sudo しないと実行できないコマンドを送ってみまそう。
+nozomiに対して ``sudo`` しないと実行できないコマンドを送ってみまそう。 ``--sudo`` オプションを付けます。
 
 .. code-block:: sh
 
@@ -735,7 +748,7 @@ SSHキーは作成済みなのでrootで入ってみましょう。
 実践する
 """"""""
 
-AnsibleのPlaybookのサンプルが公開されています [#iiansexam]_ 。この中にある lamp-simple を実際に使ってみましょう。
+AnsibleのPlaybookのサンプルが公開されています [#iiansexam]_ 。この中にある ``lamp-simple`` を実際に使ってみましょう。
 
 .. [#iiansexam] https://github.com/ansible/ansible-examples
 
@@ -825,9 +838,323 @@ hostsファイルを以下のように書き換えます。
 
   Dockerのロゴ
 
-Dockerとは、たいそう面白いギャグを連発して観客をどっかーどっかー沸かすソフトウエアです。違います。Dockerのgithub曰く「Docker: the Linux container engine」だそうです。LXCだったとかそういう歴史はふっ飛ばしていきなり実践してみましょう。
+Dockerとは、たいそう面白いギャグを連発して観客を "どっかーどっかー" 沸かすソフトウエアです。違います。Dockerのgithub曰く「Docker: the Linux container engine」だそうです。LXCだったとかそういう歴史はふっ飛ばして、いきなり実践してみましょう。
 
-VMより良いと書いてあるがどういうことか
+
+インストール
+""""""""""""
+
+おや、こんなことろに
+
+.. figure:: img/dk-do-image.eps
+  :scale: 70%
+  :alt: dk-do-image
+  :align: center
+
+  DigitalOceanのImageにDockerがすでにある
+
+honokaという名前のDropletsを作りました。OSが立ち上がればインストール完了です。ね、簡単でしょ？
+
+俺はッ！！本気で！！！！インストールしたいッヒョオッホーーー！！ウーハッフッハーン！！　ッウーン！ [#iidocun]_ な方は、インストールのドキュメントをご覧ください [#iidocins]_ 。CentOS [#iidoccentos]_ やAmazon EC2などにインストールすることができます。バイナリリリース [#iidocbin]_ もあります。
+
+.. [#iidocun] お察し下さい
+.. [#iidocins] https://docs.docker.com/installation/#installation
+.. [#iidoccentos] CentOS 6以上でカーネル2.6.32-431以上を使ってねってと書いてあります。しかし、カーネルは3系のCentOS7にしておいたほうが良いという先人の言い伝えがあります
+.. [#iidocbin] http://docs.docker.com/installation/binaries/
+
+
+つかってみる
+""""""""""""
+
+何ができるか分かっていないのに、公式ドキュメントを読みつつ進めていきます。rootでログインして、 ``docker`` コマンドをたたいてみます。
+
+.. code-block:: sh
+
+   # ssh root@128.199.140.147
+   root@hanayo:~# docker
+   Usage: docker [OPTIONS] COMMAND [arg...]
+    -H=[unix:///var/run/docker.sock]: tcp://host:port to bind/connect to or unix://path/to/socket to use
+   
+   A self-sufficient runtime for linux containers.
+   
+   Commands:
+       attach    Attach to a running container
+       build     Build an image from a Dockerfile
+       commit    Create a new image from a container's changes
+   
+   (略)
+
+docker hubにログインします。アカウントを作ります。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker login
+   Username: tboffice
+   Password: # 表示されません
+   Email: tbofficed@gmail.com
+   Account created. Please use the confirmation link we sent to your e-mail to activate it.
+
+メールが届くので、そこに書かれているURLをクリックして登録します。webサイト(https://hub.docker.com/account/signup/)であれば、githubのアカウントでログインアカウントを作ることもできます。次に、アプリケーションを起動してみます。アプリケーションといっても、 ``echo 'Hello World'`` ですが。
+
+.. code-block:: sh
+
+   # docker run ubuntu:14.04 /bin/echo 'Hello world'
+   Unable to find image 'ubuntu:14.04' locally
+   Pulling repository ubuntu
+   e54ca5efa2e9: Download complete 
+   511136ea3c5a: Download complete 
+   d7ac5e4f1812: Download complete 
+   2f4b4d6a4a06: Download complete 
+   83ff768040a0: Download complete 
+   6c37f792ddac: Download complete 
+   Hello world
+
+ubuntu:14.04というイメージを指定しています。そのイメージ(コンテナ)で ``bin/echo 'Hello world'`` を実行しています。
+初回は、数分時間がかかります。実行すると、標準出力結果には残りませんがダウンロードが走ります。これについてはあとで触れます。
+いよいよ、コンテナに入ってみましょう。 ``docker run`` でコンテナに対してコマンドを打ちます。
+
+.. code-block:: sh
+
+   # docker run -t -i ubuntu:14.04 /bin/bash
+   root@37b8238dbcdd:/# 
+
+入れましたね。-tと-iオプションは、俗にいう、おまじないです。ubuntu:14.04というイメージで ``/bin/bash`` を実行してシェルを掴んできました。
+
+``df`` や ``free`` を打ってディスク、メモリの情報を打ってみたところ、hanayoで実行したときと同じ結果が返ってきます。
+ifconfigを打つと、ローカルIPがふられています。外からつなぐにはどうすればいいかは、後ほど。
+
+試しにファイルを置いてみます
+
+.. code-block:: sh
+
+   root@hanayo:~# docker run -t -i ubuntu:14.04 /bin/bash
+   root@fc9784ab3cc2:/# touch /tmp/a 
+   root@fc9784ab3cc2:/# exit
+   root@hanayo:~# ls /tmp/a
+   ls: cannot access /tmp/a: No such file or directory
+
+おや、ありませんね。当たり前ですね。hanayoとは独立のOSが立ち上がっています [#iidoca]_ 。次に、コマンドをデーモン化して実行してみましょう。 ``-d`` オプションをつけてデーモン化します。
+
+.. [#iidoca] ちなみにもう一回 bashでコンテナにログインすると、``touch a`` で作ったファイルは消えています
+
+.. code-block:: sh
+
+   # docker run -d ubuntu:14.04 ping www.lovelive-anime.jp
+   d7168d2c3b421192a49dc15927b6a1466ab73424bda94e11679af9f8509f369c
+   # docker ps 
+   CONTAINER ID        IMAGE               COMMAND                CREATED              STATUS              PORTS               NAMES
+   d7168d2c3b42        ubuntu:14.04        ping www.lovelive-an   18 seconds ago       Up 18 seconds                           happy_meitner    
+   
+   # docker logs happy_meitner  | head
+   PING www.lovelive-anime.jp (210.138.156.25) 56(84) bytes of data.
+   64 bytes from 25.156.138.210.rev.iijgio.jp (210.138.156.25): icmp_seq=1 ttl=50 time=114 ms
+   64 bytes from 25.156.138.210.rev.iijgio.jp (210.138.156.25): icmp_seq=2 ttl=50 time=114 ms
+   64 bytes from 25.156.138.210.rev.iijgio.jp (210.138.156.25): icmp_seq=3 ttl=50 time=114 ms
+
+コマンドの標準出力の内容が全て出てきます。もう一回、同じコマンドをたたいても最初から標準出力の内容がでてきます。プロセスを止めます。
+
+.. code-block:: sh
+
+   # sudo docker stop happy_meitner 
+   happy_meitner
+
+タスクの名前は、命名規則は「形容詞_人の名前」になってるみたいです。dockerコマンドを単体で叩くと、docker XXX のXXXにあたるオプションの一覧が出てきます。
+
+.. code-block:: sh
+
+   Commands:
+       attach    Attach to a running container
+       build     Build an image from a Dockerfile
+       commit    Create a new image from a container's changes
+
+さっき叩いた ``docker logs`` のヘルプを見てみましょう。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker logs 
+   
+   Usage: docker logs CONTAINER
+   
+   Fetch the logs of a container
+   
+     -f, --follow=false        Follow log output
+     -t, --timestamps=false    Show timestamps
+     --tail="all"              Output the specified number of lines at the end of logs (defaults to all logs)
+
+Pythonのアプリケーションが入っているイメージを立ち上げてみます。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker run -d -P training/webapp python app.py
+   root@hanayo:~# docker ps -l
+   CONTAINER ID        IMAGE                    COMMAND             CREATED             STATUS              PORTS                     NAMES
+   37179ec8e0bd        training/webapp:latest   python app.py       54 seconds ago      Up 53 seconds       0.0.0.0:49153->5000/tcp   sick_davinci     
+
+
+41953ポートで待ち受けているのでアクセスしてみしょう [#iidoc49]_ 。
+
+.. [#iidoc49] dockerで起動したアプリケーションは、49000から49900の間のポートを使います。
+
+.. code-block:: sh
+
+   root@hanayo:~# curl localhost:49153
+   Hello world!root@hanayo:~# 
+   root@hanayo:~# curl -I localhost:49153
+   HTTP/1.0 200 OK
+   Content-Type: text/html; charset=utf-8
+   Content-Length: 12
+   Server: Werkzeug/0.8.3 Python/2.7.3
+   Date: Mon, 21 Jul 2014 11:47:21 GMT
+
+HTTPサーバが応答していますね。それでは、アプリケーションを止めます。 ``stop`` してからアプリケーションを ``rm`` しましょう。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker stop sick_davinci 
+   sick_davinci
+   root@hanayo:~# docker rm sick_davinci 
+   sick_davinci
+   root@hanayo:~# docker ps 
+   CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
+
+病気のダビンチさんはいなくなりました。なお、イメージは残っています。
+
+root@hanayo:~# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu              14.04               e54ca5efa2e9        4 weeks ago         276.5 MB
+training/webapp     latest              31fa814ba25a        7 weeks ago         278.8 MB
+
+さてさて、ここまではubuntu:14:04を使っていました。ほかのOSも試してみましょう。
+
+.. code-block:: sh
+
+   # docker pull centos
+   Pulling repository centos
+   cd934e0010d5: Download complete 
+   1a7dc42f78ba: Download complete 
+   511136ea3c5a: Download complete 
+   34e94e67e63a: Download complete 
+   root@hanayo:~#
+
+おもむろにCentOSが持ってこれましたね。初回だけイメージを引っ張ってくるので時間がかかります。2回め以降はすぐにコンテナが起動します。それでは、今日も一日がんばるぞい！ログインしてみましょう。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker run -t -i centos /bin/bash
+   bash-4.2# cat /etc/redhat-release 
+   CentOS Linux release 7.0.1406 (Core) 
+   bash-4.2# 
+
+CentOS 7ですね。hanayoのサーバはUbuntuなのに、Docker上のイメージでCentOSが動作しています。ここで、おもむろにカーネルのバージョンを見てみましょう。
+
+.. code-block:: sh
+
+   bash-4.2# uname -a 
+   Linux 4ee22d17ac9a 3.13.0-24-generic #46-Ubuntu SMP Thu Apr 10 19:11:08 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+
+CentOSなのに、Ubuntuって書いてあるぞ。ログアウトしてカーネルを見てみます。
+
+.. code-block:: sh
+
+   bash-4.2# exit
+   root@hanayo:~# uname -a 
+   Linux hanayo 3.13.0-24-generic #46-Ubuntu SMP Thu Apr 10 19:11:08 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+
+たしかにカーネルが一致しますね。Dockerはカーネルだけを共有しています [#iidocker]_ 。公式サイトから図を引用してみます。VMとの違いがなんとなく。なんでしょう。なんですかね。
+
+.. [#iidocker] http://stackoverflow.com/questions/18786209/what-is-the-relationship-between-the-docker-host-os-and-the-container-base-image
+
+.. figure:: img/dk-con.eps
+  :scale: 70%
+  :alt: dk-con.eps
+  :align: center
+
+  https://www.docker.com/whatisdocker/より引用。VMとDockerの違い
+
+そういえばCentOSがインストールされてしまいましたが、どこから持ってきたんでしょうか。答えは、docker hubに登録されているイメージファイルをもってきています。
+
+.. figure:: img/dk-hub-centos.eps
+  :scale: 70%
+  :alt: dk-hub-centos
+  :align: center
+
+  https://registry.hub.docker.com/_/centos/
+
+Dockerのイメージファイルは https://hub.docker.com/ にあるので検索してみてください。え？ブラウザを開くのが面倒？そういう場合は、searchコマンドで探します。すげーたくさん出てきます。
+
+.. code-block:: sh
+
+   # docker search centos | head
+   NAME                                            DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+   centos                                          The official build of CentOS.                   262       [OK]       
+   tianon/centos                                   CentOS 5 and 6, created using rinse instea...   24                   
+   blalor/centos                                   Bare-bones base CentOS 6.5 image                4                    [OK]
+   saltstack/centos-6-minimal                                                                      4                    [OK]
+   stackbrew/centos                                The CentOS Linux distribution is a stable,...   3         [OK]       
+
+なお、stackbrew(https://github.com/dotcloud/stackbrew)というのが公式イメージの一つです。
+
+ここまできたら、Ansibleあたりでテストかいてみたいと思いませんか？思いますよね？そうだと思いましたよ！！！
+
+TODO
+sshで入れる方法を示す。commitしてpushして環境を保存する感じで流れる。
+yum updateしていても、bashから抜けると変更が消えてしまうことについて触れる
+
+TODO
+hostsが書き換えられない
+永続化する方法
+dockerfileの書き方
+肝は docker ps と docker images な感じがする。指定の仕方、何が指定できるかがわかればマスターできそう
+
+VMより良いと書いてあるがどういうことか。
+さっくり感想としては、localhostのディレクトリを汚さず、アプリケーションを立ち上げることができるという感じ
+
+ssh で入れるようにするとき
+http://mizzy.org/blog/2014/06/22/1/　＜＝これが最新の流れぽい。
+http://shibayu36.hatenablog.com/entry/2013/12/07/233510
+http://d.hatena.ne.jp/naoya/20130621/
+http://www.nerdstacks.net/2014/03/ssh-ready-centos-dockerfile/ sshのキーをつけたしたdockerfile
+
+虎の巻
+http://qiita.com/deeeet/items/ed2246497cd6fcfe4104
+
+使えそう？
+http://coreos.com/docs/launching-containers/building/getting-started-with-docker/
+
+DockerのOS準備しなくてもオンラインチュートリアルがある　https://www.docker.com/tryit/
+と思ったけどあんま使えない印象
+
+なんで今まで使わなかったのか悔やまれる
+
+* inspectコマンド
+
+inspectコマンドあります。Ansibleでいう ``-m setup`` みたいなところ。
+コンテナ名(下記でいうところのsick_davinci)は、タブを押すと保管されるので便利といえば便利。ただコンテナをたくさん上げると、候補が沢山出てきて大変になる
+
+root@hanayo:~# docker ps -l
+CONTAINER ID        IMAGE                    COMMAND             CREATED             STATUS              PORTS                     NAMES
+37179ec8e0bd        training/webapp:latest   python app.py       3 hours ago         Up 3 hours          0.0.0.0:49153->5000/tcp   sick_davinci        
+root@hanayo:~# docker inspect sick_davinci 
+[{
+    "Args": [
+        "app.py"
+    ],
+    "Config": {
+        "AttachStderr": false,
+        "AttachStdin": false,
+        "AttachStdout": false,
+        "Cmd": [
+            "python",
+            "app.py"
+        ],
+(略)
+
+一部のキーを取り出すにはこんな感じ
+
+root@hanayo:~# docker inspect -f '{{ .NetworkSettings.IPAddress }}' sick_davinci 
+172.17.0.9
+
 
 * dockerとは
 
