@@ -7,15 +7,16 @@ Immutable Infrastructureの最適解を探る(chapter用)
 Immutable Infrastructureの最適解を探る
 =====================================
 
-本特集では、2014年のインフラ界のバズワードである、「Immutable Infrastructure」(以下、IIと略します)について取り上げます。
-IIが出てきた経緯や、実際にIIを実践するための方法などについて触れていきたいと思います。
+筆者の@tbofficeです。某webサービス的な会社でインフラ的なお仕事をやりつつ、裏では同人誌を書いています。本業が同人誌を書くことではないのかというツッコミを、最近受けるようになりました。おそらくそうなんじゃないでしょうか。それにしても、印刷代ってバカにならないですよね。何を言っているんでしょうかこの人は。
+
+さて、本特集では、2014年のインフラ界のバズワードである「Immutable Infrastructure」(以下、IIと略します)について取り上げます。IIの由来や、動向とそれにまつわるソフトウエアを実際に使ってみたいと思います。
 
 
 まず、こちらをご覧ください
 -------------------------------
 
 .. figure:: img/appprotweet.eps
-  :scale: 80%
+  :scale: 70%
   :alt: appprotweet
   :align: center
 
@@ -33,9 +34,11 @@ IIが出てきた経緯や、実際にIIを実践するための方法などに�
 
   いつまで手動でデプロイしているんですか？
 
-  ＿人人人人人人人人人人人人人人人人人人人人人人＿
-  ＞　いつまで手動でデプロイしているんですか？　＜
-  ￣Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y￣
+:: 
+
+   ＿人人人人人人人人人人人人人人人人人人人人人人＿
+   ＞　いつまで手動でデプロイしているんですか？　＜
+   ￣Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y￣
 
 マサカリが投げられましたね。この本については、後ほど触れることにしましょう。
 
@@ -43,7 +46,7 @@ IIが出てきた経緯や、実際にIIを実践するための方法などに�
 あわせて読みたい
 ---------------
 
-CHad Fowler氏 [#iichad]_ の「サーバを捨てて、コードを焼き付けろ！」[#iitys]_ [#iitys2]_ というブログ記事があります。
+CHad Fowler氏 [#iichad]_ の「サーバを捨てて、コードを焼き付けろ！」 [#iitys]_ [#iitys2]_ というブログ記事があります。
 その記事のJunichi Niino氏による邦訳 [#iihottan]_ を引用してみましょう。
 
   開発者として、あるいはしばしばシステム管理をする者として、これまで経験したもっとも恐ろしいものの1つは、長年にわたり稼働し続けてなんどもシステムやアプリケーションのアップグレードを繰り返してきたサーバだ。
@@ -222,7 +225,7 @@ IIの三層
 なんでServerspecから始めるのかだって？それはそこそこ重要で取っ付きやすいからです。サーバのデプロイはchefでもAnsibleでもbashスクリプトでも手動でコマンドを打てば構築はできます。
 問題はそのあとです。誰がどうやって、そのサーバが正しくセットアップできているか調べるのか？それにはServerspecを使いましょう。
 
-.. tip::
+.. topic::
 
    この本を作っている第七開発セクションが前回頒布した「ななかInside PRESS vol.4」でChefを特集しました。そのChefを執筆した人曰く、Chefのレシピを書くのが辛くなってきたそうです。
    社内でいろいろなプロジェクト(プロダクト)があります。それらに対応する汎用的なレシピを書くと、設定することが多くなり、扱いづらくなるという現象が起きました。
@@ -321,7 +324,7 @@ attributes.yml.templateとhosts.yml.templateをリネームしてhosts.ymlを変
 
 なお、attributes.ymlのosのセクションにパラメータが、テストは ``spec/os/os_spec.rb`` にあります。phpやmysqlのテストも同梱したので、使いたい人は使ってやって下さい。
 
-Serverspecで重要なのは、何をテストするかということです。なるべく重複するテストの数を少なくするのがおすすめです。これをチェックすれば、複数の項目がチェックできるテストが良いです。
+Serverspecで重要なのは、何をテストするかということです。なるべく重複するテストの数を少なくするのがおすすめです。これをチェックすれば、複数の項目がチェックできるテストが良いです [#iisstest]_ [#iisstest2]_ 。
 応用としては、開発サーバや本番サーバのSAN値 [#iisanti]_ のチェックをしてみましょう。
 具体的には、Jenkins [#iijenkins]_ おじさんを使って1日1回程度テストを回して、入ってはいけないパッケージを見つけたり、別のサーバへの疎通ができているかをチェックしましょう [#iiscn]_ 。
 テストを書くのはだるいですが、一度やっておけば、バグや障害を検出することができますので、是非やりましょう。
@@ -331,6 +334,8 @@ Serverspecで重要なのは、何をテストするかということです。�
 .. [#iiscd] https://github.com/dwango/serverspecd 「d」とついているからといって、デーモンではありません
 .. [#iiscdbun] bundleコマンドがなければ、``gem install bundler`` でインストールして下さい。``gem`` がなかったらrubyをインストールして下さい
 .. [#iijibun] 自分自身といっても人ではなく、サーバのことです。自分のテストは健康診断にでも行って下さい(執筆時期が丁度そんな時期)
+.. [#iisstest] 細かくすれば、テスト＝解決する問題となってわかりやすいんですけどね。テスト増えると管理が大変になると思う。でもテスト項目が多いと、テスト中の「....」が増えるので、見ていて面白い
+.. [#iisstest2] 「Jenkinsで動かすとそれ、見えなくね？」「こ、コンソールで見ればいいし(震え声」「ん？　君、自動化って言ったよね？」
 .. [#iisanti] SAN値とは、正気度を表すパラメーターのことである - http://dic.nicovideo.jp/a/san値
 .. [#iijenkins] http://jenkins-ci.org/ Jenkins CI。継続的デリバリーには必須のアイテム。トリガーを設定してテストなどを実行できるソフトウエアです。実行の結果がわかりやすいです
 .. [#iiscn] スイッチやロードバランサの設定がいつのまにか変わっていて疎通できない！(・ω・＼)SAN値!(／・ω・)／ピンチ!なんてことがないように
@@ -339,40 +344,447 @@ Serverspecで重要なのは、何をテストするかということです。�
 構築にはAnsible
 ^^^^^^^^^^^^^^^
 
-構築を自動で行ってくれるソフトウエアといえば chef が有名になってきました。 chefについては、弊サークルが前回頒布した「ななかInside PRESS vol.4」で特集をしているのでご覧ください。
-同じものを取り上げても面白くないので、ポストchefになりつつある [#iiann]_ Ansible [#iiansible]_ を取り上げます。さきほど取り上げた、IIの三層の「Configuration」の部分のソフトウエアです。
-なお、ここではLinux上でのAnsibleを解説します。Ansible 1.7からWindowsもサポートされたようなので、必要であればドキュメント [#iianwin]_ をご覧ください。
+構築を自動で行ってくれるソフトウエアといえば chef が有名になってきました。弊サークルが前回頒布した「ななかInside PRESS vol.4」で chef の特集をしているので、そちらもご覧ください [#iisutema]_ 。
+同じツールを取り上げても面白くないので、ポストchefになりつつある [#iiann]_ Ansible [#iiansible]_ を使ってみます。IIの三層の図の「Configuration」の部分のソフトウエアです。
+
+.. topic:: Configration界隈の動向
+
+   構築を自動化するために、これまでに色々なツールが出ています。具体的には、Puppet, Chef, Ansible, Salt [#iisalt]_ などがあります。
+   それぞれ特徴があり、業務や趣味に向いたものを使いましょう。このへんの比較で本が一冊出来てしまうので、さっくり比較したい場合は InfoWorldの記事 [#iipcas]_ をご覧ください。
+   Puppet, Chef, Ansibleの比較記事では Ansible がイイヨ！って記事もあります [#iipca]_ 。
+   chefはruby製なので日本で使われるようになったとかなんとか。時期的に新しく出てきたConfigrationツールはPythonを使う傾向にあるようです。Ansible, SaltはPython製です。
+
+.. [#iisutema] ステマです（ツッコミ待ち
+.. [#iisalt] http://www.saltstack.com/ 今調べてて知った。「Salt」ってググラビリティー低すぎ...。jujuってのもあんのか...乱立しすぎだろこの界隈
+.. [#iipcas] http://www.infoworld.com/d/data-center/review-puppet-vs-chef-vs-ansible-vs-salt-231308?page=0,3
+.. [#iipca] http://probably.co.uk/puppet-vs-chef-vs-ansible.html
+
+
+Ansibleとは
+""""""""""""""""""""
+
+Michael DeHaan [#iiansmpd]_ 氏が作ったソフトウエアです [#iiansgithub]_ 。Cobblerに関わった人でもあります。Ansibleの哲学については、本人がGoogle Groupsに投稿したメッセージ「Ansible philosophy for those new to the list == keep it simple」 [#iiansp]_ をお読み下さい。
+
+.. [#iiansmpd] https://github.com/mpdehaan
+.. [#iiansgithub] https://github.com/mpdehaan/ansible
+.. [#iiansp] https://groups.google.com/forum/#!topic/ansible-project/5__74pUPcuw
+
+Ansibleの仕組みは、1台のControl Machine(CM)から複数のManaged Node(MN)へsshで接続を行います。CMでコマンドを実行すると、MNでCMで指定されたコマンドが実行されます。
+Ansibleのwebサイトによると、「数時間で自動化できてとってもシンプル！」「構築先のサーバはノンパスsshで入れるようにしておけばOK！」「パワフル」[#iianpo]_ だそうです。
+準備は、対象のホストへsshでノンパスでログインできるようにしておけばOK。あとノンパスsudoもつけてね。
+
+Ansibleという言葉をALCのサイトで引いてみると、[#iiansalc]_ 「アンシブル◆光の速さより速く、瞬間的にコミュニケーションができるデバイス。ウルシュラ・ル・グインやオースン・スコット・カードのサイエンス・フィクションより。」だそうです。早そうですね(適当)
+
+.. [#iiansalc] http://eow.alc.co.jp/search?q=ansible&ref=sa
+
+ここではLinux上でのAnsibleを解説します。Ansible 1.7から、MNとしてWindowsもサポートされたようなので、必要であればドキュメント [#iianwin]_ をご覧ください。CMはWindowsをサポートしていないのでご注意。
 
 .. [#iiann] 脳内調べ
 .. [#iiansible] http://www.ansible.com/home
 .. [#iianwin] http://docs.ansible.com/intro_windows.html
-
-Ansibleの利点として、「数時間で自動化できてとってもシンプル！」「構築先のサーバはノンパスsshで入れるようにしておけばOK！」「パワフル」[#iianpo]_ 
-さて、何ができるかよくわからないまま使ってみましょう。対象のホストへsshでノンパスでログインできるようにしておけば準備完了。
-
 .. [#iianpo] どの辺がパワフルなのか実はよーわからん
 
-* Ansibleのインストール
+Ansibleのインストール
+""""""""""""""""""""
 
-Amazon EC2では、これでインストール完了。最新版のAnsibleがインストールされます。
+Amazon EC2のAmazon Linux AMI [#iiami]_ では、下記のコマンドでインストール完了。最新版のAnsibleがインストールされます。
+
+.. [#iiami] http://aws.amazon.com/jp/amazon-linux-ami/ amazonが作ったLinux ディストリビューション。CentOSの最新版みたいな感じのディストリビューション [脳内調べ]
 
 .. code-block:: sh
 
    $ sudo easy_install pip
    $ sudo pip install ansible
 
-なお、``python-simplejson``パッケージが必要なので、CentOSの古いバージョンでやるときには注意してください。EPELが入っているなら、`` sudo yum install ansible``でインストールできます。pipなら、``sudo easy_install simplejson``でいけるはず。
- [#iiansdo]_ 。
+DigitalOcenan の CentOS 7 では、こんな感じでした [#iianepel]_ 
 
-.. [#iiansdo] DigitalOcenan の CentOS 7 では、``yum install -y gcc python-devel`` してから ``sudo easy_install pip && sudo pip install ansible && sudo easy_install simplejson``という感じで ``ansible`` コマンドが起動はしました
+.. [#iianepel] Redhat系で、EPELが入っているなら、``sudo yum install ansible``でインストールできます
+
+.. code-block:: sh
+
+   sudo yum install -y gcc python-devel python-paramiko
+   sudo easy_install pip
+   sudo pip install ansible
+
+Ansibleは、Python 2.4以上で動作し、Python 2.6以上の環境が推奨されます。Python 2.5以下では、 ``python-simplejson`` パッケージが必要です。CentOS 5などでインストールするときは注意してください。pip [#iipip]_ があるなら、``sudo easy_install simplejson``でいけるはずです。
+今回、Ansible 1.6.6を使いました。
+ 
+.. [#iipip] https://pypi.python.org/pypi/pip Pythonのパッケージのマネージツール。Python版の cpan 的な立ち位置
+
+つかう
+""""""""""
+
+Ansibleがインストールできたところで実行してみましょう。Ansibleを実行するサーバ(CM)は、お名前.comのVPS(CentOS 6.5)で、リモートマシン(MN)は DigitalOceanで2つ作ります。
+リモートマシンを作る前にsshの公開鍵を、DigitalOceanに登録しておきましょう。
+
+#TODO手順を書く
+
+インスタンス(Droplets)を作るときに、登録したsshキーを登録するとrootでログインできます。インスタンスは1分くらいで起動してきます。Droplets [#iiansdrop]_ を作りました。
+
+.. figure:: img/an-do-dl.eps
+  :scale: 50%
+  :alt: an-do-dl
+  :align: center
+
+  nozomiとeriのDroplets
+
+.. [#iiansdrop] dropletsをALC(http://eow.alc.co.jp/search?q=droplet)でひくと、水滴とか飛沫という意味が引っかかったのでアレゲな感じ
+
+``/etc/hosts`` にDropletsのIPアドレスを追記します [#iiandhosts]_ 。
+
+:: 
+
+   104.131.231.95 nozomi
+   128.199.140.147 eri
 
 
-  * ansibleとは
-  * 使ってみる
-  * 利点欠点
-  * 参考
+.. [#iiandhosts] 分かってる方は別の方法でどうぞ
 
-    * 不思議の国のAnsible – 第1話 : http://demand-side-science.jp/blog/2014/ansible-in-wonderland-01/
+ログインしてみましょう。
+
+.. code-block:: bash
+   
+   [tboffice@yoshihama4 ~]$ ssh root@104.131.231.95
+   Welcome to Ubuntu 14.04 LTS (GNU/Linux 3.13.0-24-generic x86_64)
+   
+   * Documentation:  https://help.ubuntu.com/
+    
+   System information as of Sat Jul 19 15:29:53 EDT 2014
+   
+   System load: 0.08              Memory usage: 9%   Processes:       81
+   Usage of /:  6.1% of 19.56GB   Swap usage:   0%   Users logged in: 0
+
+   Graph this data and manage this system at:
+        https://landscape.canonical.com/
+   root@nozomi:~# 
+
+ログイン成功。ユーザを作ります。Ubuntuだと ``adduser`` ですね。あとは公開鍵をそのユーザにコピーしてsudoできるようにします [#iiansinstallcom]_ 。
+
+.. code-block:: bash
+
+   # adduser tojo
+   # adduser tojo sudo
+   # visudo 
+   %sudo   ALL=(ALL:ALL) NOPASSWD:ALL # 「NOPASSWORD」を追加
+   # cp -a .ssh/ /home/tojo/
+   # chown -R tojo. /home/tojo/.ssh
+
+.. [#iiansinstallcom] cpとchownのところ、installコマンドを使って一行で書けないかと試行錯誤したんですが、うまくいきませんでした
+
+ここまでくればCMサーバから ``$ ssh nozomi`` で入れます。 ``sudo ls -la /root/`` で、何か見れたら完了です。
+ここからは、CMサーバの構築です。ansibleのhostsファイルを作ります。CentOS6で.ssh/configを読んでくれない [#iianscenth]_ ので細工もします。
+
+.. [#iianscenth] https://github.com/yteraoka/ansible-tutorial/wiki/SSH のでhostsファイルに細工する
+
+
+pip経由でansibleをインストールすると/etc/ansibleディレクトリが作られていないので作って下さい。``/etc/ansible/hosts``ファイルの中身はこんな感じです。
+
+:: 
+
+   nozomi ansible_ssh_user=tojo
+   eri ansible_ssh_user=ayase
+
+
+ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
+
+.. [#iianssshyes] sshで初めてのサーバに入ることになるので、yesとか押さないといけないんだけど省略
+
+.. code-block:: bash
+
+   $ ansible all -m ping
+   
+   nozomi | success >> {
+       "changed": false, 
+       "ping": "pong"
+   }
+   
+   eri | FAILED => FAILED: Authentication failed.
+
+失敗しましたね。エリチ(eri)サーバはセットアップしていませんでしたね。セットアップしてしまいましょう [#iianseri]_ 。
+
+.. [#iianseri] ん？エリチをセットアップ？なんか卑猥ですね（おいやめろ（なお、朝7時くらいに書いている模様
+
+起動しているので``ssh root@eri``でログイン。もし入れなかったらDigitalOceanのサイトのDropletsからeriサーバを選択してパスワードリセットしましょう [#iianslogin]_ 。
+
+.. [#iianslogin] 筆者の場合はなぜか.sshディレクトリが600になってた...
+
+.. figure:: img/an-do-passwdreset.eps
+  :scale: 50%
+  :alt: appprotweet
+  :align: center
+
+  DigitalOcean上でDropletsのパスワードリセット
+
+
+.. code-block:: bash
+
+   # useradd -G wheel ayase
+   # yum install -y python-simplejson
+   # visudo
+   %wheel  ALL=(ALL)       NOPASSWD: ALL # コメントになっているので有効化
+   # cp -a .ssh/ /home/ayase/
+   # chown -R ayase. /home/ayase/.ssh
+
+ここまでやればCMのサーバで``ssh eri``でログイン可能。再度 ansible コマンドを実行。
+
+.. code-block:: bash
+
+   [tboffice@yoshihama4 ~]$ ansible all -m ping 
+   eri | success >> {
+       "changed": false, 
+       "ping": "pong"
+   }
+   
+   nozomi | success >> {
+       "changed": false, 
+       "ping": "pong"
+   }
+
+pingに対してpongが帰ってきました。成功です。うまくいかない時は、ansibleのコマンドに-vvvオプションをつけると何をやっているかわかります [#iiansvvv]_ 。
+筆者がハマったところは、接続先のサーバを何度も作りなおしていたので、.ssh/known_hostsファイルのキーを消さなかったため失敗することが有りました。
+
+.. [#iiansvvv] ansible all -m ping 
+
+お気づきですか？rootで入れるのであれば、MNサーバ側で実行したコマンドをansibleでやれそうですね。
+
+
+必殺！アドホックコマンド投げつけ
+""""""""""""""""""""""""""""""
+
+Ansibleといえば、Inventry とか Playbook とかなんですが、後回しにしますね。ここでは、アドホックコマンド [#iiansad]_ に手を出してみましょう。サーバを作ったんだけど壊せなくて、本番サーバに更新を加えることが一度や二度、いや、もっとあったかな。
+対象となっているサーバに、泥臭くコマンドを投げ込む方法を実践してみましょう。例えば、OSのディストリビューションを見てみましょう。
+
+.. code-block:: sh
+   
+   $ ansible all -a "cat /etc/issue"
+   eri | success | rc=0 >>
+   CentOS release 5.8 (Final)
+   Kernel \r on an \m
+
+   nozomi | success | rc=0 >>
+   Ubuntu 14.04 LTS \n \l
+
+nozomiに対して sudo しないと実行できないコマンドを送ってみまそう。
+
+.. code-block:: sh
+
+   $ ansible nozomi -a "ls -l /root/.ssh" --sudo 
+   nozomi | success | rc=0 >>
+   total 4
+   -rw------- 1 root root 402 Jul 20 07:03 authorized_keys
+
+.. [#iiansad] http://docs.ansible.com/intro_adhoc.html
+
+ファイルをコピーしてみます。-m
+
+.. code-block:: sh
+  
+   $ ansible eri -m copy -a "src=/etc/hosts dest=/tmp/hosts"
+    eri | success >> {
+        "changed": true, 
+        "dest": "/tmp/hosts", 
+        "gid": 500, 
+        "group": "ayase", 
+        "md5sum": "fe54ebbbad6eb65cc89ecdfb79d80526", 
+        "mode": "0664", 
+        "owner": "ayase", 
+        "size": 240, 
+        "src": "/home/ayase/.ansible/tmp/ansible-tmp-1405855702.69-264966159997730/source", 
+        "state": "file", 
+        "uid": 500
+    }
+
+``-m`` オプションでモジュールを指定することが出来ます。モジュールの一覧は、``ansible-doc -l`` で見られます。copyモジュールの詳細を知りたい場合は ``ansible-doc copy`` と打って下さい。
+CentOSの場合、yum経由で apache をインストールするので ``ansible eri -m yum -a "name=httpd state=latest" --sudo`` と実行します。Ubuntuの場合は``ansible nozomi -m apt -a "name=apache2 state=latest" --sudo``でインストールできます。
+``ansible all -m setup`` とすると、OSやIPアドレス、ansibleの変数などの情報が取得できます。
+
+アドホックなコマンドはこのへんにして、Playbookへ話を移しましょう。
+
+
+Playbook
+"""""""""
+
+Playbookとは、MNに対してどのような実行するかを書いたAnsibleの設定ファイルです。中身はYAML [#iiasnayaml]_ です。
+適当なディレクトリでPlaybookを作成しましょう。まずは``yum-apache.yml``というファイルに下記のように書きます。
+
+.. [#iiasnayaml] http://docs.ansible.com/YAMLSyntax.html
+
+.. code-block:: config
+
+   ---
+   - hosts: all
+     user: root
+     sudo: yes
+     tasks:
+       - name: yumでapacheをインストール
+       - yum: name=httpd state=latest
+
+対象のhostsをどうしましょうか。AWSのEC2だと面白く無いので DigitalOcean を使います(またか)。
+honokaサーバ(IN LONDON)でCentOS 6.5の64bitで作りました。IPは178.62.48.99がとれてきました。
+
+.. figure:: img/an-do-honoka.eps
+  :scale: 50%
+  :alt: condel
+  :align: center
+
+  honoka(IN LONDON)
+
+SSHキーは作成済みなのでrootで入ってみましょう。
+
+.. code-block:: config
+
+   $ ssh root@178.62.48.99 cat /etc/redhat-release
+
+``CentOS release 6.5 (Final)`` と出てきたら成功です。次にAnsibleのhostsファイルを書きましょう。``hosts.list`` というファイル名でこんな感じで書いてやります。
+
+``honoka ansible_connection=ssh ansible_ssh_port=22 ansible_ssh_host=178.62.48.99``
+
+明示的に ``ansible_ssh_port=22`` としています。ポート番号を22から変更していれば、そのポート番号を指定して下さい。
+
+.. topic:: CentOS 6だと失敗する罠
+
+   対象サーバであるhonokaはCentOS6.5を使いました。OpenSSHのバージョンがやや古く(5.3)、Ansibleを実行したとき、ControlPersistオプションが使えずエラーとなります。
+   OpenSSHを5.6以降にバージョンアップするか、ansible.cfgにsshのオプションを上書きしてやります [#iianscent6]_ 。ansible.cfgはPlaybookを実行するディレクトリにおいておけばOK。ssh_argsの行は一行で書いて下さい。
+   
+   .. code-block:: sh
+
+      [ssh_connection]
+      ssh_args = -o PasswordAuthentication=no -o ControlMaster=auto 
+        -o ControlPath=/tmp/ansible-ssh-%h-%p-%r
+
+
+.. [#iianscent6] https://groups.google.com/forum/#!msg/ansible-project/M_QmqhwNynE/wyz-c0bXZmUJ
+
+ファイル一覧を見るとこんな感じです。
+
+.. code-block:: sh
+
+   $ ls
+   ansible.cfg  hosts.list  yum-apache.yml
+
+さてPlaybookを実行してみましょう。
+
+.. code-block:: sh
+
+   $ ansible-playbook yum-apache.yml -i hosts.list
+   
+   PLAY [all] ******************************************************************** 
+   
+   GATHERING FACTS *************************************************************** 
+   ok: [honoka]
+   
+   TASK: [yumでgitをインストールする] ****************************************************** 
+   changed: [honoka]
+   
+   PLAY RECAP ******************************************************************** 
+   honoka                     : ok=2    changed=1    unreachable=0    failed=0   
+
+インストールできましたね。そろそろこのへんでネタばらしをすると、 ``/etc/ansible/hosts`` や ``/etc/hosts`` ファイルにクライアントのサーバの設定は必要ないんですねーやっちゃいましたね（何
+そういえばもう一回、さっきのansibleのコマンドを叩くとどうなるでしょうか？もうインストールされているのでエラーになってしまうんでしょうか。
+
+.. code-block:: sh
+
+   $ ansible-playbook yum-apache.yml -i hosts.list
+   
+   PLAY [all] ******************************************************************** 
+   
+   GATHERING FACTS *************************************************************** 
+   ok: [honoka]
+   
+   TASK: [yumでgitをインストールする] ******************************************************
+   ok: [honoka]
+   
+   PLAY RECAP ******************************************************************** 
+   honoka                     : ok=2    changed=0    unreachable=0    failed=0  
+
+
+おや、エラーになっていませんね。わざとこんなことをやっているのには訳があります。IIではおなじみの冪等性(べきとうせい)です。
+
+.. topic:: 冪等性(べきとうせい)
+
+   ひとことでいうと、何度やっても同じ結果になるという意味の言葉です。中途半端に構築したサーバでも、新規のサーバでも、同じPlaybookを実行すれば、どちらも同じ状態になることを示しています。
+   chefでも言えるのですが、すでに作られているモジュールは冪等性を担保しているので、何度実行してもサーバが同じ状態になります。それ以外の自分で書いたスクリプトは、自分で冪等性を担保しなければなりません。
+
+   冪等性の利点は、chefのレシピを書いてデバッグしているときに、レシピを追加しても動作することです。
+
+   一方、この記事の冒頭にでてきた「作って壊す」という環境があれば、冪等性について考えなくてもいいかもしれません。
+   壊せない環境、たとえば本番サーバしかない環境に手を加えるのはストレスになります。
+
+
+過去の遺産 Playback
+""""""""""""""""""
+
+俺は！！シェルスクリプトをッッッ！！！実行したいんだァァァァッ！！！！！という熱い方はPlaybookに下記のように書いてみてください。この例だと ``hoge.sh`` ファイルはこのPlaybookと同じディレクトリにおいてください。
+
+.. code-block:: sh
+
+   ---
+   - hosts: all
+     user: root
+     tasks:
+       - name: シェルスクリプトを実行
+         script: hoge.sh
+
+
+実践する
+""""""""
+
+AnsibleのPlaybookのサンプルが公開されています [#iiansexam]_ 。この中にある lamp-simple を実際に使ってみましょう。
+
+.. [#iiansexsm] https://github.com/ansible/ansible-examples
+
+まずはCMサーバの適当なディレクトリで ``git clone https://github.com/ansible/ansible-examples.git`` して持ってきます。
+webserverとdbserverの1つに役割が分かれています。DigitalOceanで、honokaとkotoriのDropletsを作成します [#iianshon]_ 。
+
+.. [#iiansreadme] https://github.com/ansible/ansible-examples/blob/master/lamp_simple/README.md
+.. [#iianshon] honokaはさっき作ったものをそのまま利用。
+
+.. figure:: img/an-do-honokoto.eps
+  :scale: 50%
+  :alt: an-do-honokoto
+  :align: center
+
+  honokaとkotoriのDroplets
+
+hostsファイルを以下のように書き換えます。
+
+:: 
+
+   [webservers]
+   honoka ansible_ssh_host=178.62.48.99
+   
+   [dbservers]
+   kotori ansible_ssh_host=128.199.140.147
+
+あとはansibleを実行するだけです。
+
+.. code-block:: sh
+
+   $ ansible-playbook -i hosts site.yml 
+
+数分待てば、honokaにapacheが、dbserverにmysqlがそれぞれ立ち上がっていてhonokaにブラウザでアクセスするとDBの中身が読めた旨のメッセージがでてきます。
+
+.. figure:: img/an-do-ans-lamp.eps
+  :scale: 50%
+  :alt: an-do-ans-lamp
+  :align: center
+
+  honokaサーバにアクセスすると、セットアップできてるー！
+
+さいごに
+""""""""
+
+さらに様々なPlaybookを探すには、Ansible Galaxy [#iiansag]_ を参照して下さい。
+業務などできっちりやるなら、ベストプラクティスとしてディレクトリのレイアウト(http://docs.ansible.com/playbooks_best_practices.html)があります。どのサーバにどの変数を使うか、開発環境と本番環境を分けたりそういったことができます。また、「ansible ベストプラクティス」と検索するといくつかでてきます。
+
+.. [#iiansag] https://galaxy.ansible.com/explore#/
+
+参考
+""""
+
+* practice http://www.stavros.io/posts/example-provisioning-and-deployment-ansible/
+* 不思議の国のAnsible – 第1話 : http://demand-side-science.jp/blog/2014/ansible-in-wonderland-01/
+* 今日からすぐに使えるデプロイ・システム管理ツール ansible 入門 - http://tdoc.info/blog/2013/05/10/ansible_for_beginners.html
 
 
 仮想化そのいち Vagrant
