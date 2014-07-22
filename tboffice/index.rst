@@ -366,7 +366,7 @@ Ansibleとは
 Michael DeHaan [#iiansmpd]_ 氏が作ったソフトウエアです [#iiansgithub]_ 。Cobbler [#iianscobb]_ に関わった人でもあります。
 
 .. figure:: img/mpdehaan.eps
-  :scale: 70%
+  :scale: 10%
   :alt: mpdehaan
   :align: center
 
@@ -380,13 +380,15 @@ Ansibleの哲学については、本人がGoogle Groupsに投稿したメッセ
 .. [#iiansp] https://groups.google.com/forum/#!topic/ansible-project/5__74pUPcuw
 
 Ansibleの仕組みは、1台のControl Machine(CM)から複数のManaged Node(MN)へsshで接続を行います。CMでコマンドを実行すると、MNでCMで指定されたコマンドが実行されます。
-Ansibleのwebサイトによると、「数時間で自動化できてとってもシンプル！」「構築先のサーバはノンパスsshで入れるようにしておけばOK！」「パワフル」[#iianpo]_ だそうです。
+Ansibleのwebサイトによると、「数時間で自動化できてとってもシンプル！」「構築先のサーバはノンパスsshで入れるようにしておけばOK！」「パワフル」 [#iianpo]_ だそうです。
 準備は、対象のホストへsshでノンパスでログインできるようにしておけばOK。あと、ノンパスsudoもつけてね。
 
-Ansibleという言葉をALCのサイトで引いてみると[#iiansalc]_ 「アンシブル◆光の速さより速く、瞬間的にコミュニケーションができるデバイス。ウルシュラ・ル・グインやオースン・スコット・カードのサイエンス・フィクションより。」だそうです。早そうですね(適当)
+Ansibleという言葉をALCのサイトで引いてみると [#iiansalc]_ 「アンシブル◆光の速さより速く、瞬間的にコミュニケーションができるデバイス。ウルシュラ・ル・グインやオースン・スコット・カードのサイエンス・フィクションより。」だそうです。早そうですね(適当)
+
 
 .. [#iianpo] どの辺がパワフルなのか実はよーわからん
 .. [#iiansalc] http://eow.alc.co.jp/search?q=ansible&ref=sa
+
 
 ここではLinux上でのAnsibleを解説します。Ansible 1.7から、MNとしてWindowsもサポートされたようなので、必要であればドキュメント [#iianwin]_ をご覧ください。CMはサポートしていないのでご注意。
 
@@ -432,7 +434,7 @@ Ansibleがインストールできたところで実行してみましょう。A
 インスタンス(Droplets)を作るときに、登録したsshキーを登録するとrootでログインできます。インスタンスは1分くらいで起動してきます。Droplets [#iiansdrop]_ を作りました。
 
 .. figure:: img/an-do-dl.eps
-  :scale: 50%
+  :scale: 70%
   :alt: an-do-dl
   :align: center
 
@@ -487,7 +489,7 @@ Ansibleがインストールできたところで実行してみましょう。A
 .. [#iianscenth] https://github.com/yteraoka/ansible-tutorial/wiki/SSH のでhostsファイルに細工する
 
 
-pip経由でansibleをインストールすると ``/etc/ansible`` ディレクトリが作られていないので作って下さい。``/etc/ansible/hosts``ファイルの中身はこんな感じです。
+pip経由でansibleをインストールすると ``/etc/ansible`` ディレクトリが作られていないので作って下さい。 ``/etc/ansible/hosts`` ファイルの中身はこんな感じです。
 
 :: 
 
@@ -514,7 +516,7 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
 
 .. [#iianseri] ん？エリチをセットアップ？なんか卑猥ですね（おいやめろ（なお、朝7時くらいに書いている模様
 
-起動しているので``ssh root@eri``でログイン。もし入れなかったらDigitalOceanのサイトのDropletsからeriサーバを選択してパスワードリセットしましょう [#iianslogin]_ 。
+起動しているので ``ssh root@eri`` でログイン。もし入れなかったらDigitalOceanのサイトのDropletsからeriサーバを選択してパスワードリセットしましょう [#iianslogin]_ 。
 
 .. [#iianslogin] 筆者の場合はなぜか.sshディレクトリが600になってた...
 
@@ -528,12 +530,12 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
 
 .. code-block:: bash
 
-   # useradd -G wheel ayase
-   # yum install -y python-simplejson
-   # visudo
+   [root@eri ~]# useradd -G wheel ayase
+   [root@eri ~]# yum install -y python-simplejson
+   [root@eri ~]# visudo
    %wheel  ALL=(ALL)       NOPASSWD: ALL # コメントになっているので有効化
-   # cp -a .ssh/ /home/ayase/
-   # chown -R ayase. /home/ayase/.ssh
+   [root@eri ~]# cp -a .ssh/ /home/ayase/
+   [root@eri ~]# chown -R ayase. /home/ayase/.ssh
 
 ここまでやればCMのサーバで ``ssh eri`` でログイン可能。再度 ansible コマンドを実行。
 
@@ -551,7 +553,18 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
    }
 
 pingに対してpongが帰ってきました。成功です。うまくいかない時は、ansibleのコマンドに-vvvオプションをつけると何をやっているかわかります [#iiansvvv]_ 。
-筆者がハマったところは、接続先のサーバを何度も作りなおしていたので、.ssh/known_hostsファイルのキーを消さなかったため失敗することが有りました。
+
+.. topic:: known_hostsを無視する方法
+
+   筆者がハマったところは、DigitalOceanの接続先のホストを何度も作りなおしていました。同じ Region でホストを作ると、前回使ったGlobal IPアドレスが使いまわされます。
+   当然のことながら ``.ssh/known_hosts`` ファイルのキーを消さないとsshのログインに失敗します。そのときは、あらかじめ ``ansible.cfg`` に下記を書いておくと良いです。
+   
+   .. code-blcok:: conf
+
+      [defaults]
+      host_key_checking=False
+
+
 
 .. [#iiansvvv] ansible all -m ping 
 
@@ -563,8 +576,9 @@ pingに対してpongが帰ってきました。成功です。うまくいかな
 
 タイトル無理やり過ぎないですかね。ええ。筆者もそう思っています [#iiansnande]_ 。
 
-.. [#iiansnande] じゃあ、なんでつけたし
-Ansibleといえば、Inventry とか Playbook とかなんですが、後回しにしますね。ここでは、アドホックコマンド [#iiansad]_ に手を出してみましょう。サーバを作ったんだけど壊せなくて、本番サーバに更新を加えることが一度や二度、いや、もっとあったかな。
+.. [#iiansnande] なぜつけたし
+
+Ansibleといえば、Inventry とか Playbook の解説だとおもった？後回しにしますね。ここでは、アドホックコマンド [#iiansad]_ に手を出してみましょう。サーバを作ったんだけど壊せなくて、本番サーバに更新を加えることが一度や二度、いや、もっとあったかな。毎日かな？　
 対象となっているサーバに、泥臭くコマンドを投げ込む方法を実践してみましょう。一例として、OSのディストリビューションを見てみましょう。
 
 .. code-block:: sh
@@ -608,8 +622,19 @@ nozomiに対して ``sudo`` しないと実行できないコマンドを送っ�
     }
 
 ``-m`` オプションでモジュールを指定することが出来ます。モジュールの一覧は、``ansible-doc -l`` で見られます。copyモジュールの詳細を知りたい場合は ``ansible-doc copy`` と打って下さい。
-CentOSの場合、yum経由で apache をインストールするので ``ansible eri -m yum -a "name=httpd state=latest" --sudo`` と実行します。Ubuntuの場合は ``ansible nozomi -m apt -a "name=apache2 state=latest" --sudo`` でインストールできます。
-``ansible all -m setup`` とすると、OSやIPアドレス、ansibleの変数などの情報が取得できます。
+CentOSの場合、yum経由で apache をインストールするので 
+
+.. code-block:: sh
+
+   ansible eri -m yum -a "name=httpd state=latest" --sudo
+
+と実行します。Ubuntuの場合は 
+
+.. code-block:: sh
+
+   ansible nozomi -m apt -a "name=apache2 state=latest" --sudo
+
+でインストールできます。``ansible all -m setup`` とすると、OSやIPアドレス、ansibleの変数などの情報が取得できます。
 
 アドホックなコマンドはこのへんにして、Playbookへ話を移しましょう。
 
@@ -620,7 +645,7 @@ Playbook
 Playbookとは、MNに対してどのような設定するかを書いたAnsibleの設定ファイルです。中身はYAML [#iiasnayaml]_ です。
 適当なディレクトリでPlaybookを作成しましょう。まずは ``yum-apache.yml`` というファイルに下記のように書きます。
 
-.. [#iiasnayaml] http://docs.ansible.com/YAMLSyntax.html
+.. [#iiasnayaml] YAMLの書き方はこちらを参照。jsonよりマシ。 http://docs.ansible.com/YAMLSyntax.html
 
 .. code-block:: config
 
@@ -636,7 +661,7 @@ Playbookとは、MNに対してどのような設定するかを書いたAnsible
 honokaサーバ(IN LONDON)でCentOS 6.5の64bitで作りました。IPは178.62.48.99がとれてきました。
 
 .. figure:: img/an-do-honoka.eps
-  :scale: 70%
+  :scale: 80%
   :alt: condel
   :align: center
 
@@ -661,14 +686,14 @@ SSHキーは作成済みなのでrootで入ってみましょう。
    対象サーバ(MN)であるhonokaはCentOS6.5を使いました。OpenSSHのバージョンがやや古く(5.3)、Ansibleを実行したとき、ControlPersistオプションが使えずエラーとなります。
    OpenSSHを5.6以降にバージョンアップするか、ansible.cfgにsshのオプションを上書きしてやります [#iianscent6]_ 。ansible.cfgはPlaybookを実行するディレクトリにおいておけばOK。ssh_argsの行は一行で書いて下さい。
    
+   .. [#iianscent6] https://groups.google.com/forum/#!msg/ansible-project/M_QmqhwNynE/wyz-c0bXZmUJ
+
    .. code-block:: sh
 
       [ssh_connection]
       ssh_args = -o PasswordAuthentication=no -o ControlMaster=auto 
         -o ControlPath=/tmp/ansible-ssh-%h-%p-%r
 
-
-.. [#iianscent6] https://groups.google.com/forum/#!msg/ansible-project/M_QmqhwNynE/wyz-c0bXZmUJ
 
 ファイル一覧を見るとこんな感じです。
 
@@ -719,13 +744,13 @@ SSHキーは作成済みなのでrootで入ってみましょう。
 .. topic:: 冪等性(べきとうせい)
 
    何度やっても同じ結果になるという意味の言葉です。中途半端に構築したサーバでも、新規のサーバでも、同じPlaybook(Chefの場合はRecipe)を実行すれば、同じ状態になります。
-   AnsibleやChefにあるモジュールは冪等性を担保しているので、何度実行してもサーバが同じ状態になります。それ以外の自分で書いたスクリプトは、自分で冪等性を担保しなければなりません(これが苦痛になることがあります)。
+   AnsibleやChefにあるモジュールは冪等性を担保しているので、何度実行してもサーバが同じ状態になります。それ以外の自分で書いたスクリプトは、自分で冪等性を担保しなければなりません(これがつらさを生み出す原因になることがあります)。
 
    構成管理における冪等性の利点はAnsibleやChefなどの構成管理ツールでコード化できる点です。できあがったサーバは、Serverspecやinfratasterを使ってテストを行い、動作の保証を行います。
 
    デプロイされているプログラムのアップデートにともなって、ミドルウエアのモジュールを追加したい場合があります。手順書をコード化してサーバで実行すれば、構築完了です。
    ただし、本番環境に対して変更を加える事はストレスになります。一方、本記事の冒頭にでてきた「作って壊す」という環境があれば、冪等性について考える必要はないかもしれません。
-   そんな時はBlue-Green Deploymentで切り替えましょう。まてよ、そんな富豪的に使えるところってあるんですかねえ・・・
+   そんな時はBlue-Green Deploymentで切り替えましょう。といっても、そんな富豪的に使えるところってあるんですかねえ・・・
 
 
 過去の遺産 Playback
@@ -844,16 +869,16 @@ Dockerとは、たいそう面白いギャグを連発して観客を "どっか
 インストール
 """"""""""""
 
-おや、こんなことろに
+おや、こんなことろ(DigitalOcean)にDocker入りのイメージがあるじゃないですか。hanayoという名前でDropletsを作りました。OSが立ち上がればインストール完了です。ね、簡単でしょ？
 
 .. figure:: img/dk-do-image.eps
   :scale: 70%
   :alt: dk-do-image
   :align: center
 
-  DigitalOceanのImageにDockerがすでにある
+  DigitalOceanのImageにDockerがすでにある！
 
-honokaという名前のDropletsを作りました。OSが立ち上がればインストール完了です。ね、簡単でしょ？
+
 
 俺はッ！！本気で！！！！インストールしたいッヒョオッホーーー！！ウーハッフッハーン！！　ッウーン！ [#iidocun]_ な方は、インストールのドキュメントをご覧ください [#iidocins]_ 。CentOS [#iidoccentos]_ やAmazon EC2などにインストールすることができます。バイナリリリース [#iidocbin]_ もあります。
 
@@ -909,7 +934,7 @@ docker hubにログインします。アカウントを作ります。
    6c37f792ddac: Download complete 
    Hello world
 
-ubuntu:14.04というイメージを指定しています。そのイメージ(コンテナ)で ``bin/echo 'Hello world'`` を実行しています。
+ubuntu:14.04というイメージを指定しています。そのイメージ(コンテナ)で ``/bin/echo 'Hello world'`` を実行しています。
 初回は、数分時間がかかります。実行すると、標準出力結果には残りませんがダウンロードが走ります。これについてはあとで触れます。
 いよいよ、コンテナに入ってみましょう。 ``docker run`` でコンテナに対してコマンドを打ちます。
 
@@ -1020,10 +1045,12 @@ HTTPサーバが応答していますね。それでは、アプリケーショ�
 
 病気のダビンチさんはいなくなりました。なお、イメージは残っています。
 
-root@hanayo:~# docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-ubuntu              14.04               e54ca5efa2e9        4 weeks ago         276.5 MB
-training/webapp     latest              31fa814ba25a        7 weeks ago         278.8 MB
+.. code-block:: sh
+
+   root@hanayo:~# docker images
+   REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+   ubuntu              14.04               e54ca5efa2e9        4 weeks ago         276.5 MB
+   training/webapp     latest              31fa814ba25a        7 weeks ago         278.8 MB
 
 さてさて、ここまではubuntu:14:04を使っていました。ほかのOSも試してみましょう。
 
