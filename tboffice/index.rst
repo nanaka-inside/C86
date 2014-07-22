@@ -1064,7 +1064,7 @@ HTTPサーバが応答していますね。それでは、アプリケーショ�
    34e94e67e63a: Download complete 
    root@hanayo:~#
 
-おもむろにCentOSが持ってこれましたね。初回だけイメージを引っ張ってくるので時間がかかります。2回め以降はすぐにコンテナが起動します。それでは、今日も一日がんばるぞい！ログインしてみましょう。
+おもむろにCentOSが持ってこれましたね。初回だけイメージを引っ張ってくるので時間がかかります。2度目以降はすぐにコンテナが起動します。今日も一日がんばるぞい！それでは、ログインしてみましょう。
 
 .. code-block:: sh
 
@@ -1080,7 +1080,7 @@ CentOS 7ですね。hanayoのサーバはUbuntuなのに、Docker上のイメー
    bash-4.2# uname -a 
    Linux 4ee22d17ac9a 3.13.0-24-generic #46-Ubuntu SMP Thu Apr 10 19:11:08 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
 
-CentOSなのに、Ubuntuって書いてあるぞ。ログアウトしてカーネルを見てみます。
+CentOSなのに、Ubuntuって書いてありますね。ログアウトしてカーネルを見てみます。
 
 .. code-block:: sh
 
@@ -1088,7 +1088,7 @@ CentOSなのに、Ubuntuって書いてあるぞ。ログアウトしてカー�
    root@hanayo:~# uname -a 
    Linux hanayo 3.13.0-24-generic #46-Ubuntu SMP Thu Apr 10 19:11:08 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
 
-たしかにカーネルが一致しますね。Dockerはカーネルだけを共有しています [#iidocker]_ 。公式サイトから図を引用してみます。VMとの違いがなんとなく。なんでしょう。なんですかね。
+hanayoとカーネルが一致しますね。Dockerはカーネルだけを共有しています [#iidocker]_ 。公式サイトから図を引用してみます。VMとの違いがなんとなく。なんでしょう。なんですかね。
 
 .. [#iidocker] http://stackoverflow.com/questions/18786209/what-is-the-relationship-between-the-docker-host-os-and-the-container-base-image
 
@@ -1108,21 +1108,147 @@ CentOSなのに、Ubuntuって書いてあるぞ。ログアウトしてカー�
 
   https://registry.hub.docker.com/_/centos/
 
-Dockerのイメージファイルは https://hub.docker.com/ にあるので検索してみてください。え？ブラウザを開くのが面倒？そういう場合は、searchコマンドで探します。すげーたくさん出てきます。
+Dockerのイメージファイルは https://hub.docker.com/ にあるので検索してみてください。え？ブラウザを開くのが面倒？そういう場合は、searchコマンドで探します。すげーたくさん出てきます [#iidocsb]_ 。
 
 .. code-block:: sh
 
    # docker search centos | head
-   NAME                                            DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
-   centos                                          The official build of CentOS.                   262       [OK]       
-   tianon/centos                                   CentOS 5 and 6, created using rinse instea...   24                   
-   blalor/centos                                   Bare-bones base CentOS 6.5 image                4                    [OK]
-   saltstack/centos-6-minimal                                                                      4                    [OK]
-   stackbrew/centos                                The CentOS Linux distribution is a stable,...   3         [OK]       
+   NAME                         DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+   centos                       The official build of CentOS.                   262       [OK]       
+   tianon/centos                CentOS 5 and 6, created using rinse instea...   24                   
+   blalor/centos                Bare-bones base CentOS 6.5 image                4                    [OK]
+   saltstack/centos-6-minimal                                                   4                    [OK]
+   stackbrew/centos             The CentOS Linux distribution is a stable,...   3         [OK]       
 
-なお、stackbrew(https://github.com/dotcloud/stackbrew)というのが公式イメージの一つです。
+.. [#iidocsb] stackbrew(https://github.com/dotcloud/stackbrew)というのが公式イメージの一つです。 ``NAME`` は、 ``username/imagename`` と付けるのが流儀。
 
-ここまできたら、Ansibleあたりでテストかいてみたいと思いませんか？思いますよね？そうだと思いましたよ！！！
+再度、実行してみましょう。ついでに ``gcc`` をインストールをインストールしてみましょう。CentOSなので、もれなく ``yum install -y gcc`` が打てます。応募者全員サービスです。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker run -t -i centos /bin/bash
+   bash-4.2# yum install -y gcc
+   (略)
+   Complete!
+   bash-4.2# ps aux
+   USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+   root         1  0.0  0.3  11740  1692 ?        Ss   17:54   0:00 /bin/bash
+   root        61  0.0  0.2  19748  1200 ?        R+   17:58   0:00 ps aux
+   bash-4.2# exit
+   root@hanayo:~# 
+
+おわかりいただけただろうか。 ``ps`` コマンドを打つと、bashのプロセスと自身の ps プロセスしかいないのだ。プロセスのおかわりはいただけないのだろうか。いただけないのである。
+何故、こんなことを書いているかというと、コンテナには1つのプロセスしか載せないのである。topを打つともちろん、bashとtopのプロセスしかないのだ！！！な、なんだって！！ ``ΩΩ Ω``
+
+茶番を終わらせるために、いったんbashを抜けて、コンテナをすべて表示してみます。centos:centos7というイメージ上に、0ab61f52d310と31318abf2f23というコンテナがあることがわかります。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker ps -a
+   CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                       PORTS               NAMES
+   0ab61f52d310        centos:centos7      /bin/bash           8 minutes ago       Exited (130) 4 seconds ago                       furious_mayer       
+   31318abf2f23        centos:centos7      /bin/bash           11 minutes ago      Exited (130) 9 minutes ago                       prickly_bardeen     
+
+STATUSがExitedとなっていますね。bashプロセスから抜けると、コンテナは沈黙してしまうのです。では、このコンテナを起動させてみましょう。
+そのまえに、便利な ``dl`` コマンドを作りましょう [#iidocdl]_ 。
+
+.. [#iidocdl] 15 Docker Tips in 5 Minutes - http://sssslide.com/speakerdeck.com/bmorearty/15-docker-tips-in-5-minutes
+
+.. code-block:: sh
+
+   root@hanayo:~# alias dl='docker ps -l -q'
+   root@hanayo:~# dl
+   0ab61f52d310
+
+実行できましたね。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker start `dl`
+   0ab61f52d310
+   root@hanayo:~# docker attach `dl`
+    # 止まったかな？と思っても、Enterを押してください。bashが返ってきますヨ！
+   bash-4.2# 
+   bash-4.2# rpm -qa | grep ^gcc 
+   gcc-4.8.2-16.el7.x86_64
+
+ちゃんと gcc もインストールされていますね。今回はexitせず、 ``ctrl + p`` のあとに、 ``ctrl + q`` を押して抜けます。
+
+.. code-block:: sh
+
+   CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                        PORTS               NAMES
+   0ab61f52d310        centos:centos7      /bin/bash           20 minutes ago      Up 5 minutes                                      furious_mayer       
+   31318abf2f23        centos:centos7      /bin/bash           23 minutes ago      Exited (130) 21 minutes ago                       prickly_bardeen     
+
+今度は、STATUSがUPになってますね。これで起動中のコンテナが出来ました！
+あとはいらないコンテナを削除しましょう。
+
+.. code-block:: sh
+
+   # docker rm prickly_bardeen 
+   prickly_bardeen
+
+
+さあ、ここまできたら、sshで入ってみたいと思いませんか？そうですよね！！そうだと思いましたよ！！！そういうことにしておいてください！！！！
+
+
+sshでログインする
+""""""""""""""""
+
+http://mizzy.org/blog/2014/06/22/1/ を見ながら。
+
+Goが入っていなかったのでインストール。いまさらですけど、DockerはGo製です。
+
+.. code-block:: sh
+
+   root@hanayo:~# apt-get install gccgo-go golang
+   root@hanayo:~# export GOPATH=$HOME/_go
+   root@hanayo:~# export PATH=$PATH:$GOPATH/bin
+   root@hanayo:~# go get github.com/docker/libcontainer/nsinit
+   docker-attach()
+   {
+     id=`sudo docker ps -q --no-trunc $1`
+     root=/var/lib/docker/execdriver/native/$id
+     sudo sh -c "cd $root && $GOPATH/bin/nsinit exec $2"
+   }
+
+
+nsinitのバイナリができてなくてうまくいかなかった。
+どうもパッチ当てないと行けない模様 http://qiita.com/comutt/items/2f873a0e7eaddd3f647e
+nsenterでやってみる。gettextが0.18.3でぴったりだった。
+
+
+shipyard
+"""""""""""""""
+
+docker run -i -t -v /var/run/docker.sock:/docker.sock shipyard/deploy setup
+
+数分かかる
+
+dockerを再起動してしまったので再起動。最後のはdocker ps -a でNameをさがしてください。
+
+root@hanayo:~# docker restart shipyard shipyard_db shipyard_lb shipyard_redis shipyard_router determined_tesla 
+
+ブラウザでアクセス。　http://128.199.140.147:8000　
+
+Server Error (500) と表示されてしまった。かなしい。
+
+
+作ったdockerをpushする
+
+pullもしたいな
+
+
+さっくりしててよい
+http://qiita.com/curseoff/items/a9e64ad01d673abb6866
+
+containerを全部消す
+
+ docker rm `docker ps -aq`
+ docker rm `docker ps -a | awk '/iranai/ {print $1}'` 
+
+
+
 
 TODO
 sshで入れる方法を示す。commitしてpushして環境を保存する感じで流れる。
@@ -1142,6 +1268,9 @@ http://mizzy.org/blog/2014/06/22/1/　＜＝これが最新の流れぽい。
 http://shibayu36.hatenablog.com/entry/2013/12/07/233510
 http://d.hatena.ne.jp/naoya/20130621/
 http://www.nerdstacks.net/2014/03/ssh-ready-centos-dockerfile/ sshのキーをつけたしたdockerfile
+
+データ永続化の話
+http://qiita.com/mopemope/items/b05ff7f603a5ad74bf55
 
 虎の巻
 http://qiita.com/deeeet/items/ed2246497cd6fcfe4104
@@ -1183,15 +1312,8 @@ root@hanayo:~# docker inspect -f '{{ .NetworkSettings.IPAddress }}' sick_davinci
 172.17.0.9
 
 
-* dockerとは
-
-  * chrootのつよいやつ
-  * OS上にコンテナを作って、そのうえに環境をつくる
-  * 差分が重要らしい
-  * ネットワークまわりとか、ディレクトリ関連がどうなるのかわからん。chrootでよくね？
-  * FAQ形式で掘っていくのもよいかもね。じゃがいもよろしくー
-
-* 使ってみる
+関連書籍・URL
+"""""""""""""
 
 
 Cobbler
