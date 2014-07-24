@@ -1,0 +1,125 @@
+最初にログインしておく
+docker login
+
+https://registry.hub.docker.com/_/redis/
+
+docker pull redis
+root@hanayo:~# docker run -d -p 6379:6379 redis 
+e6df5aeac92800f2494dd1977f93d3b0141b5b20ffb29016d398b207c4b2151f
+
+
+root@hanayo:~# docker ps -l
+root@hanayo:~# docker ps -a 
+CONTAINER ID        IMAGE               COMMAND                CREATED              STATUS                      PORTS                    NAMES
+e6df5aeac928        redis:2.8           redis-server --bind    About a minute ago   Up About a minute           0.0.0.0:6379->6379/tcp   loving_lumiere   
+
+telnet localhost 6379
+なんかでてくればおｋ
+
+quitを打ってEnterを押して抜ける。quitコマンドを送信した
+
+
+apache+php+sshのDockerfileを書く
+
+Dockerfileを書く
+mkdir centos && cd centos
+Dockerfileの例はこっち　https://github.com/dotcloud/docker/blob/master/Dockerfile
+
+apache+phpとssh+supervisorが入ったCentOSのイメージを作ります
+あらかじめ、sshで入るために公開鍵を作成します
+
+ssh-keygen -t rsa -N "" -f .ssh/id_rsa
+
+コピーしておく
+cp .ssh/id_rsa.pub centos
+
+
+vim Dockerfile
+
+FROM centos
+RUN yum update -y
+# RUN yum install -y nginx openssh-server php-fpm php-cli php-devel wget unzip gcc make python-setuptools
+RUN yum install -y openssh-server php-cli php-devel wget unzip gcc make python-setuptools
+RUN yum install -y tar bzip2 apr-devel apr-util-devel ; true
+RUN yum clean all
+RUN easy_install supervisor
+
+# SSH
+ADD id_rsa.pub /root/id_rsa.pub
+RUN mkdir -p /root/.ssh/
+RUN cp /root/id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 700 /root/.ssh
+RUN chmod 600 /root/.ssh/authorized_keys
+
+RUN sed -i -e '/^UsePAM\s\+yes/d' /etc/ssh/sshd_config
+# RUN systemctl stop sshd && systemctl start sshd
+
+# phpredis
+RUN cd /tmp && wget https://github.com/nicolasff/phpredis/archive/master.zip
+RUN cd /tmp && unzip master.zip
+RUN cd /tmp/phpredis-master && phpize && ./configure && make && make install
+RUN echo "extension=redis.so" > /etc/php.d/redis.ini
+RUN sed -i -e "s|;date.timezone =|date.timezone = Asia/Tokyo|" /etc/php.ini 
+
+# apache
+RUN cd /tmp && wget http://ftp.kddilabs.jp/infosystems/apache//httpd/httpd-2.4.10.tar.bz2
+RUN cd /tmp && tar jxvf httpd-2.4.10.tar.bz2
+RUN cd /tmp/httpd-2.4.10 && ./configure && make && make install 
+
+# supervisor
+RUN mkdir -p /var/log/supervisor
+ADD supervisord.conf /etc/supervisord.conf
+EXPOSE 22 80
+CMD ["/usr/bin/supervisord"]
+
+
+supervisord.conf
+----
+[supervisord]
+nodaemon=true
+
+[program:httpd]
+command=/usr/local/apache2/bin/httpd -DFOREGROUND
+
+[program:sshd]
+command=/usr/sbin/sshd -D
+----
+https://docs.docker.com/articles/using_supervisord/
+
+
+ビルド
+root@hanayo:~/centos# docker build -t centos:ap .
+root@hanayo:~/centos# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ap                  latest              0a057246d71b        3 minutes ago       433.2 MB
+
+できた
+apacheのところで cpioのエラーがでる。なんでやねん、
+nginxにしようとしたけどapacheをソースから入れてsupervisordから起動しれやればいいんじゃね？
+yum install tar bzip2 apr-devel apr-util-devel
+
+cd /tmp && wget http://ftp.kddilabs.jp/infosystems/apache//httpd/httpd-2.4.10.tar.bz2
+tar jxvf httpd-2.4.10.tar.bz2
+cd httpd-2.4.10
+./configure && make && make install
+
+
+
+
+
+
+
+なお、redisのDockerfileがある
+
+https://github.com/dockerfile/redis/blob/master/Dockerfile
+
+
+2014/07/23 12:27:23 The command [/bin/sh -c yum install -y openssh-server httpd php php-redis python-setuptools] returned a non-zero code: 1
+
+ctrl+pがdockerに取られる。コマンドラインで一つ前のコマンドを呼び出すときに ctrl+pを二回押さないといけない
+
+root@hanayo:~# alias dl='docker ps -l -q'
+root@hanayo:~# dl
+0866d11c7932
+
+
