@@ -21,14 +21,16 @@ HTTP/2 を試してみる前に、まず従来の HTTP/1.1 と比較した HTTP/
 HTTP/1.1 の抱える課題
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-HTTP/1.x は今日の web を支える重要なプロトコルとして広く利用されています。
+HTTP/1.1 [#]_ は今日の web を支える重要なプロトコルとして広く利用されています。
+前バージョンの HTTP/1.0 では1リクエスト毎に1TCPコネクションを張っており、3ウェイハンドシェイクが頻繁に実行され効率が良くありませんでした。
 
-しかし現在一般的に利用されている HTTP/1.1 は今日の web でやり取りされるコンテンツの性質やハードウェア性能の向上に追従できているとはいえません。
+しかし RFC2616 が公開された 1999 年とは事情が異なっており、 HTTP/1.1 は今日の web でやり取りされるコンテンツの性質やハードウェア性能の向上に追従できているとはいえません。
 具体的には下記のような性能面の懸念点が存在します。
 
 1. HTTP/1.1 の pipelining が抱える Head-of-Line(HOL) Blocking 問題
-2. 冗長なヘッダ
-3. リソースの優先度を考慮しないレスポンス
+2. TCP の性質
+3. 冗長なヘッダ
+4. リソースの優先度を考慮しないレスポンス
 
 HTTP/1 では通常リクエスト毎にTCPコネクションを張るため、 3-way handshake のコストが大きい、ブラウザがサーバへの負荷を考慮してドメイン当り 6 コネクションまでしか張らない、 TCP slow start の影響のため効率が良くないなどの問題を抱えています。
 これを改善するため、 HTTP/1.1 では1コネクションを使って複数のリクエストを投げる pipelining という機能が仕様に含まれています。
@@ -36,6 +38,8 @@ HTTP/1 では通常リクエスト毎にTCPコネクションを張るため、 
 これが HOL Blocking です。
 
 その他にも 2. に挙げたように、 User-Agent として毎回同じような内容を送っていたり、テキスト形式で送っているなど HTTP ヘッダの転送は冗長なものとなっています。
+
+.. [#] http://tools.ietf.org/html/rfc2616
 
 HTTP/2 のメリット
 ^^^^^^^^^^^^^^^^^^^
@@ -70,21 +74,24 @@ HPACK は よく使用される HTTP ヘッダ（ステータスコードの組�
 HTTP/2 実装を動かしてみる
 --------------------------
 
-現在未だ仕様策定中で、仕様の修正も頻繁に入っている HTTP/2 ですが、 既にいくつかの実装が存在し、実際に動作を確認することが可能です。
-仕様自体にまだ Last Call がかかっていない都合、多くの実装が試験的に機能提供しているという状態です。
+HTTP/2 は未だ仕様策定中で、仕様の修正も頻繁に入っている状態にありますが、既にいくつかの実装が存在し動作を確認することが可能です。
+ただし仕様自体が固まりきっていない都合、多くの実装が試験的に機能提供しているという状態です。
 
 よく知られた実装については、 HTTP/2 の仕様策定について議論するための GitHub のリポジトリの Wiki に記載されています。 [#]_ 
 
-ここではいくつかの HTTP/2 実装を挙げて、実際に動かしてみるまでの手順について説明します。
+ここではいくつかの HTTP/2 実装を挙げて、実際に動かしてみるまでの手順について（なるべく楽に環境構築できるように）説明します。
 
 .. [#] https://github.com/http2/http2-spec/wiki/Implementations
 
 クイックスタート
 ^^^^^^^^^^^^^^^^^^
 
-HTTP/2 を試してみたいけど、 HTTP/2 を解釈可能なサーバとクライアントを用意するのが面倒だというそこのアナタは、ひとまずクライアントとして後述の Goole Chrome Canary もしくは Firefox Nightly Build を利用しましょう。
-これらのクライアント実装はコンフィグ画面から HTTP/2 機能を ON にするだけで、特にビルドをしたり Docker でイメージを作成する必要がありません。
-サーバについては https://Twitter.com/ にアクセスすることで代替しましょう。 twitter は既にプロダクションで HTTP/2 をサポートしており、実際に HTTP/2 を使って通信できます。
+HTTP/2 を試してみたいけど、 HTTP/2 を解釈可能なサーバとクライアントを用意するのが面倒だというそこのアナタ！
+ひとまずクライアントとして後述の Goole Chrome Canary もしくは Firefox Nightly Build を利用しましょう。
+これらのクライアント実装はコンフィグ画面から HTTP/2 機能を ON にするだけで HTTP/2 リクエストを送ることができるようになります。
+
+サーバについては、 https://Twitter.com/ にアクセスすることで代替しましょう。
+twitter.com は既にプロダクションで HTTP/2 をサポートしており、実際に HTTP/2 を使って通信できます！
 
 サーバを動かしてみる
 ^^^^^^^^^^^^^^^^^^^^^
@@ -93,7 +100,7 @@ nghttp2
 """"""""
 
 nghttp2 [#]_ は @tatsuhiro-t 氏によって開発が進められている C 実装の HTTP/2 ライブラリです。
-HTTP/2 の仕様の変更に迅速に対応しており、仕様の網羅性も高く、後述の curl, Wireshark でも使用されています。
+HTTP/2 の仕様の変更に迅速に対応しており仕様の網羅性も高く、後述の curl, Wireshark でも使用されています。
 
 GitHub の nghttp2 リポジトリにはクライアント (nghttp) とサーバ (nghttpd) 、プロキシ (nghttpx)、ベンチマークツール (h2load) が存在します。
 ./configure 実行時に --enable-app オプションを付与することでこれらがビルドされるようになります。
@@ -105,7 +112,8 @@ GitHub の nghttp2 リポジトリにはクライアント (nghttp) とサーバ
 
    $ docker build https://raw.githubusercontent.com/syucream/h2dockerfiles/master/nghttp2/Dockerfile
 
-nghttp2 サーバをインストールした後は、下記コマンドで実行できます。
+nghttp2 サーバ(nghttpd)をインストールした後は、 nghttpd コマンドで実行できます。
+証明書を用意するのが面等という場合は、 --no-tls オプションを付与することですぐに起動可能です。
 
 ::
 
@@ -121,16 +129,25 @@ Apache Traffic Server
 Apache Traffic Server (以下、ATS)は Apache のトップレベルプロジェクトの一つとして開発が進められている、オープンソースのキャッシュ・プロキシサーバです。
 ATS は現状では正式に HTTP/2 をサポートしている訳ではないのですが、筆者に馴染み深いソフトウェアであり、かつ最近 HTTP/2  サポートに向けた活動が見られているので記述します。
 
-ATS の HTTP/2 対応は、 ATS の開発を管理する JIRA 上のチケットで議論が進められています。 [#]_
-初期は先述の nghttp2 を利用した HTTP/2 対応パッチが投稿されており、仕様の draft-12 で動作が確認できていました。
+ATS の HTTP/2 対応は現在進行中です。 ATS の開発を管理する JIRA 上のチケットで議論が進められています。 [#]_
+初期は先述の nghttp2 を利用した HTTP/2 対応パッチが投稿されており、仕様のドラフト番号 13 番で最低限の動作が確認できています。
 （ただし現状では議論の結果、このパッチはマージされず外部ライブラリに依存しない方針で対応を再検討されています。）
 
-本記事では上記パッチを当てた ATS を簡単に動作させるための Dockerfile も用意しています。
-もしご興味がある方がいらっしゃれば、 docker build してご利用ください。
+本稿では上記パッチを当てた ATS を簡単に動作させるための Docker イメージを用意しました。
+もし動作を確認してみたいとの要望が有りましたら、下記手順で ATS を動作させてみてください。
+
+※ ATS は基本的にプロキシサーバとして動作するため、オリジナルのコンテンツを配信する HTTP サーバ（オリジンサーバ）が別途必要になります。
+ここで紹介する Docker イメージでは nginx をオリジンサーバとして導入し、 nginx へリクエストを仲介するように ATS に設定追加を行っております。
 
 ::
 
-   $ docker build https://raw.githubusercontent.com/syucream/h2dockerfiles/master/trafficserver/Dockerfile
+   # docker pull
+   $ docker pull syucream/h2ts
+
+   # docker run して nginx と ATS を起動
+   $ docker run -d -p 80:8080 -p 443:443 -t syucream/h2ts /bin/sh -c 'nginx && traffic_server'
+
+上記コマンドで ATS を起動させた後は次節で紹介する HTTP/2 対応クライアントで通信してみてください。
 
 .. [#] https://issues.apache.org/jira/browse/TS-2729
 
@@ -158,19 +175,57 @@ curl
 """""
 
 curl では 7.33.0 以降から HTTP/2 リクエストが送れるようになりました。
---http2 オプションを付与することで明示的に HTTP/2 リクエストを送ることができます。
+--http2 オプションを付与することで HTTP/2 リクエストを送ることができます。
+curl の HTTP/2 処理は nghttp2 を利用して実装されており、自前で curl をビルドする際には事前に nghttp2 をインストールしておく必要があることに注意してください。
 
-curl の HTTP/2 処理は nghttp2 を利用して実装されており、自前で curl をビルドする際には事前に nghttp2 をインストールしておく必要があります。
-curl についても本稿では Dockerfile を用意しました。
+curl についても本稿では Docker イメージを用意しました。
+下記手順のように docker pull して試してみてください。
 
 ::
 
-   $ docker build https://raw.githubusercontent.com/syucream/h2dockerfiles/master/curl/Dockerfile
+    # docker pull
+    $ docker pull syucream/h2curl
 
-実際に curl で --http2 オプションを付けてリクエストを投げた結果は下記のようになります。
+    # コンテナ内に入る
+    $ docker run -i -t syucream/h2curl /bin/bash
 
-〜〜ここに出力結果を貼る〜〜
+    # -v, --http2 オプション付きで HTTP/2 対応サーバにリクエストを投げる
+    $ curl -v --http2 https://twitter.com/ > /dev/null
 
+実際に curl で -v, --http2 オプションを付けてリクエストを投げた結果は下記のようになります。
+使用プロトコルに h2-13 （HTTP/2 ドラフト番号13番）が選択されており、その後 HTTP/2 処理に関する出力がされていれば正常に HTTP/2 でリクエストを投げられています。
+
+::
+
+    # プロトコルネゴシエーション部分（一部抜粋） h2-13 が選択されている
+    * SSLv3, TLS handshake, Client hello (1):
+    } [data not shown]
+    * SSLv3, TLS handshake, Server hello (2):
+    { [data not shown]
+    * NPN, negotiated HTTP2 (h2-13)
+    * SSLv3, TLS handshake, CERT (11):
+    { [data not shown]
+    ...
+
+    # レスポンスヘッダ一部抜粋
+    < HTTP/2.0 200
+    < cache-control:no-cache, no-store, must-revalidate, pre-check=0, post-check=0
+    < content-length:54793
+
+    # レスポンスのデータフレームの処理。ストリーム番号 1 で処理されているのが分かる。
+    * http2_recv: 16384 bytes buffer
+    * nread=18
+    * on_data_chunk_recv() len = 10, stream = 1
+    * 10 data written
+    * on_frame_recv() was called with header 0
+    * nghttp2_session_mem_recv() returns 18
+    { [data not shown]
+    * http2_recv: 16384 bytes buffer
+    * nread=4096
+    * on_data_chunk_recv() len = 4088, stream = 1
+    * 4088 data written
+    * nghttp2_session_mem_recv() returns 4096
+    { [data not shown]
 
 Google Chrome Canary
 """""""""""""""""""""
