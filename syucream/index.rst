@@ -240,11 +240,15 @@ Google Chrome Canary をダウンロードしたら、 chrome://flags にアク�
 そこで SPDY indicator  [#]_ という Chrome 拡張を導入してみましょう。
 この拡張を導入することで HTTP/2 通信が使用できている際に、下図のようにアドレスバーの右側に青い稲妻のアイコンが現れるようになります。
 
-〜〜ここに図を貼る〜〜
+.. figure:: img/chrome_canary_with_spdy_indicator.eps
+
+   SPDY Indicator による HTTP/2 通信の確認
 
 また、 chrome://net-internals/#spdy で現在張られている HTTP/2 （と SPDY ）セッションの情報を確認することもできます。
 
-〜〜ここに図を貼る〜〜
+.. figure:: img/chrome_net_internals.eps
+
+   HTTP/2 のセッション情報の確認
 
 .. [#] https://www.google.com/intl/en/chrome/browser/canary.html
 
@@ -259,7 +263,9 @@ Firefox Nightly Build [#]_ は Firefox のナイトリービルド版であり�
 HTTP/2 通信できているか確認するには、 Firebug の Net タブから閲覧出来るレスポンスヘッダの内容からできます。
 X-Firefox-Spdy ヘッダの内容に下図のような "h2-<ドラフト番号>" が含まれていれば HTTP/2 通信ができています。
 
-〜〜ここに図を貼る〜〜
+.. figure:: img/x_firefox_spdy.eps
+
+   X-Firefox-Spdy ヘッダの内容の例
 
 .. [#] http://nightly.mozilla.org/
 
