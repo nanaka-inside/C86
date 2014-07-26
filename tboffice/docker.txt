@@ -1,0 +1,203 @@
+最初にログインしておく
+docker login
+
+https://registry.hub.docker.com/_/redis/
+
+docker pull redis
+root@hanayo:~# docker run -d -p 6379:6379 redis 
+e6df5aeac92800f2494dd1977f93d3b0141b5b20ffb29016d398b207c4b2151f
+
+
+root@hanayo:~# docker ps -l
+root@hanayo:~# docker ps -a 
+CONTAINER ID        IMAGE               COMMAND                CREATED              STATUS                      PORTS                    NAMES
+e6df5aeac928        redis:2.8           redis-server --bind    About a minute ago   Up About a minute           0.0.0.0:6379->6379/tcp   loving_lumiere   
+
+telnet localhost 6379
+なんかでてくればおｋ
+
+quitを打ってEnterを押して抜ける。quitコマンドを送信した
+
+
+なお、redisのDockerfileがある。
+https://github.com/dockerfile/redis/blob/master/Dockerfile
+
+
+apache+php+sshのDockerfileを書く
+
+Dockerfileを書く
+mkdir centos && cd centos
+Dockerfileの例はこっち　https://github.com/dotcloud/docker/blob/master/Dockerfile
+
+apache+phpとssh+supervisorが入ったCentOSのイメージを作ります
+あらかじめ、sshで入るために公開鍵を作成します
+
+ssh-keygen -t rsa -N "" -f .ssh/id_rsa
+
+コピーしておく
+cp .ssh/id_rsa.pub centos
+
+
+vim Dockerfile
+
+FROM centos
+RUN yum update -y
+# RUN yum install -y nginx openssh-server php-fpm php-cli php-devel wget unzip gcc make python-setuptools
+RUN yum install -y openssh-server wget unzip gcc make python-setuptools vim pcre-devel libxml2-devel autoconf
+RUN yum install -y tar bzip2 apr-devel apr-util-devel ; true
+RUN yum clean all
+RUN easy_install supervisor
+
+# apache
+RUN cd /tmp && wget http://ftp.kddilabs.jp/infosystems/apache//httpd/httpd-2.4.10.tar.bz2
+RUN cd /tmp && tar jxvf httpd-2.4.10.tar.bz2
+RUN cd /tmp/httpd-2.4.10 && ./configure --enable-so && make && make install 
+RUN echo "みんなーっ！ご飯炊けたよっ♪" > /usr/local/apache2/htdocs/index.html
+RUN echo "AddType application/x-httpd-php .php" >> /usr/local/apache2/conf/httpd.conf 
+RUN echo "LoadModule php5_module modules/libphp5.so" >> /usr/local/apache2/conf/httpd.conf
+ADD redis.php /usr/local/apache2/htdocs/redis.php
+
+# php 
+RUN cd /tmp && wget http://jp2.php.net/distributions/php-5.5.15.tar.gz && tar zvxf php-5.5.15.tar.gz && cd php-5.5.15/ && ./configure  --with-apxs2=/usr/local/apache2/bin/apxs && make && make install
+
+# phpredis
+RUN cd /tmp && wget https://github.com/nicolasff/phpredis/archive/master.zip
+RUN cd /tmp && unzip master.zip
+RUN cd /tmp/phpredis-master && phpize && ./configure && make && make install
+RUN echo "extension=redis.so" >> /usr/local/lib/php.ini
+RUN sed -i -e "s|;date.timezone =|date.timezone = Asia/Tokyo|" /usr/local/lib/php.ini
+
+# SSH
+ADD id_rsa.pub /root/id_rsa.pub
+RUN mkdir -p /root/.ssh/ /var/run/sshd
+RUN cp /root/id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 700 /root/.ssh && chmod 600 /root/.ssh/authorized_keys
+RUN /usr/bin/ssh-keygen -t rsa  -f /etc/ssh/ssh_host_rsa_key -N ''
+RUN /usr/bin/ssh-keygen -t ecdsa  -f /etc/ssh/ssh_host_ecdsa_key -N ''
+RUN sed -i -e 's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
+# RUN systemctl stop sshd && systemctl start sshd
+
+# supervisor
+RUN mkdir -p /var/log/supervisor
+ADD supervisord.conf /etc/supervisord.conf
+EXPOSE 22 80
+CMD ["/usr/bin/supervisord"]
+
+build.sh
+
+#!/bin/sh
+IP=$(docker inspect $(docker ps -a | awk /redis-server/'{print $1}') | awk -F \" /IPAddress/'{print $4}')
+sed -e "s/127.0.0.1/"$IP"/" redis.php.template > redis.php
+docker build -t centos:ap .
+docker run -d -p 10022:22 -p 80:80 centos:ap
+docker ps -a
+
+
+supervisord.conf
+----
+[supervisord]
+nodaemon=true
+
+[program:httpd]
+command=/usr/local/apache2/bin/httpd -DFOREGROUND
+
+[program:sshd]
+command=/usr/sbin/sshd -D
+----
+https://docs.docker.com/articles/using_supervisord/
+
+
+ビルド
+root@hanayo:~/centos# docker build -t centos:ap .
+root@hanayo:~/centos# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ap                  latest              0a057246d71b        3 minutes ago       433.2 MB
+
+できた
+
+AUFSの話
+Dockerfileで書いた一行一行の設定が1ファイルになって積み重なる。dockerfileを途中で書き換えたら、そこまでのファイルはそのままで、書き換えた行のあとから再度ビルドが走ってファイルがまた作られる。
+
+php-embeddedでlibphp5.soが入る。それをapacheで使う感じにした。が、
+httpd: Syntax error on line 505 of /usr/local/apache2/conf/httpd.conf: Can't locate API module structure `php5_module' in file /usr/lib64/libphp5.so: /usr/lib64/libphp5.so: undefined symbol: php5_module
+まあ、ですよねー。じゃあphpコンパイルするか
+
+phpのmake中
+virtual memory exhausted: Cannot allocate memory
+make: *** [ext/fileinfo/libmagic/apprentice.lo] Error 1
+make: *** Waiting for unfinished jobs....
+あっ
+make -j2をmakeにしたら通った。時間かかるけど。
+
+sshが入れない問題があった。sshdを上げてみたところ
+Could not load host key: /etc/ssh/ssh_host_rsa_key
+Could not load host key: /etc/ssh/ssh_host_ecdsa_key
+とかいわれる
+
+/usr/bin/ssh-keygen -t rsa  -f /etc/ssh/ssh_host_rsa_key -N ''
+/usr/bin/ssh-keygen -t ecdsa  -f /etc/ssh/ssh_host_ecdsa_key -N ''
+
+http://stmind.hatenablog.com/entry/20110802/1312302164
+ここみてつくった
+あと、PAM noにすると入れた
+
+root@hanayo:~/centos# docker run -p 2222:22 -p 80:80 -d centos:ap
+できたぽい
+
+CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS                                       NAMES
+152a9bda3b1b        centos:ap           /usr/bin/supervisord   38 seconds ago      Up 37 seconds       0.0.0.0:80->80/tcp, 0.0.0.0:10022->22/tcp   goofy_archimedes   
+PORTSがこうなってないといけない
+
+root@hanayo:~/centos# ssh -p 10022 localhost 
+-bash-4.2# 
+
+＼ｷｪｪｪｪｪｪｱｧｧｧｧｧｧ SSH ｶﾞ ｼｬｧﾍﾞｯﾀｧｧｧｧｧｧｧ!!!／
+
+root@hanayo:~/centos# curl localhost 
+みんなーっ！ご飯炊けたよっ♪
+
+飯テロやめて下さいお願いします
+
+なお、ホストOSにプロセスが侵食している模様
+root@hanayo:~/centos# ps aux | grep httpd
+root      1449  0.0  0.6  75184  3100 ?        S    14:18   0:00 /usr/local/apache2/bin/httpd -DFOREGROUND
+bin       1451  0.0  0.4 364148  2192 ?        Sl   14:18   0:00 /usr/local/apache2/bin/httpd -DFOREGROUND
+bin       1452  0.0  0.4 364148  2192 ?        Sl   14:18   0:00 /usr/local/apache2/bin/httpd -DFOREGROUND
+bin       1453  0.0  0.5 429684  2784 ?        Sl   14:18   0:00 /usr/local/apache2/bin/httpd -DFOREGROUND
+
+なお、sshd -Dもみえる模様。
+
+
+はまった点
+yum install -y httpdでコケる
+Bug 1012952 - docker: error: unpacking of archive failed on file /usr/sbin/suexec: cpio: cap_set_file
+https://bugzilla.redhat.com/show_bug.cgi?id=1012952
+つらい。apacheをソースから入れることにした。それにともなって、phpもコンパイルすることに。なお、nginxならyum installで入る。
+
+centos7になってsysmtedになった。systemctlでアプリケーションが動かない
+Bug 1033604 - Unable to start systemd service in Docker container
+https://bugzilla.redhat.com/show_bug.cgi?id=1033604
+コンテナやからサービスで動かさないものである。直接起動せよ！といっている。あるいは単純なデーモン化にしよう。とある。うーむ。ただしみある。
+「There are basically two ways to go.
+
+First, the "application container" model. Here, you don't use systemctl to launch the service -- you just run it directly. This works very well for relatively simple daemons.」
+
+Step 17 : RUN echo "extension=redis.so" > /etc/php.d/redis.ini
+ ---> Running in 63cea966820b
+/bin/sh: /etc/php.d/redis.ini: No such file or directory
+2014/07/24 20:59:58 The command [/bin/sh -c echo "extension=redis.so" > /etc/php.d/redis.ini] returned a non-zero code: 1
+
+
+buildやってると docker imagesでたくさんイメージが残っている
+docker rmi $(docker images | grep "^<none>" | awk "{print $3}")
+一気に消す
+
+ctrl+pがdockerに取られる。コマンドラインで一つ前のコマンドを呼び出すときに ctrl+pを二回押さないといけない
+
+便利コマンド
+root@hanayo:~# alias dl='docker ps -l -q'
+root@hanayo:~# dl
+0866d11c7932
+
+
+
