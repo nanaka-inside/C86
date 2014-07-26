@@ -233,10 +233,10 @@ Google Chrome Canary
 Google Chrome Canary [#]_ は Google Chrome のナイトリービルド版であり、実験的に搭載された数多くの機能を試すことができます。
 HTTP/2 もこの実験的な機能に含まれており、設定を有効にすることで手軽に利用を開始できます。
 
-Google Chrome Canary をダウンロードしたら、 chrome://flags にアクセスして試験運用機能の設定画面を開き、「SPDY/4 を有効にする」という項目を有効にしましょう。
+HTTP/2 通信を有効にするには、 Google Chrome Canary をインストール後 chrome://flags にアクセスして試験運用機能の設定画面を開き、「SPDY/4 を有効にする」という項目を有効にしましょう。
 これだけですぐに HTTP/2 通信が利用可能になります。
 
-しかしこれだけでは実際に HTTP/2 通信できているかはいまいち判別が付きません。
+しかし HTTP/2 通信はユーザから見ると HTTP/1.1 と見た目上の差分はないため、これだけでは実際に HTTP/2 通信できているかいまいち判別が付きません。
 そこで SPDY indicator  [#]_ という Chrome 拡張を導入してみましょう。
 この拡張を導入することで HTTP/2 通信が使用できている際に、下図のようにアドレスバーの右側に青い稲妻のアイコンが現れるようになります。
 
@@ -295,29 +295,35 @@ Wireshark の HTTP/2 対応は残念ながら正式にサポートされてい�
 
    https://code.wireshark.org/review/wireshark
 
-Mac OS X を利用している場合、 Homebrew で HEAD 版を入れてしまうのが手っ取り早いかも知れません。
+Mac OS X を利用している場合、 Homebrew で HEAD 版を入れてしまうのが手っ取り早いでしょう。
 
 ::
 
    $ brew install wireshark -HEAD
 
-
 h2load
 """""""
 
 h2load は nghttp2 リポジトリに含まれる HTTP/2 と SPDY に対応したベンチマークツールです。
-HTTP/1.1 のベンチマークツールとしては ab, http_load, weighttp などがありますが、 HTTP/2 に対応したベンチマークツールとしては現状 h2load のみです。
+HTTP/1.1 のベンチマークツールとしては ab, http_load, weighttp などがありますが、 HTTP/2 に対応したベンチマークツールは現状 h2load のみです。
 
-h2load は weighttp と似たようなオプションを持ちます。
+h2load は weighttp と似たようなオプションを持ち、これを使い慣れている方は違和感なく使用できると思います。
 また、 HTTP/2 の特徴であるストリームの同時接続上限を指定して、複数ストリームでアクセスすることも可能です。
 
-h2load も nghttp2 の Dockerfile をビルドすることで手軽に環境構築が可能です。
+h2load も nghttp2 の Docker イメージを使用することで手軽に試すことができます。
 
 ::
 
-   $ docker build https://raw.githubusercontent.com/syucream/h2dockerfiles/master/nghttp2/Dockerfile
+   $ docker pull syucream/nghttp2
+
+h2load に関しては、作者の @tatsuhiro-t さんが Qiita に投稿した解説 [#]_ があるので、これも合わせて読んでおくとよいでしょう。
 
 .. [#] http://qiita.com/tatsuhiro-t/items/6cbe5b095e24d7feb381
+
+また、 matsumoto-r さんによって執筆されたこの h2load を使って HTTP/1.1, SPDY/3.1, HTTP/2 の性能比較を行った記事も存在します。
+HTTP/2 のベンチマークを行いたい際、こちらも参考にするとよいと思われます。
+
+.. [#] http://blog.matsumoto-r.jp/?p=4079
 
 まとめ
 -------
