@@ -41,7 +41,7 @@ roadworker はコマンドライン引数から AWS のアクセスキーとシ�
 
 roadworker は **Routefile** と呼ばれる独自の DSL を解釈して、 Route 53 の設定を行います。ただ、現在の設定を上書きなどしてしまうと問題ですので、現在の Route 53 の設定を書き出すところから始めましょう。
 
-::
+.. code:: shell
 
     $ roadwork -e -o Routefile
     # Bundler で管理している場合は以下
@@ -49,7 +49,7 @@ roadworker は **Routefile** と呼ばれる独自の DSL を解釈して、 Rou
 
 上記のコマンドを実行すると、カレントディレクトリの ``Routefile`` に Route 53 の現在のレコードがすべて出力されます。
 
-::
+.. code:: ruby
 
     hosted_zone "example.com." do
       rrset "example.com.", "A" do
@@ -76,10 +76,10 @@ roadworker の DSL を理解する
 
 そのまま、Route 53 の Hosted Zone のことを指しています。たとえば、 ``nicovideo.jp`` なら、
 
-::
+.. code:: ruby
 
     hosted_zone "nicovideo.jp." do
-      ...
+      # ...
     end
 
 と記述します。最後の ``.`` が必須なことを忘れないように気をつけてください。
@@ -93,7 +93,7 @@ Route 53 の Record Set のことを指しています。Hosted Zone 内の A �
 
 たとえば、 ``blog.nicovideo.jp`` を Tumblr で運用する、といった設定の場合
 
-::
+.. code:: ruby
 
     hosted_zone "nicovideo.jp." do
       rrset "blog.nicovideo.jp.", "CNAME" do
@@ -120,7 +120,7 @@ Elastic Load Balancer を使って、動的な IP の付与とロードバラン
 
 Management Console では A レコードタイプを選択して Alias オプションを有効にすることで指定を行うことが出来ますが、 roadworker を利用する場合、以下のような指定で、目的の設定を行う事ができます。
 
-::
+.. code:: ruby
 
     hosted_zone "nicovideo.jp." do
       rrset "www.nicovideo.jp.", "A" do
@@ -130,7 +130,7 @@ Management Console では A レコードタイプを選択して Alias オプシ
 
 S3 に Alias を設定する場合も同様に
 
-::
+.. code:: ruby
 
     hosted_zone "nicovideo.jp." do
       rrset "www.nicovideo.jp.", "A" do
@@ -145,7 +145,7 @@ Failover を利用した動的なドメイン切り替え
 
 Route 53 には Failover 機能があり、ヘルスチェックと組み合わせることで、サービスダウン時には自動的にレコードを切り替える、といった運用が可能になります(もちろん、クライアント側で名前解決結果をキャッシュしている可能性がありますから、過信は禁物ですが)。
 
-::
+.. code:: ruby
 
     hosted_zone "nicovideo.jp." do
       rrset "www.nicovideo.jp.", "A" do
