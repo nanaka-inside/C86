@@ -2,16 +2,16 @@ var gulp = require('gulp');
 var pandoc = require('gulp-pandoc');
 
 gulp.task('default', function() {
-  gulp.watch('*.mkd', function(event) {
-    console.log("Build: " + event.path);
+  gulp.watch('*.mkd', ['build']);
+});
 
-    gulp.src('*.mkd')
-      .pipe(pandoc({
-        from: 'markdown',
-        to: 'rst',
-        ext: '.rst',
-        args: ['--smart']
-      }))
-      .pipe(gulp.dest('./'));
-  });
+gulp.task('build', function() {
+  gulp.src('*.mkd')
+  .pipe(pandoc({
+    from: 'markdown_github',
+    to: 'rst',
+    ext: '.rst',
+    args: ['--no-wrap']
+  }))
+  .pipe(gulp.dest('./'));
 });
