@@ -4,7 +4,7 @@
 
 今回は AWS をコード化する、ということで、実際に使用している、いくつかのコード例と共に、 AWS の各パーツをコード化していきましょう。
 
-## なぜコード化するのか
+## 序文: なぜコード化するのか
 
 本題に入る前に、まずはなぜコード化しなくてはならないのか、何が嬉しいのか？について少しお話します。
 
@@ -198,6 +198,7 @@ end
 ```ruby
 # Routefile
 require 'yaml'
+
 hosted_zone "nicovideo.jp." do
   defined_by_yaml = YAML.load_file("./sample.yml")
 
@@ -229,3 +230,155 @@ No change
 ```
 
 出力を確認することで期待する内容がきちんと設定されているかを確認しながら Routefile の編集・適用を行うことで、より安全に実行することが出来るようになります。
+
+#### ダイナミックな DNS 設定
+
+いままではプログラマブルとはいえ、設定内容はすべてコード上で表現されていました。ですが、現実にはより柔軟に DNS の設定を行いたいことが多々あります。例えば、ELB の増設を行った時に自動的に DNS も設定されて欲しい、などの状況です。
+
+roadworker は aws-sdk という AWS 公式の gem を使って実装されているため、もちろん aws-sdk を使って、他の AWS コンポーネントの情報を取得することも簡単に行えます。
+
+ここでは、aws-sdk と連携することで、ELB に付けられた名前から自動的に DNS レコードを設定するような Routefile を書いてみましょう。
+
+##### DNS を設定する ELB を取得する
+
+ELB 上のロードバランサを取得するのは以下のようなコードで簡単に行う事ができます。
+
+```ruby
+require 'aws-sdk'
+
+# ec2_endpoint 及び elb_endpoint はご利用の region に併せて変更してください
+elb = AWS::ELB.new(
+  ec2_endpoint: 'ec2.ap-northeast-1.amazonaws.com',
+  elb_endpoint: 'elasticloadbalancing.ap-northeast-1.amazonaws.com'
+)
+load_balancers = elb.load_balancers
+```
+
+ここで気をつけなければならないことは `load_balancers` メソッドで返ってくるのは『全ての』ELB ロードバランサだということです。すべてということは、内部用に設定され外部に公開されていない Intenal ELB も含まれていることになります。必ず `schema` が ちゃんと `internet-facing` になっているかを確認するコードを入れておかないと、おかしなことになりかねませんから、注意が必要です。
+
+##### 実際に DNS を設定する
+
+次は、どのように DNS レコードと紐付けるかですが、ここは ELB 名の suffix が `nicovideo-jp` で終わる時のみ、その `hosted_zone` に名前を設定することとします。例えば `www-nicovideo-jp` という Name の設定された ELB は自動的に Route53 で `www.nicovide.jp` の A レコードとして設定される、という具合です。
+
+```ruby
+# Routefile
+require 'aws-sdk'
+
+elb = AWS::ELB.new(
+  ec2_endpoint: 'ec2.ap-northeast-1.amazonaws.com',
+  elb_endpoint: 'elasticloadbalancing.ap-northeast-1.amazonaws.com'
+)
+load_balancers = elb.load_balancers
+
+hosted_zone 'nicovideo.jp' do
+  load_balancers.each do |load_balancer|
+    if load_balancer.scheme == 'internet-facing' && load_balancer.name.match(/nicovideo-jp$/)
+      rrset load_balancer.name.gsub('-', '.'), 'A' do
+        dns_name load_balancer.canonical_hosted_zone_name
+      end
+    end
+  end
+end
+```
+
+これだけのコードで、十分に目的の挙動を行ってくれます。あまりに拍子抜けしてしまいましたか？これで十分なのです！記述がすっきりしただけでなく、今後は手動でレコードを追加していくといった手間からも開放されてしまいました。また ELB の設定もコード化することが出来ますから(これについては次の機会に記事を書かせていただきたいと思います)、組み合わせることで、より便利な環境が実現できるかと思います。
+
+##### S3 もついでにやってしまおう！
+
+あまりにも簡単に ELB を自動的に Route 53 に設定することが出来てしまいましたから、この勢いで S3 のバケットによる静的サイトを Route 53 を使って DNS 設定するということもやってしまいましょう。
+
+S3 のバケット一覧を取得するには、以下のようなコードで簡単に取得することが出来ます。
+
+```ruby
+require 'aws-sdk'
+
+s3 = AWS::S3.new
+buckets = s3.buckets
+```
+
+あとは、`nicovideo.jp` で終わるバケット名が指定されているものを取得して DNS レコードを設定していきましょう。
+
+```ruby
+# Routefile
+require 'aws-sdk'
+
+s3 = AWS::S3.new
+buckets = s3.buckets
+
+hosted_zone 'nicovideo.jp' do
+  buckets.each do |bucket|
+    if bucket.website? && bucket.name.match(/nicovideo.jp$/)
+      rrset bucket.name, "CNAME" do
+        resource_records("#{bucket.name}.s3-website-ap-northeast-1.amazonaws.com.")
+      end
+    end
+  end
+end
+```
+
+`bucket.website?` を利用して Web サイトホスティング設定されているものだけに絞っています。もっと難しくて長々しいものを期待していたでしょうか？たったこれだけで終わってしまいます。
+
+#### 全部入りの Routefile
+
+さて、ここまで『シンプルなレコード設定は YAML で』『ELB は名前から自動的に』『S3 も名前から自動的に』設定してくれる Routefile を作ってきました。最後にはすべてを組み合わせた Routefile を作ってみます。とはいえ、難しいことは何もありません。すべてをつなげてしまえばいいのです。
+
+```ruby
+# Routefile
+require 'yaml'
+require 'aws-sdk'
+
+elb = AWS::ELB.new(
+  ec2_endpoint: 'ec2.ap-northeast-1.amazonaws.com',
+  elb_endpoint: 'elasticloadbalancing.ap-northeast-1.amazonaws.com'
+)
+load_balancers = elb.load_balancers
+
+s3 = AWS::S3.new
+buckets = s3.buckets
+
+hosted_zone "nicovideo.jp." do
+  # Simple records by YAML
+  defined_by_yaml = YAML.load_file("./sample.yml")
+
+  defined_by_yaml.each do |record|
+    rrset(record["name"], record["type"] || "A") do
+      ttl(record["ttl"] || 300)
+      resource_records(*record["values"])
+    end
+  end
+
+  # ELB configuration by automatically
+  load_balancers.each do |load_balancer|
+    if load_balancer.scheme == 'internet-facing' && load_balancer.name.match(/nicovideo-jp$/)
+      rrset load_balancer.name.gsub('-', '.'), 'A' do
+        dns_name load_balancer.canonical_hosted_zone_name
+      end
+    end
+  end
+
+  # S3 configuration by automatically
+  buckets.each do |bucket|
+    if bucket.website? && bucket.name.match(/nicovideo.jp$/)
+      rrset bucket.name, "CNAME" do
+        resource_records("#{bucket.name}.s3-website-ap-northeast-1.amazonaws.com.")
+      end
+    end
+  end
+end
+```
+
+どうでしょう？たった50行にも満たない DSL は見た目とは裏腹に大変便利に扱う事ができます。ELB や S3 は作れば名前から自動的に設定されるし、簡単なレコードは YAML で見やすく管理することが出来ます。
+
+もちろん、 Failover ポリシーなどを利用した設定等はこれでは行えませんが、ここまで読んで頂ければより便利にするためのアイディアはすでにあなたの中にいくつもひらめていることでしょう。より高度な DSL を拡張して作ってもいいかもしれません。
+
+いままで面倒だった DNS のレコード管理は、すでにあなたのエディタの中にあるのです！
+
+## 跋文: コードにすると、おもちゃになる
+
+さて、今日はここまででオシマイです。AWS をコード化する、Route 53 編となってしまいましたが、いかがでしたでしょうか？
+
+個人的に、設定やこのような管理運用はいつも悩みの種です。簡単ですぐできることであっても、なんとなくめんどくさくて後回しにしてしまったり、どれをやったか忘れてしまったり……と。その点、このようにコード化して管理することで『より良い方法はないか』『もっと便利にしよう！』といった遊びが生まれます。こうしておもちゃにすることで、面倒な管理運用タスクも、息抜きのコーディングに変化するのです。
+
+AWS を使うことで、豊富なクラウドリソースが扱えるようになりましたが、本当の恩恵は実はこういったシステマティックなコード化や API 経由の操作による手作業の占める範囲を減らしてゆくことにこそあるのではないでしょうか？
+
+あなたもぜひ、AWS をおもちゃにして遊んでみてください！
