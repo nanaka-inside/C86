@@ -36,7 +36,7 @@ roadworker はコマンドライン引数から AWS のアクセスキーとシ�
 
 roadworker は __Routefile__ と呼ばれる独自の DSL を解釈して、 Route 53 の設定を行います。ただ、現在の設定を上書きなどしてしまうと問題ですので、現在の Route 53 の設定を書き出すところから始めましょう。
 
-```shell
+```
 $ roadwork -e -o Routefile
 # Bundler で管理している場合は以下
 $ bundle exec roadwork -e -o Routefile
@@ -221,7 +221,7 @@ TXT レコードや CNAME レコードなど、単純なレコードを記述す
 
 そのため、 roadworker には `--apply` の実行時に使える `--dry-run` というオプションが組み込みで容易されています。先ほどの設定内容を試しに実行してみると、以下の様な出力が得られます。
 
-```shell
+```
 $ roadwork --apply --dry-run -f Routefile
 Apply `Routefile` to Route53 (dry-run)
 Create HostedZone: nicovideo.jp (dry-run)
