@@ -37,12 +37,10 @@ UNIXコマンドを使い倒せば、PerlだのPHPだのRubyだのPythonだのJa
 
 .. include:: chap_basket.rst
 
+.. include:: chap_stock.rst
+
 .. include:: chap_paypalapi.rst
 
-
-在庫管理をする       - truncateで在庫持出、echoで補充
---------------------------
-* カーネル活かせばロックは要らぬ！
 
 カゴの中身を見せる   - joinコマンドで表計算
 --------------------------
@@ -61,13 +59,6 @@ UNIXコマンドを使い倒せば、PerlだのPHPだのRubyだのPythonだのJa
 * メールファイルはどういう構造か
 * 日本語メールはnkfコマンドで変換
 * 明細表もmojihameコマンドで
-
-決済をする           - curlコマンドでPayPal APIを叩け
---------------------------
-* PayPal APIの概要
-* CGI変数はsedやAWKで作成する
-* curlでAPI叩き
-* ヒアドキュメントで303リダイレクション
 
 
 
