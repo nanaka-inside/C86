@@ -65,8 +65,6 @@ Webブラウザーはそのどちらかを選んで送ってくるので、
 この環境変数 ``REQUEST_METHOD`` がGETかPOSTかで、
 次項で示すように二通りの取得方法を使い分けなけねばならないのだ。
 
-.. rubric::
-
 .. [#contenttype] 今書いたCGIスクリプト、最初の2つのechoコマンドは画面に表示されていないな。この部分の話は今説明しているCGI変数の受け取り方を終えてから説明するぞ。
 
 
@@ -144,8 +142,6 @@ CGI変数を1行1変数化して更に区切り文字を半角スペース化す
 	echo "ボタン名は" "$(nameread button $Tmp-cgivars)"
 	
 	rm -f $Tmp-*
-
-.. rubric::
 
 .. [#tempfile]    シェルスクリプトを書くとき、一時ファイルは変数の如く、とにかく躊躇わず利用せよ。頻繁に読み書きしたとしても、今どきのUNIX系OSはバカじゃないので、キャッシュメモリで済ませようとする。従って大して遅くなりはしないのだよ。
 .. [#percent_enc] 検索サイトで全角キーワードで検索した時、URLに出てくる ``%E3%81%82`` とかのアレ。
@@ -350,8 +346,6 @@ mktempの第一引数では生成するファイルのテンプレートを指�
 Cookie文字列を発行するmkcookieコマンド [#mkcookie]_ と、
 セッションファイルの管理をするsessionfコマンド  [#sessionf]_  だ。
 
-.. rubric::
-
 .. [#cookie_qiita] http://qiita.com/richmikan@github/items/ee77911602afc911858f
 .. [#mkcookie]     https://github.com/ShellShoccar-jpn/shellshoccar1/blob/master/public_html/CART/UTL/mkcookie
 .. [#sessionf]     https://github.com/ShellShoccar-jpn/shellshoccar1/blob/master/public_html/CART/UTL/sessionf
@@ -389,8 +383,6 @@ Cookie文字列を発行するmkcookieコマンド [#mkcookie]_ と、
 
 このように、今訪れているサイトとは別のサイトとやりとりするCookieのことを
 サードパーティーCookieという。
-
-.. rubric::
 
 .. [#ad_batsu_game]       消耗品ならいざしらず、一度買った同じものを買うかっつーの! 観賞用、保存用、交換用で3つ買えとでも?
 
