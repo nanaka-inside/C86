@@ -175,3 +175,71 @@ Route 53 には Failover 機能があり、ヘルスチェックと組み合わ�
 ~~~~~~~~~~~~~~~~~~
 
 roadworker は Ruby で実装されており、その DSL も Ruby 上で動作する Ruby スクリプトとして解釈されます。ということは、Ruby そのものの機能を活用して、プログラマブルな DNS を構築出来ることになります。
+
+単純に DSL のみで記述することももちろん簡単ですが、もう一歩発展した使い方をすることで、よりよい DNS 設定を構築しましょう。
+
+単純なレコードは YAML で管理したい
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Amazon Simple Email Service や Google Analytics など、DNS レコードに指定の値を設定しなければいけない場面は多くあります。こういったものまでいちいち DSL で記述するのは面倒ですから、 YAML で管理出来るように改造してしまいましょう。
+
+まずは、YAML の読み込みを出来るように Routefile を修正します。
+
+.. code:: ruby
+
+    # Routefile
+    require 'yaml'
+
+    hosted_zone "nicovideo.jp." do
+      defined_by_yaml = YAML.load_file("./nicovideo.jp.yml")
+    end
+
+これで、\ ``nicovideo.jp.yml`` の中身が ``defined_by_yaml`` に代入出来るようにりました。YAML の書式は好きなように決めるとして、今回はこんな感じにしてみます。
+
+.. code:: yaml
+
+    # nicovideo.jp.yml
+    - name: "www.nicovideo.jp"
+      type: "A"
+      ttl: 300
+      values:
+        - "192.168.0.1"
+        - "192.168.0.2"
+
+ルートは配列で、中に ``rrset`` の名前とレコードタイプ、 TTL と値を入れられるようにしておきます。あとは、Routefile の方でこの書式からエントリを作ってあげるだけですね。
+
+.. code:: ruby
+
+    # Routefile
+    require 'yaml'
+    hosted_zone "nicovideo.jp." do
+      defined_by_yaml = YAML.load_file("./sample.yml")
+
+      defined_by_yaml.each do |record|
+        rrset(record["name"], record["type"] || "A") do
+          ttl(record["ttl"] || 300)
+          resource_records(*record["values"])
+        end
+      end
+    end
+
+これで単純なレコードであれば YAML を修正するだけで追加出来るようになりました。\ ``dns_name`` などを利用しない、単純なレコードはこのように YAML から読み込むようにしておくと、コードレビュー時も便利になります。YAML だとインデントベースなので運用が難しい、といった場合には適宜 JSON を使うなどの変更を行ってもよいでしょう。
+
+TXT レコードや CNAME レコードなど、単純なレコードを記述するのにあまり苦労したくない……という場合にはより効果を発揮すると思われます。
+
+Protip: ``--dry-run`` による確認
+''''''''''''''''''''''''''''''''
+
+単純な DSL であれば書式が間違っていないかをチェックするだけで十分でしたが、このようにコード化されていくと、最終的な結果を予測することが難しくなります。
+
+そのため、 roadworker には ``--apply`` の実行時に使える ``--dry-run`` というオプションが組み込みで容易されています。先ほどの設定内容を試しに実行してみると、以下の様な出力が得られます。
+
+.. code:: shell
+
+    $ roadwork --apply --dry-run -f Routefile
+    Apply `Routefile` to Route53 (dry-run)
+    Create HostedZone: nicovideo.jp (dry-run)
+    Create ResourceRecordSet: www.nicovideo.jp A (dry-run)
+    No change
+
+出力を確認することで期待する内容がきちんと設定されているかを確認しながら Routefile の編集・適用を行うことで、より安全に実行することが出来るようになります。
