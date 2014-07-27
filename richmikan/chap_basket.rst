@@ -47,7 +47,7 @@ Webブラウザーはそのどちらかを選んで送ってくるので、
 
 というCGIスクリプトをサーバー上で書いて、
 
-.. code-block:: HTML
+.. code-block:: html
 
 	<html>
 	  <body>
@@ -419,7 +419,7 @@ Cookie文字列を発行するmkcookieコマンド [#mkcookie]_ と、
 ユーザーがカゴに入れるボタンを押し、WebブラウザーがAjaxによるHTTPリクエストを発すると、
 我々のサイト(ユーザーが見ているサイトではない)にこのようなHTTPヘッダーが送られてくる。
 
-.. code-block::
+.. code-block:: text
 
 	Accent-Encoding: gzip,deflate,sdch
 	Connection: keep-alive
@@ -435,7 +435,7 @@ Cookie文字列を発行するmkcookieコマンド [#mkcookie]_ と、
 そして、そのOriginの値が確かに自分が改造したWebページのものであるならば、
 そのリクエストに対して、次のようなレスポンスヘッダーを返す。
 
-.. code-block::
+.. code-block:: text
 
 	Content-Type: text/html
 	   :

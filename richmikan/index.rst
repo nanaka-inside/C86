@@ -41,14 +41,10 @@ UNIXコマンドを使い倒せば、PerlだのPHPだのRubyだのPythonだのJa
 
 .. include:: chap_mktable.rst
 
+.. include:: chap_webform.rst
+
 .. include:: chap_paypalapi.rst
 
-
-顧客情報記入欄を作る - sed&AWKでHTMLテンプレに文字ハメ
---------------------------
-* 基本的にはsedでハメ
-* 繰り返す各行には特製mojihameコマンド
-* JSONもXMLもCSVも、sedやAWKでパース可能。
 
 注文明細メールを送る - sendmailコマンドで一発送信
 --------------------------
