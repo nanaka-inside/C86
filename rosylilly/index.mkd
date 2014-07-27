@@ -64,7 +64,7 @@ roadworker による Export は現在の設定内容を書き出してくれま�
 
 ### roadworker の DSL を理解する
 
-#### `hosted_zone`
+#### hosted_zone
 
 そのまま、Route 53 の Hosted Zone のことを指しています。たとえば、 `nicovideo.jp` なら、
 
@@ -78,7 +78,7 @@ end
 
 この `hosted_zone` に渡すブロックの中で、その Hosted Zone の各 Record Set の設定を行っていきます。
 
-#### `rrset`
+#### rrset
 
 Route 53 の Record Set のことを指しています。Hosted Zone 内の A レコードなどの具体的な設定の記述になります。
 
