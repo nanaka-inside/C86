@@ -39,14 +39,10 @@ UNIXコマンドを使い倒せば、PerlだのPHPだのRubyだのPythonだのJa
 
 .. include:: chap_stock.rst
 
+.. include:: chap_mktable.rst
+
 .. include:: chap_paypalapi.rst
 
-
-カゴの中身を見せる   - joinコマンドで表計算
---------------------------
-* INNER JOINにjoinコマンド
-* OUTER JOINにjoinとsedコマンド
-* パイプ活かせばSQLは要らぬ!
 
 顧客情報記入欄を作る - sed&AWKでHTMLテンプレに文字ハメ
 --------------------------
