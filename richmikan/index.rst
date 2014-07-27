@@ -29,13 +29,15 @@ UNIXコマンドを使い倒せば、PerlだのPHPだのRubyだのPythonだのJa
 .. [#about_shellshoccar] 仮面○イダーとかいう架空のヒーローが出てくる物語のゲ○ショッカーではない！断じて違う。我々は壊滅などしない。
 
 
-.. include:: chap1.rst
+.. include:: chap_1.rst
 
-.. include:: chap2.rst
+.. include:: chap_2.rst
 
-.. include:: chap3.rst
+.. include:: chap_3.rst
 
-.. include:: chap4.rst
+.. include:: chap_basket.rst
+
+.. include:: chap_paypalapi.rst
 
 
 在庫管理をする       - truncateで在庫持出、echoで補充
