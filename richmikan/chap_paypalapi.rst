@@ -134,7 +134,7 @@ SetExpressCheckoutを呼び出している、CGI/PAYPAL1.CGIの中を掻い摘�
 CGI/PAYPAL1.CGIのコード(抜粋)
 ``````````````````````````````````````````````````````````````````````
 
-.. code-block:: shell
+.. code-block:: bash
 
 	    :
 	cat <<-SETEXPCO_DATA > $Tmp-setexpco_data0                             ←334行目あたり

@@ -36,7 +36,7 @@ Webブラウザーはそのどちらかを選んで送ってくるので、
 それが書かれているのは、 ``REQUEST_METHOD`` という名の *環境変数* だ。
 試しに、
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 	
@@ -79,7 +79,7 @@ GETメソッドの場合は環境変数 ``QUERY_STRING`` で渡ってくる。
 printfを使う方が安心だ。先程のHTMLのmethodを ``GET`` にし、
 下記のCGIスクリプトを書いて呼びだしてみるがよい。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 	
@@ -96,7 +96,7 @@ printfを使う方が安心だ。先程のHTMLのmethodを ``GET`` にし、
 
 ``QUERY_STRING`` に入っているとわかったらあとは簡単だ。次のコードを見よ。
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	#! /bin/sh
@@ -129,7 +129,7 @@ CGI変数を1行1変数化して更に区切り文字を半角スペース化す
 さらに、このCGIスクリプトではAWKで抽出していた各変数の抽出をやってくれるコマンドも用意されていて、namereadという。
 これらを使って書き換えると、こんな感じになる。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 	
@@ -158,7 +158,7 @@ POSTメソッドの時は、標準入力
 でも文字列の形式自体はGETの時と同じだ。
 従って、単にCGIスクリプトの最初の部分を標準入力から読み込むように直せばよい。
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	#! /bin/sh
@@ -211,7 +211,7 @@ Webブラウザーはその画像ファイルをダウンロードすること�
 
 しかしGET,POSTのところで例示したCGIスクリプトを見直すと
 
-.. code-block:: shell
+.. code-block:: bash
 
 	         :
 	         :
@@ -237,7 +237,7 @@ WebブラウザーはHTMLファイルと解釈して画面表示するし、"ima
 例えばHTTPステータスコード(404とかああいうヤツ)だ。
 それを利用するとこんなCGIスクリプトも作れる。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 
@@ -270,7 +270,7 @@ Statusヘッダーを付けてブラウザーに404(File Not Found)を知らせ�
 商品をカゴに入れることの成功・失敗を返す場合、HTTPヘッダーには"Content-Type: text/plain"さえあればよい。
 まあ、実際のシェルショッカー1号ではWebブラウザーやプロクシにキャッシュされないようにするために
 
-.. code-block:: shell
+.. code-block:: bash
 
 	Cache-Control: private, no-store, no-cache, must-revalidate
 	Pragma: no-cache
@@ -306,7 +306,7 @@ WebブラウザーからのCookieを回収するのは環境変数HTTP_COOKIEを
 このCookieはWebブラウザーを閉じるまでの間有効であり、
 Webページをリロードすると最初にセッションが作成された日時を返すようになっている。
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	#! /bin/sh
@@ -471,7 +471,7 @@ Webブラウザーは追加後の数を画面に反映させる。
 
 先程の解説を見ながら眺めて見てもらいたい。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	    :
 	# --- CGI変数(POST)を取得 -------------------------------------------- ←145行目あたり

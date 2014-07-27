@@ -31,7 +31,7 @@ psコマンドはプロセスに対応するユーザー名は表示できるが
 
 先に解答を載せてしまうぞ。(解説のため、一つにまとめられるであろうコマンドでも細かくステップ分けしているので悪しからず)
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	#! /bin/sh
@@ -105,7 +105,7 @@ joinコマンドというのは基本的にはINNER JOIN(内部結合)のため�
 何らかの事情でユーザーマスター表には自分とrootの行しかなかったとしよう。
 擬似的には次のようにしてgrepの行を書き換えれば再現できる。
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	   :
@@ -128,7 +128,7 @@ OUTER JOINするにはどうすればよいか。
 OUTER JOINをするために修正したコード
 ``````````````````````````````````````````````````````````````````````
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	#! /bin/sh
@@ -168,7 +168,7 @@ joinの出力は、右表1列目、左表2列目と指定しているが、
 この例では空になる列が行末に1つだけだったが、
 もし空(ヌル)列が複数がある場合や、行末に限らない場合は、次のように一般化できる。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	join (ここで何らかのOUTER JOINをする) |
 	sed 's/ $/ */'                        |
@@ -230,7 +230,7 @@ CGIスクリプトだ。
 INNER JOINの例(CGI/SHOWQTYS.AJAX.CGI内、244行目付近)
 ``````````````````````````````````````````````````````````````````````
 
-.. code-block:: shell
+.. code-block:: bash
 
 	# 2)メッセージ作成
 	msg=$(cat $Tmp-curqtytbl                                 |
@@ -259,7 +259,7 @@ INNER JOINの例(CGI/SHOWQTYS.AJAX.CGI内、244行目付近)
 OUTER JOINの例(CGI/SHOWQTYS.AJAX.CGI内、264行目付近)
 ``````````````````````````````````````````````````````````````````````
 
-.. code-block:: shell
+.. code-block:: bash
 
 	# 2)カゴ入れ商品情報行のカゴ入れ数を、超過数を考慮して更新
 	zcat "$File_session"                                    |

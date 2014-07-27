@@ -47,7 +47,7 @@ HTML上に値をハメ込むのは簡単にできるように、独自コマン�
 シェルショッカー1号のディレクトリーでは、UTL/fsedとして収録してあるが、
 ちょっと中身を覗いてみるとこんな感じになっている。
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	#! /bin/sh
@@ -65,7 +65,7 @@ HTML上に値をハメ込むのは簡単にできるように、独自コマン�
 
 こうすることで、
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 	
@@ -110,7 +110,7 @@ Open usp Tukubaiにあるコマンドの一つにmojihameというがあるの�
 
 次のようなmojihameコマンドを叩くと、
 
-.. code-block:: shell
+.. code-block:: bash
 
 	$ cat meisai.txt | mojihame -l ITEMS template.html
 
@@ -161,7 +161,7 @@ fsedコマンドもmojihameコマンドも、
 CGI/CASHIER.CGI内、937行目付近)
 ``````````````````````````````````````````````````````````````````````
 
-.. code-block:: shell
+.. code-block:: bash
 
 	   :
 	# --- レシートデータをHTMLテンプレ(テーブル区間)にmojihame -----------

@@ -15,7 +15,7 @@
 見よ、これが我々が独自に開発したシェルスクリプト製ショッピングカートだ!
 動くものが見たければ ``http://richlab.org/coterie/`` にアクセスするがよい。
 
-.. figure:: images/transformed_webpage.png
+.. figure:: images/transformed_webpage.eps
    :width: 141mm
 
    ショッピングカートに改造されたページ
@@ -31,7 +31,7 @@
 暗黒世界への扉が常に口を開けて待ち構えているというわけだ。
 わっはっは!
 
-.. figure:: images/customer_form.png
+.. figure:: images/customer_form.eps
    :width: 141mm
 
    「お客様情報入力画面」暗黒世界への入り口
@@ -45,7 +45,7 @@
 念を押しておくが、Webブラウザー上のJavaScriptは置いといて、
 サーバー上のプログラムは全てシェルスクリプトだからな。
 
-.. figure:: images/PayPal_form.png
+.. figure:: images/PayPal_form.eps
    :width: 141mm
 
    PayPal誘導機能も実装し、組織運営の資金源に
@@ -91,7 +91,7 @@ PayPalのAPIを独自解析 [#PayPalAPI]_ し、ようやく繋ぎ込みに成�
 飽くまで我々のサイトだったからピンとこなかったかもしれんな。
 ならばこれを見るがいい! URL→ ``http://richlab.hatenablog.com/``
 
-.. figure:: images/invaded_hatenablog.png
+.. figure:: images/invaded_hatenablog.eps
    :width: 141mm
 
    はてなブログも「シェルショッカー1号」で侵略

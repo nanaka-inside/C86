@@ -39,7 +39,7 @@
 ある商品の在庫数を保持しているファイルが ``shoccar_1`` だったとして、
 その商品を10個補充するとしたら、こう書いておしまいだ。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	$ echo -n 0000000000 >> shoccar_1
 
@@ -49,7 +49,7 @@
 ちなみに、同人誌の規模ではほとんどその機会はないが、もし1000個追加するとしたら、
 さすがに文字を1000個書くのは疲れるので代わりにこう書く。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	$ printf '%01000d' 0 >> shoccar_1
 
@@ -76,13 +76,13 @@ echoやprintfコマンド一発で済ませるこのやり方を見て、
 
 ターミナルを2つ開き、片方で次のコマンドを何回も実行し、
 
-.. code-block:: shell
+.. code-block:: bash
 
 	$ printf '%04096d' 0 >> shoccar_1
 
 その間にもう片方で、次のコマンドを実行したとして、
 
-.. code-block:: shell
+.. code-block:: bash
 
 	$ echo -n 1 >> shoccar_1
 
@@ -108,14 +108,14 @@ echoやprintfコマンド一発で済ませるこのやり方を見て、
 全ての商品の在庫数ファイルを格納しているディレクトリーが ``STOCK`` という名前だったとすると、
 全商品の在庫数は次のようにすれば一発でわかる。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	$ ls -l STOCK
 
 もしタイムスタンプ等の他のフィールドが邪魔ならば、AWKコマンドやself(Tukubaiコマンド)を使って
 必要なフィールだけ取り出せばよい。次の例は、商品ID(ファイル名)と在庫数だけ抽出する例だ。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	$ ls -l STOCK | tail -n +2 | awk '{print $9,$5}'  # AWKコマンドを使う場合
 	
@@ -134,7 +134,7 @@ echoやprintfコマンド一発で済ませるこのやり方を見て、
 この場合はどうすればいいかというと、truncateコマンドを使う。
 例えば、在庫数ファイル ``shoccar_1`` から在庫を3つ減らしたい場合は次のように書く。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	$ truncate -s -3 shoccar_1
 
@@ -168,7 +168,7 @@ FreeBSDやLinuxには ``lockf`` や ``flock`` といったファイルロック�
 
 使い方はこんな感じだ。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 	
@@ -206,7 +206,7 @@ SHELL/TAKEOUT_STOCKS.SHだ。コードを掻い摘んで見せてやる!
 実際のコード(SHELL/TAKEOUT_STOCKS.SHから抜粋)
 ``````````````````````````````````````````````````````````````````````
 
-.. code-block:: shell
+.. code-block:: bash
 
 	   :
 	# --- 対象在庫数ファイル全てをロックする(ロックに失敗したらエラー終了) ←157行目あたり
