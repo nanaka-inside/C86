@@ -11,15 +11,13 @@
 プログラムはGitHub上に全て公開してある [#on_GitHub]_ ので、
 直接見てもらうのが手っ取り早いかもしれないが、ざっと説明することにする。
 
-.. rubric:: 脚注
-
 .. [#on_GitHub] ``https://github.com/ShellShoccar-jpn/shellshoccar1``
 
 
 シェルショッカー1号ディレクトリー構成
 ``````````````````````````````````````````````````````````````````````
 
-.. code-block::
+.. code-block:: text
 
 	CART/
 	├─ CGI/                ・WebブラウザーからCGI経由で呼び出されるプログラムの置き場所
@@ -90,8 +88,6 @@ Webブラウザーから送られてくるCGI変数を取り出すコマンド�
 特にXMLパーサー(UTL/parsrx.sh)などは力作で、ソースコードを見ればわかるが
 **sedやAWKを何十個もパイプで繋ぐのみでXMLを解釈** している。
 まぁ、シェルショッカー1号では今のところ使っていないのだがな。[#parsrx_app]_
-
-.. rubric:: 脚注
 
 .. [#openusptukubai]    ``https://github.com/usp-engineers-community/Open-usp-Tukubai``
 .. [#uecman]            ``https://uec.usp-lab.com/TUKUBAI_MAN/CGI/TUKUBAI_MAN.CGI``

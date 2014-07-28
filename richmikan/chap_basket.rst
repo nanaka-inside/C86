@@ -36,7 +36,7 @@ Webブラウザーはそのどちらかを選んで送ってくるので、
 それが書かれているのは、 ``REQUEST_METHOD`` という名の *環境変数* だ。
 試しに、
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 	
@@ -47,7 +47,7 @@ Webブラウザーはそのどちらかを選んで送ってくるので、
 
 というCGIスクリプトをサーバー上で書いて、
 
-.. code-block:: HTML
+.. code-block:: html
 
 	<html>
 	  <body>
@@ -65,8 +65,6 @@ Webブラウザーはそのどちらかを選んで送ってくるので、
 この環境変数 ``REQUEST_METHOD`` がGETかPOSTかで、
 次項で示すように二通りの取得方法を使い分けなけねばならないのだ。
 
-.. rubric:: 脚注
-
 .. [#contenttype] 今書いたCGIスクリプト、最初の2つのechoコマンドは画面に表示されていないな。この部分の話は今説明しているCGI変数の受け取り方を終えてから説明するぞ。
 
 
@@ -79,7 +77,7 @@ GETメソッドの場合は環境変数 ``QUERY_STRING`` で渡ってくる。
 printfを使う方が安心だ。先程のHTMLのmethodを ``GET`` にし、
 下記のCGIスクリプトを書いて呼びだしてみるがよい。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 	
@@ -96,7 +94,7 @@ printfを使う方が安心だ。先程のHTMLのmethodを ``GET`` にし、
 
 ``QUERY_STRING`` に入っているとわかったらあとは簡単だ。次のコードを見よ。
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	#! /bin/sh
@@ -129,7 +127,7 @@ CGI変数を1行1変数化して更に区切り文字を半角スペース化す
 さらに、このCGIスクリプトではAWKで抽出していた各変数の抽出をやってくれるコマンドも用意されていて、namereadという。
 これらを使って書き換えると、こんな感じになる。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 	
@@ -145,8 +143,6 @@ CGI変数を1行1変数化して更に区切り文字を半角スペース化す
 	
 	rm -f $Tmp-*
 
-.. rubric:: 脚注
-
 .. [#tempfile]    シェルスクリプトを書くとき、一時ファイルは変数の如く、とにかく躊躇わず利用せよ。頻繁に読み書きしたとしても、今どきのUNIX系OSはバカじゃないので、キャッシュメモリで済ませようとする。従って大して遅くなりはしないのだよ。
 .. [#percent_enc] 検索サイトで全角キーワードで検索した時、URLに出てくる ``%E3%81%82`` とかのアレ。
 
@@ -158,7 +154,7 @@ POSTメソッドの時は、標準入力
 でも文字列の形式自体はGETの時と同じだ。
 従って、単にCGIスクリプトの最初の部分を標準入力から読み込むように直せばよい。
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	#! /bin/sh
@@ -211,7 +207,7 @@ Webブラウザーはその画像ファイルをダウンロードすること�
 
 しかしGET,POSTのところで例示したCGIスクリプトを見直すと
 
-.. code-block:: shell
+.. code-block:: bash
 
 	         :
 	         :
@@ -237,7 +233,7 @@ WebブラウザーはHTMLファイルと解釈して画面表示するし、"ima
 例えばHTTPステータスコード(404とかああいうヤツ)だ。
 それを利用するとこんなCGIスクリプトも作れる。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	#! /bin/sh
 
@@ -270,7 +266,7 @@ Statusヘッダーを付けてブラウザーに404(File Not Found)を知らせ�
 商品をカゴに入れることの成功・失敗を返す場合、HTTPヘッダーには"Content-Type: text/plain"さえあればよい。
 まあ、実際のシェルショッカー1号ではWebブラウザーやプロクシにキャッシュされないようにするために
 
-.. code-block:: shell
+.. code-block:: bash
 
 	Cache-Control: private, no-store, no-cache, must-revalidate
 	Pragma: no-cache
@@ -306,7 +302,7 @@ WebブラウザーからのCookieを回収するのは環境変数HTTP_COOKIEを
 このCookieはWebブラウザーを閉じるまでの間有効であり、
 Webページをリロードすると最初にセッションが作成された日時を返すようになっている。
 
-.. code-block:: shell
+.. code-block:: bash
 	:linenos:
 
 	#! /bin/sh
@@ -350,8 +346,6 @@ mktempの第一引数では生成するファイルのテンプレートを指�
 Cookie文字列を発行するmkcookieコマンド [#mkcookie]_ と、
 セッションファイルの管理をするsessionfコマンド  [#sessionf]_  だ。
 
-.. rubric:: 脚注
-
 .. [#cookie_qiita] http://qiita.com/richmikan@github/items/ee77911602afc911858f
 .. [#mkcookie]     https://github.com/ShellShoccar-jpn/shellshoccar1/blob/master/public_html/CART/UTL/mkcookie
 .. [#sessionf]     https://github.com/ShellShoccar-jpn/shellshoccar1/blob/master/public_html/CART/UTL/sessionf
@@ -390,8 +384,6 @@ Cookie文字列を発行するmkcookieコマンド [#mkcookie]_ と、
 このように、今訪れているサイトとは別のサイトとやりとりするCookieのことを
 サードパーティーCookieという。
 
-.. rubric:: 脚注
-
 .. [#ad_batsu_game]       消耗品ならいざしらず、一度買った同じものを買うかっつーの! 観賞用、保存用、交換用で3つ買えとでも?
 
 
@@ -419,7 +411,7 @@ Cookie文字列を発行するmkcookieコマンド [#mkcookie]_ と、
 ユーザーがカゴに入れるボタンを押し、WebブラウザーがAjaxによるHTTPリクエストを発すると、
 我々のサイト(ユーザーが見ているサイトではない)にこのようなHTTPヘッダーが送られてくる。
 
-.. code-block::
+.. code-block:: text
 
 	Accent-Encoding: gzip,deflate,sdch
 	Connection: keep-alive
@@ -435,7 +427,7 @@ Cookie文字列を発行するmkcookieコマンド [#mkcookie]_ と、
 そして、そのOriginの値が確かに自分が改造したWebページのものであるならば、
 そのリクエストに対して、次のようなレスポンスヘッダーを返す。
 
-.. code-block::
+.. code-block:: text
 
 	Content-Type: text/html
 	   :
@@ -471,7 +463,7 @@ Webブラウザーは追加後の数を画面に反映させる。
 
 先程の解説を見ながら眺めて見てもらいたい。
 
-.. code-block:: shell
+.. code-block:: bash
 
 	    :
 	# --- CGI変数(POST)を取得 -------------------------------------------- ←145行目あたり
