@@ -20,7 +20,7 @@ Immutable Infrastructureの最適解を探る
   :alt: appprotweet
   :align: center
 
-  やめて！！
+  やめて！！(https://twitter.com/skoji/status/392588415473963008)
 
 心臓に何かが刺さった音がしましたか？
 
@@ -38,7 +38,7 @@ Immutable Infrastructureの最適解を探る
 
    ＿人人人人人人人人人人人人人人人人人人人人人人＿
    ＞　いつまで手動でデプロイしているんですか？　＜
-   ￣Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y￣
+   ￣Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y￣
 
 マサカリが投げられましたね。この本については、後ほど触れることにしましょう。
 
@@ -57,8 +57,6 @@ CHad Fowler氏 [#iichad]_ の「サーバを捨てて、コードを焼き付け
 
   もちろんOSは（きちんと管理されているならば）なんども適切にパッチが当て続けられているだろうが、そこには（訳注：やがて秩序が失われていくという）エントロピーの法則が忍び込んでくるものだし、適切に管理されていないとすればいちどもパッチは当てられず、もしこれからパッチを当てようものならなにが起きるか分からない。
 
-  私たちはこの問題を解決するために何年ものあいだ、チームポリシーの策定から自動化までさまざまな方法を試してきた。そしていま試している新しい方法が「Immutable Deployments」（イミュータブル・デプロイメント）だ。
-
 .. [#iichad] https://twitter.com/chadfowler
 .. [#iitys] 邦題は@naoya氏の「Immutable Infrastructure Conference #1」の発言から引用
 .. [#iitys2] 「Trash Your Servers and Burn Your Code: Immutable Infrastructure and Disposable Components」http://chadfowler.com/blog/2013/06/23/immutable-deployments/
@@ -76,9 +74,7 @@ CHad Fowler氏 [#iichad]_ の「サーバを捨てて、コードを焼き付け
 * 手動で変更を加えていったサーバのプログラムのアップデートを行うために、なぜ毎週、戦々恐々としなくてはならないのか？
 * バグを出してしまったが、来週のアップデートまで待たせるのか？
 
-本来は、バグを潰したコードを、すぐにでも本番サーバに安全にデプロイしたい、と思っているんじゃないでしょうか。そして、こう考えます。
-
-手動で変更を加えていったサーバは壊そう！
+本来は、バグを潰したコードを、すぐにでも安全に、本番サーバにデプロイしたい、と思っているんじゃないでしょうか。
 
 .. [#iikz] http://www.amazon.co.jp/dp/4048707876
 
@@ -86,14 +82,14 @@ CHad Fowler氏 [#iichad]_ の「サーバを捨てて、コードを焼き付け
 作って壊す、そして自動化
 ----------------------
 
-Martin Fowler氏のブログに、PhenixServer [#iifs]_ という記事があります。不死鳥のように蘇るサーバという意味です。
+Martin Fowler氏のブログに、PhoenixServer [#iifs]_ という記事があります。不死鳥のように蘇るサーバという意味です。
 お仕事で動作中のサーバの監査行ったとき、本番と同じサーバを作ろうとしたところ、構成のズレやアドホックな変更でサーバの設定が「drift」(漂流)していたそうです [#iisfs]_ 。
 だったらいっそのこと定期的にサーバを焼き払ったほうがよく、puppetやchefを使ってサーバを作り直そうと書かれています。
 
 .. [#iifs] http://martinfowler.com/bliki/PhoenixServer.html
 .. [#iisfs] そんなサーバのことを SnowflakeServer(雪の欠片サーバ) という http://martinfowler.com/bliki/SnowflakeServer.html
 
-あるいは、開発環境をいじくりまくって、やっぱりもとの綺麗さっぱりした状態にもどしたい、なんて経験は一回や二回、いやもっとあったかな？
+あるいは、実験環境をいじくりまくって、やっぱりもとの綺麗さっぱりした状態にもどしたい、なんて経験は一回や二回、いやもっとあったかな？
 そんなときに、もし作りなおすことが簡単にできたらどうでしょう。
 
 ここで、先ほどでてきた「継続的デリバリー」の中でも重要な事として **自動化** が何度も登場します。
@@ -133,7 +129,7 @@ pull requiestをIRCなどのツールで自動化して作成し、Pull Request�
 
 IIの説明をするまえに、我々は何を自動化したいのかを明確にしておきましょう。例えばサーバのセットアップの一般的手順を示すと下記のようになります [#iisetup]_ 。
 
-* データセンターにサーバを設置してケーブリング。またはインスタンスを立ち上げ
+* データセンターにサーバを設置してケーブリング [#iicable]_ 。またはインスタンスを立ち上げ
 * OSをインストール [#iigoldenimage]_ 
 * ミドルウエアをインストールして設定ファイルを書く
 * プログラムをデプロイ
@@ -144,7 +140,7 @@ IIの説明をするまえに、我々は何を自動化したいのかを明確
 
 .. [#iisetup] Serf という Orchestration ツール #immutableinfra http://www.slideshare.net/sonots/serf-iiconf-20140325 の14ページを参考にしました
 .. [#iigoldenimage] ゴールデンイメージってやつもあるけど各自ぐぐってね！
-
+.. [#iicable] 自動化無理
 
 Immutable Infrastructure を導入
 -------------------------------
@@ -162,7 +158,7 @@ IIの三層
 .. [#ii3lay3] このスライドは、もともとToolchainの話をしています。Toolchainとはソフトウエアを作る生産ラインみたいなものです。たとえば「emacs->autoconf->autoheader->automake->libtool->gcc->ld」
 
 .. figure:: img/3layer.eps
-  :scale: 50%
+  :scale: 100%
   :alt: 3layer
   :align: center
 
@@ -170,36 +166,39 @@ IIの三層
 
 サーバをセットアップする生産ラインとしてこの３つの層がでてきます。矢印の方向に向かって、ベルトコンベアのようにサーバがセットアップされる様子を表しています。
 
-* Bootstrapping
-
-  * OSのインストールやVM,クラウドのイメージの起動
-  * 使われるツールやソフトウエア：Kickstart, Cobbler, OpenStack, AWS
+* Orchestration　[#iisurf00]_ 
+  
+  * アプリケーションのデプロイ
+  * 使われるツールやソフトウエア：Fabric, Capistrano, MCollective
 
 * Configuration
 
   * ミドルウエアのインストールや設定
   * 使われるツールやソフトウエア：Puppet, Chef, AWS OpsWorks, Ansible
 
-* Orchestration
-  
-  * アプリケーションのデプロイ
-  * 使われるツールやソフトウエア：Fabric, Capistrano, MCollective
+* Bootstrapping
 
-どの層で何をやるかは、正確な定義はないので好きなようにしましょう。使われるツールからやれることを想像してみてください。ただし、どの層で何をやるのか決めておかないと手間が増えます。たとえば、kickstartでOSのユーザを作って、さらにChefでも同じユーザを作ろうとしてレシピがコケるとか [#iisurf00]_ 。
+  * OSのインストールやVM,クラウドのイメージの起動
+  * 使われるツールやソフトウエア：Kickstart, Cobbler, OpenStack, AWS
+
+
+どの層で何をやるかは、正確な定義はないので好きなようにしましょう。使われるツールからやれることを想像してみてください。ただし、どの層で何をやるのか決めておかないと手間が増えます。たとえば、kickstartでOSのユーザを作って、さらにChefでも同じユーザを作ろうとしてレシピがコケるとか。
 
 .. [#iisurf00] Orchestrationからしれっと Surf を消してますが、まあ無視しましょう
 
 以上は三層で終わっていますが、本誌ではそれに付け加えて２つの層を設定します。
+
+* Agent
+  
+  * 外部サービスに自分を登録
+  * 使われるツールやソフトウエア：Serf
 
 * Test
 
   * デプロイされたプログラムの動作を確認
   * 使われるツールやソフトウエア：Serverspec
 
-* Agent
-  
-  * 外部サービスに自分を登録
-  * 使われるツールやソフトウエア：Serf
+
 
 どうでしょうか [#ii]_ 。ここまでくると、先ほどの「サーバのセットアップの一般的手順」を網羅できましたね！ [#iitaechan]_ [#iiyarukoto]_
 
@@ -211,28 +210,9 @@ IIの三層
 早速実践してみよう
 ----------------
 
-そういえばサーバのセットアップの一般的手順で「データセンターにサーバを設置してケーブリング」を自動化してませんよね？えっ？GoogleかAmazonあたりが革新なソリューションを発表してくれることを期待してここでは放置しましょう [#iicable]_ 。
-
-.. [#iicable] このへんのソリューションを作ったら売れそうな感じしますよね。ってかなんで21世紀になってサーバとスイッチを有線でつなぐの？ありえないんですけどーーぷんすか（落ち着いて下さい
-.. [#iirack1] っていうかさーなんで21世紀になって電源タップからサーバに電源ケーブル繋がないといけないの？ケーブルが絡みついてあられもない格好に（なりません
-.. [#iirack2] そもそもなんでサーバ設置しないといけないの？てかもう、サーバラックとサーバを一体型にしてデータセンターにポンを置けばもう使えるとかできないの？？
-.. [#iirack3] ↑このシステム、売れそうな気がするんですけど誰かやってくれないですかねえ。あ、できたら筆者に分け前ください!!シクヨロ!!
-
-さて、IIの三層+二層をひと通り実践してみましょう。Bootstrappingから始まると思った?残念!!Serverspecちゃんでした!! [#iizansaya]_ 
-
-.. [#iizansaya] 残念さやかちゃん。まえがきでこのネタを使おうと準備してたけど結局使えなかったのでここで満を持して登場!!
-
-なんでServerspecから始めるのかだって？それはそこそこ重要で取っ付きやすいからです。サーバのデプロイはchefでもAnsibleでもbashスクリプトでも手動でコマンドを打てば構築はできます。
+IIの三層+二層をひと通り実践してみましょう。まずはServerspecから始めていきます。
+Serverspecから始める理由は、手始めに手をつけるにはうってつけだからです。サーバのデプロイはchefでもAnsibleでもbashスクリプトでも手動でコマンドを打てば構築できます。
 問題はそのあとです。誰がどうやって、そのサーバが正しくセットアップできているか調べるのか？それにはServerspecを使いましょう。
-
-.. topic:: とあるインフラのChef疲れ
-
-   この本を作っている第七開発セクションが前回頒布した「ななかInside PRESS vol.4」でChefを特集しました。そのChefを執筆した人曰く、Chefのレシピを書くのが辛くなってきたそうです。
-   社内でいろいろなプロジェクト(プロダクト)があります。それらに対応する汎用的なレシピを書くと、設定することが多くなり、扱いづらくなるという現象が起きました。
-
-   そのため、すでにあるレシピをプロダクト担当のインフラの中の人が各自forkして使いやすいように手を加えました。構築に一回使うだけだしいいよね、ってことで一回だけ実行される死屍累々のレシピが作られていったそうです。おしまい。
-   
-   なお、この話はフィクションです。フィクションですよ！！大事なことなので二回言いました。
 
 
 動作確認するためにServerspec
@@ -279,7 +259,7 @@ hosts.ymlにホスト名とチェックするrolesを書いて、attributes.yml�
 .. code-block:: conf
 
    Host nico
-     HostName        niko.example.com
+     HostName        nico.example.com
      Port            2525
      User            nico_yazawa
      IdentityFile    ~/.ssh/id_rsa
@@ -308,13 +288,13 @@ attributes.yml.templateとhosts.yml.templateをリネームしてhosts.ymlを変
    (in /home/chiba/repo/serverspecd)
    rake serverspec       # Run serverspec to all hosts
    rake serverspec:maki  # Run serverspec to maki
-   rake serverspec:niko  # Run serverspec to niko
+   rake serverspec:nico  # Run serverspec to nico
 
 テスト実行してみます。成功したテストは ``.``  、失敗したテストは ``F`` で表示されます。失敗したテストの理由が表示されます。どんなコマンドを実行したか出るので、デバックするときに使います。
 
 .. code-block:: sh
 
-   $ rake serverspec:niko
+   $ rake serverspec:nico
    (in /home/chiba/repo/serverspecd)
    /usr/local/bin/ruby -S rspec spec/os/os_spec.rb
    .FFFFFFFFF..FF...F.F....FFFFFF........F.........FF..FF..FFFF....F....F..F.......FF....F...FFFFF......FFF
@@ -344,17 +324,15 @@ Serverspecで重要なのは、何をテストするかということです。�
 構築にはAnsible
 ^^^^^^^^^^^^^^^
 
-構築を自動で行ってくれるソフトウエアといえば chef が有名になってきました。弊サークルが前回頒布した「ななかInside PRESS vol.4」で chef の特集をしているので、そちらもご覧ください [#iisutema]_ 。
-同じツールを取り上げても面白くないので、ポストchefになりつつある [#iiann]_ Ansible [#iiansible]_ を使ってみます。IIの三層の図の「Configuration」の部分のソフトウエアです。
+今回、構築には [#iiann]_ Ansible [#iiansible]_ を使ってみます。IIの三層の図の「Configuration」の部分のソフトウエアです。
 
-.. topic:: Configration界隈の動向
+.. topic:: Configuration界隈の動向
 
    構築を自動化するために、これまでに色々なツールが出ています。具体的には、Puppet, Chef, Ansible, Salt [#iisalt]_ などがあります。
    それぞれ特徴があり、業務や趣味に向いたものを使いましょう。このへんの比較で本が一冊出来てしまうので、さっくり比較したい場合は InfoWorldの記事 [#iipcas]_ をご覧ください。
    Puppet, Chef, Ansibleの比較記事では Ansible がイイヨ！って記事もあります [#iipca]_ 。
-   chefはruby製なので日本で使われるようになったとかなんとか。時期的に新しく出てきたConfigrationツールはPythonを使う傾向にあるようです。Ansible, SaltはPython製です。
+   chefはruby製なので日本で使われるようになったとかなんとか。時期的に新しく出てきたConfigurationツールはPythonを使う傾向にあるようです。Ansible, SaltはPython製です。
 
-.. [#iisutema] ステマです（ツッコミ待ち
 .. [#iisalt] http://www.saltstack.com/ 今調べてて知った。「Salt」ってググラビリティー低すぎ...。jujuってのもあんのか...乱立しすぎだろこの界隈
 .. [#iipcas] http://www.infoworld.com/d/data-center/review-puppet-vs-chef-vs-ansible-vs-salt-231308?page=0,3
 .. [#iipca] http://probably.co.uk/puppet-vs-chef-vs-ansible.html
@@ -365,30 +343,20 @@ Ansibleとは
 
 Michael DeHaan [#iiansmpd]_ 氏が作ったソフトウエアです [#iiansgithub]_ 。Cobbler [#iianscobb]_ に関わった人でもあります。
 
-.. figure:: img/mpdehaan.eps
-  :scale: 10%
-  :alt: mpdehaan
-  :align: center
-
-  Michael DeHaan氏のアイコン
-
-Ansibleの哲学については、本人がGoogle Groupsに投稿したメッセージ「Ansible philosophy for those new to the list == keep it simple」 [#iiansp]_ をお読み下さい。
-
 .. [#iiansmpd] https://github.com/mpdehaan
 .. [#iiansgithub] https://github.com/mpdehaan/ansible
 .. [#iianscobb] http://www.cobblerd.org/
 .. [#iiansp] https://groups.google.com/forum/#!topic/ansible-project/5__74pUPcuw
 
+Ansibleのwebサイトでは、「数時間で自動化できてとってもシンプル！」「構築先のサーバはノンパスsshで入れるようにしておけばOK！」「パワフル」 [#iianpo]_ と書かれています。
 Ansibleの仕組みは、1台のControl Machine(CM)から複数のManaged Node(MN)へsshで接続を行います。CMでコマンドを実行すると、MNでCMで指定されたコマンドが実行されます。
-Ansibleのwebサイトによると、「数時間で自動化できてとってもシンプル！」「構築先のサーバはノンパスsshで入れるようにしておけばOK！」「パワフル」 [#iianpo]_ だそうです。
-準備は、対象のホストへsshでノンパスでログインできるようにしておけばOK。あと、ノンパスsudoもつけてね。
-
-Ansibleという言葉をALCのサイトで引いてみると [#iiansalc]_ 「アンシブル◆光の速さより速く、瞬間的にコミュニケーションができるデバイス。ウルシュラ・ル・グインやオースン・スコット・カードのサイエンス・フィクションより。」だそうです。早そうですね(適当)
-
+インストール対象となるサーバにエージェントを入れる必要はなく、対象のホストにsshでノンパスでログインできるようにしておくことと、そのユーザでノンパスsudoができるようになっていれば準備完了です。
+また、設定ファイル(Playbookという)はYAMLで作成すればよく、変数の概念はありますが、プログラミングの知識はほぼ必要がありません。
 
 .. [#iianpo] どの辺がパワフルなのか実はよーわからん
 .. [#iiansalc] http://eow.alc.co.jp/search?q=ansible&ref=sa
 
+.. Ansibleという言葉をALCのサイトで引いてみると [#iiansalc]_ 「アンシブル◆光の速さより速く、瞬間的にコミュニケーションができるデバイス。ウルシュラ・ル・グインやオースン・スコット・カードのサイエンス・フィクションより。」だそうです。早そうですね(適当)
 
 ここではLinux上でのAnsibleを解説します。Ansible 1.7から、MNとしてWindowsもサポートされたようなので、必要であればドキュメント [#iianwin]_ をご覧ください。CMはサポートしていないのでご注意。
 
@@ -397,7 +365,7 @@ Ansibleという言葉をALCのサイトで引いてみると [#iiansalc]_ 「�
 .. [#iianwin] http://docs.ansible.com/intro_windows.html
 
 Ansibleのインストール
-""""""""""""""""""""
+""""""""""""""""""""""
 
 Amazon EC2のAmazon Linux AMI [#iiami]_ では、下記のコマンドでインストール完了。最新版のAnsibleがインストールされます。
 
@@ -408,7 +376,7 @@ Amazon EC2のAmazon Linux AMI [#iiami]_ では、下記のコマンドでイン�
    $ sudo easy_install pip
    $ sudo pip install ansible
 
-DigitalOcenan の CentOS 7 では、こんな感じでした [#iianepel]_ 
+CentOS 7 では、こんな感じでした [#iianepel]_ 
 
 .. [#iianepel] Redhat系で、EPELが入っているなら、 ``sudo yum install ansible`` でインストールできます
 
@@ -418,8 +386,7 @@ DigitalOcenan の CentOS 7 では、こんな感じでした [#iianepel]_
    sudo easy_install pip
    sudo pip install ansible
 
-Ansibleは、Python 2.4以上で動作し、Python 2.6以上の環境が推奨されます。Python 2.5以下では、 ``python-simplejson`` パッケージが必要です。CentOS 5などでインストールするときは注意してください。pip [#iipip]_ があるなら、 ``sudo easy_install simplejson`` でいけるはずです。
-今回、Ansible 1.6.6を使いました。
+Ansibleは、Python 2.4以上で動作し、Python 2.6以上の環境が推奨されます。Python 2.5以下では、 ``python-simplejson`` パッケージが必要です。CentOS 5などでインストールするときは注意してください。pip [#iipip]_ があるなら、 ``sudo pip install simplejson`` でいけるはずです。今回、Ansible 1.6.6を使いました。
  
 .. [#iipip] https://pypi.python.org/pypi/pip Pythonのパッケージのマネージツール。Python版の cpan 的な立ち位置
 
@@ -429,9 +396,9 @@ Ansibleは、Python 2.4以上で動作し、Python 2.6以上の環境が推奨�
 Ansibleがインストールできたところで実行してみましょう。Ansibleを実行するサーバ(CM)は、お名前.comのVPS(CentOS 6.5)で、リモートマシン(MN)は DigitalOceanで2つ作ります。
 リモートマシンを作る前にsshの公開鍵を、DigitalOceanに登録しておきましょう。
 
-#TODO手順を書く
+#TODO手順を書く DigitalOceanの説明。SSDを使えるVPSサービス。AWS上に構築されてる
 
-インスタンス(Droplets)を作るときに、登録したsshキーを登録するとrootでログインできます。インスタンスは1分くらいで起動してきます。Droplets [#iiansdrop]_ を作りました。
+インスタンス(Droplets)を作るときに、登録したsshキーを登録するとrootでログインできます。インスタンスは1分くらいで起動してきます。
 
 .. figure:: img/an-do-dl.eps
   :scale: 70%
@@ -440,9 +407,8 @@ Ansibleがインストールできたところで実行してみましょう。A
 
   nozomiとeriのDroplets
 
-.. [#iiansdrop] dropletsをALC(http://eow.alc.co.jp/search?q=droplet)でひくと、水滴とか飛沫という意味が引っかかったのでアレゲな感じ
-
 ``/etc/hosts`` にDropletsのIPアドレスを追記します [#iiandhosts]_ 。
+TODO このへんもいらない
 
 :: 
 
@@ -484,17 +450,16 @@ Ansibleがインストールできたところで実行してみましょう。A
 .. [#iiansinstallcom] cpとchownのところ、installコマンドを使って一行で書けないかと試行錯誤したんですが、うまくいきませんでした
 
 ここまでくればCMサーバから ``$ ssh nozomi`` で入れます。 ``sudo ls -la /root/`` で、何か見れたら完了です。
-ここからは、CMサーバの構築です。ansibleのhostsファイルを作ります。CentOS6で ``.ssh/config`` を読んでくれない [#iianscenth]_ ので細工もします。
+ここからは、CMサーバの構築です。ansibleのhostsファイルを作ります。
 
-.. [#iianscenth] https://github.com/yteraoka/ansible-tutorial/wiki/SSH のでhostsファイルに細工する
-
+TODO .ssh/configを作る話
 
 pip経由でansibleをインストールすると ``/etc/ansible`` ディレクトリが作られていないので作って下さい。 ``/etc/ansible/hosts`` ファイルの中身はこんな感じです。
 
 :: 
 
-   nozomi ansible_ssh_user=tojo
-   eri ansible_ssh_user=ayase
+   nozomi 
+   eri 
 
 
 ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
@@ -591,7 +556,7 @@ Ansibleといえば、Inventry とか Playbook の解説だとおもった？後
    nozomi | success | rc=0 >>
    Ubuntu 14.04 LTS \n \l
 
-nozomiに対して ``sudo`` しないと実行できないコマンドを送ってみまそう。 ``--sudo`` オプションを付けます。
+nozomiに対して ``sudo`` しないと実行できないコマンドを送ってみましょう。 ``--sudo`` オプションを付けます。
 
 .. code-block:: sh
 
@@ -819,7 +784,7 @@ hostsファイルを以下のように書き換えます。
 """"""""
 
 さらに様々なPlaybookを探すには、Ansible Galaxy [#iiansag]_ を参照して下さい。
-業務などできっちりやるなら、ベストプラクティスとしてディレクトリのレイアウト(http://docs.ansible.com/playbooks_best_practices.html)があります。どのサーバにどの変数を使うか、開発環境と本番環境を分けたりそういったことができます。また、「ansible ベストプラクティス」と検索するといくつかでてきます。
+業務などできっちりやるなら、ベストプラクティスとしてディレクトリのレイアウト(http://docs.ansible.com/playbooks_best_practices.html)があります。どのサーバにどの変数を使うか、実験環境と本番環境を分けたりそういったことができます。また、「ansible ベストプラクティス」と検索するといくつかでてきます。
 
 .. [#iiansag] https://galaxy.ansible.com/explore#/
 
@@ -1424,7 +1389,7 @@ IIやる人はこれだけは最低限みておけリンク
 壮大なメモ
 ----------
 
-* PhenixServer : http://martinfowler.com/bliki/PhoenixServer.html
+* PhoenixServer : http://martinfowler.com/bliki/PhoenixServer.html
 
   * フェニックスサーバ。認証監査をしようと思った
 
