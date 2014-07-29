@@ -1,7 +1,7 @@
 解説 Socket.IO 1.0
 =====================
 
-こんにちは。sisidovski(@44_10)と申します。普段は元気にPHPを書いています。
+こんにちは。@sisidovskiと申します。普段は元気にPHPを書いています。
 
 2014年はGoやswiftなどが話題をかっさらっているのを感じますが、js界隈も盛り上がっています。altjsで天下一を決める人達[#]_がいたり、MVCフレームワークで天下一を決める人達[#]_がいたり。
 Node.js界隈も色んな意味で盛り上がっていて、common.js関連やgruntやgulpなどのビルドツール、visionmedia(expressやmocha、jadeなどの作者)の勇退[#]_など、考えれば枚挙に暇がないがありません。
@@ -9,6 +9,10 @@ Node.js界隈も色んな意味で盛り上がっていて、common.js関連やg
 その中でも忘れてはならないのが、そうSocket.IO1.0のリリースですね。2年近く待っていた方もいるのではないかと思います。
 
 待望のリリースということで、稚拙ながら解説させていただきます。
+
+..[#] http://connpass.com/event/6402/
+..[#] http://connpass.com/event/6910/
+..[#] 'Farewell Node.js' https://medium.com/code-adventures/farewell-node-js-4ba9e7f3e52b
 
 はじめに
 ---------
@@ -19,7 +23,7 @@ Node.js界隈も色んな意味で盛り上がっていて、common.js関連やg
 WebSocketとは
 ^^^^^^^^^^^^^^
 
-WebSocketプロトコルについてはRFC6455[Ref]_に書かれている通りですが、ちょっと説明しておきますと、サーバ・クライアント間における双方向通信用の技術規定であり、TCP上で動くプロトコルです。リクエスト・レスポンス形式に沿った従来の通信とは異なり、WebSocketは一度コネクションを張った後は必要な通信を全てそのコネクション上で行うことにより、サーバからクライアントへのプッシュ配信が可能になっています。
+WebSocketプロトコルについてはRFC6455[#]_に書かれている通りですが、ちょっと説明しておきますと、サーバ・クライアント間における双方向通信用の技術規定であり、TCP上で動くプロトコルです。リクエスト・レスポンス形式に沿った従来の通信とは異なり、WebSocketは一度コネクションを張った後は必要な通信を全てそのコネクション上で行うことにより、サーバからクライアントへのプッシュ配信が可能になっています。
 
 	The goal of this technology is to provide a mechanism for browser-based applications that need two-way communication with servers that does not rely on opening multiple HTTP connections (e.g., using XMLHttpRequest or <iframe>s and long polling).
 
@@ -29,11 +33,8 @@ WebSocketプロトコルについてはRFC6455[Ref]_に書かれている通り�
 #. サーバー側はその要求をHTTPとして解釈し、WebSocketへと切り替えて応答を返す(Upgrade)
 #. コネクションが確立する
 
+..[#] http://tools.ietf.org/html/rfc6455 日本語訳はこちらで読めます http://www.hcn.zaq.ne.jp/___/WEB/RFC6455-ja.html
 
-[#] http://connpass.com/event/6402/
-[#] http://connpass.com/event/6910/
-[#] 'Farewell Node.js' https://medium.com/code-adventures/farewell-node-js-4ba9e7f3e52b
-[#] http://socket.io/blog/introducing-socket-io-1-0/
 
 Socket.IOについて
 ^^^^^^^^^^^^^^^^^^^
@@ -42,7 +43,7 @@ Socket.IOについて
 Socket.IOを利用することで、双方向通信の確立方式、実装の違いを考えることなく、プログラマはアプリケーションの開発に集中することができます。その他、ルーム分割の機能や、認証機能、Redis等を利用してプロセス間の共有なども可能になっています。Socket.IOおよびEngine.IO（後述）は、双方向通信における様々の実装を隠蔽し、共通のインターフェースで開発ができるリアルタイムアプリケーション向けのライブラリ、と言うことができるでしょう。
 
 
-SocketIO10における主な変更点
+Socket.IO1.0における主な変更点
 ----------------------------
 
 5月末にリリースされた1.0ですが、次のような変更点があります。
@@ -58,11 +59,14 @@ SocketIO10における主な変更点
 
 上記変更点はブログ[#]_で言及されていますが、主要な部分を解説します。　
 
+..[#] http://socket.io/blog/introducing-socket-io-1-0/
+
 トランスポート層の実装をEngineIOに移譲した
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Engine.IOは、ざっくばらんに言うと「Websocketでもhttp pollingでも何でもいいからとにかく通信できる状態を確立する」ライブラリです。以前は通信に関する部分もSocket.IOが内包していましたが、1.0からはそれらの機能をEngine.IOに移譲し、Socket.IOはルーム機能や接続要求などの、より高度な機能のみ実装されるようになりました。実際、Socket.IO自体のコードはサーバ、クライアントそれぞれ1000行前後と大幅にシンプルになりました。また、Engine.IOは通信方式に関わらずWebSocktとして利用できるインターフェースを提供してくれるので、仮にWebSocktのみをサポートするのであれば、Engine.IOを利用せずともSocket.IOは動作するでしょう。
 また、接続の確立方法がfallback形式からupgrade形式に変更になりました。
+
 * 従来のfallback形式
  - WebSocktでの接続試行
   + 成功したら終了
