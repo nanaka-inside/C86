@@ -1,0 +1,307 @@
+
+* vagrantとは
+  
+  * 仮想マシンを自動作成するツール
+  * Linuxなどの仮想環境を起動することができる
+  * Ruby
+    で実装されている。Mac OS、Linuxで動作する
+    Windowsでは制限あり（用調査
+  * MacOS
+    だとインストーラがある
+  * 今回
+    はVagrant 1.6.3
+  * 
+  * 浮浪者という意味
+  * 簡単に言うとOracleVirtualBoxのゲストOSを作るもの。最近は、AWSとかDigitalOceanとかVMwareのOSファイルを作ることができる。作ることができるものをProviderという
+  * Githubを見てみるとruby製ということが分かる。https://github.com/mitchellh/vagrant　
+  * Vagrant ha wget しておいたほうがいい。ファイルサイズがでかいので。
+    
+
+  * rpm -ivh https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.rpm // wgetするときちょっと時間かかる
+
+[root@rin ~]# rpm -ivh vagrant_1.6.3_x86_64.rpm 
+Preparing...                ########################################### [100%]
+   1:vagrant                ########################################### [100%]
+
+[root@rin ~]# vagrant init
+A `Vagrantfile` has been placed in this directory. You are now
+ready to `vagrant up` your first virtual environment! Please read
+the comments in the Vagrantfile as well as documentation on
+`vagrantup.com` for more information on using Vagrant.
+
+
+VirtualBoxがインストールされていなかったのでインストールする
+http://pkgs.repoforge.org/rpmforge-release/を参照。rpmforge-releaseをインストール
+
+rpm -ivh http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+yum install dkms
+yum install VirtualBox-4.3
+
+めちゃめちゃダウンロードが遅かったのでRPMを直接持ってくる
+https://www.virtualbox.org/wiki/Linux_Downloads　ここから。
+
+wget http://download.virtualbox.org/virtualbox/4.3.14/VirtualBox-4.3-4.3.14_95030_el6-1.x86_64.rpm
+
+これをyum installにかませる
+インストールできたがvagrant upがうごかん。今のカーネルと違うkernel-headersが入ってるぽい
+yum updateを一番先にウッておいたほうがよいかも
+
+起動しているカーネルt、kernel-headersの版数があわないとvbがcd /etc/yum.repos.d/起動しないぽい
+ついでに、そのカーネルの版数のkernel-develもないといけない。
+http://ftp.riken.jp/Linux/centos/6/updates/x86_64/Packages/　このへんから拾ってきた
+
+!?
+
+less /var/lib/dkms/vboxhost/4.3.14/build/make.log
+
+/bin/sh: perl: command not found
+
+perl必須ぽい
+yum install perl
+
+vagrant init hashicorp/precise32
+vagrant up
+
+vagrant upに失敗したらこれを打つ　/etc/init.d/vboxdrv setup
+
+vagrant ssh
+ やや間ののちにインストール完了
+ じゃっかんつらいところある
+
+vagrant sshから出て、またssh仕様としたらフォーク仕様としてメモリが無くなって死亡
+
+http://www.vagrantbox.es/
+ぼっくすがあるところ
+
+
+
+
+もっかい追試
+
+
+
+
+--------------------------------------------------------------------------------------------------------------
+
+Mac OSでインストールしてみる　MacBook Air OS X 10.9.4を使用。
+VirtualBoxをインストール。公式サイトにパッケージがあるのでダウンロード。　https://www.virtualbox.org/wiki/Downloads
+今回は　VirtualBox 4.3.14 for OS X hosts　このバージョンをダウンロードしてインストール
+VagrantはMac OX用のパッケージがあるのでインストール。スクリーンショット撮った
+
+仮想マシンを作ってみましょう。適当なディレクトリをつくってその中でコマンドを打ってみましょう。
+
+> vagrant init hashicorp/precise32
+A `Vagrantfile` has been placed in this directory. You are now
+ready to `vagrant up` your first virtual environment! Please read
+the comments in the Vagrantfile as well as documentation on
+`vagrantup.com` for more information on using Vagrant.
+
+すると、仮想マシンのひな形ファイルであるVagrantというファイルが作られます。仮想マシンの名前や、どういったネットワーク環境を作るかなどの設定が書かれています。
+hashicorp/precise32というのは、Vagrant公式が用意している仮想マシンの名前です。中身はUbuntu 12.0Vagrantでは仮想マシンのことをBoxと呼びます。
+
+
+vagrant upすると、こんな感じでBoxファイルのインストールが始まります。
+
+> vagrant up
+Bringing machine 'default' up with 'virtualbox' provider...
+==> default: Box 'hashicorp/precise32' could not be found. Attempting to find and install...
+    default: Box Provider: virtualbox
+    default: Box Version: >= 0
+==> default: Loading metadata for box 'hashicorp/precise32'
+    default: URL: https://vagrantcloud.com/hashicorp/precise32
+==> default: Adding box 'hashicorp/precise32' (v1.0.0) for provider: virtualbox
+    default: Downloading: https://vagrantcloud.com/hashicorp/precise32/version/1/provider/virtualbox.box
+==> default: Successfully added box 'hashicorp/precise32' (v1.0.0) for 'virtualbox'!
+==> default: Importing base box 'hashicorp/precise32'...
+==> default: Matching MAC address for NAT networking...
+==> default: Checking if box 'hashicorp/precise32' is up to date...
+==> default: Setting the name of the VM: Vagrant_default_1406656929508_34958
+==> default: Clearing any previously set network interfaces...
+==> default: Preparing network interfaces based on configuration...
+    default: Adapter 1: nat
+==> default: Forwarding ports...
+    default: 22 => 2222 (adapter 1)
+==> default: Booting VM...
+==> default: Waiting for machine to boot. This may take a few minutes...
+    default: SSH address: 127.0.0.1:2222
+    default: SSH username: vagrant
+    default: SSH auth method: private key
+    default: Warning: Connection timeout. Retrying...
+==> default: Machine booted and ready!
+==> default: Checking for guest additions in VM...
+    default: The guest additions on this VM do not match the installed version of
+    default: VirtualBox! In most cases this is fine, but in rare cases it can
+    default: prevent things such as shared folders from working properly. If you see
+    default: shared folder errors, please make sure the guest additions within the
+    default: virtual machine match the version of VirtualBox you have installed on
+    default: your host and reload your VM.
+    default: 
+    default: Guest Additions Version: 4.2.0
+    default: VirtualBox Version: 4.3
+==> default: Mounting shared folders...
+    default: /vagrant => /Users/tboffice/Project/Vagrant
+
+うまく行ったら作られたBoxにsshでログインしてみます
+
+> vagrant ssh
+Welcome to Ubuntu 12.04 LTS (GNU/Linux 3.2.0-23-generic-pae i686)
+
+ * Documentation:  https://help.ubuntu.com/
+Welcome to your Vagrant-built virtual machine.
+Last login: Fri Sep 14 06:22:31 2012 from 10.0.2.2
+vagrant@precise32:~$  
+vagrant@precise32:~$ lsb_release -a
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 12.04 LTS
+Release:	12.04
+Codename:	precise
+
+
+おめでとうございます。これて仮想環境が手に入りました。
+
+> vagrant box list
+hashicorp/precise32 (virtualbox, 1.0.0)
+
+> vagrant status
+Current machine states:
+
+default                   running (virtualbox)
+
+デフォルトが起動しています。マシンを終了して様子をみてみます。
+
+> vagrant halt
+==> default: Discarding saved state of VM...
+> vagrant status
+Current machine states:
+
+default                   poweroff (virtualbox)
+
+The VM is powered off. To restart the VM, simply run `vagrant up`
+
+お次はdestroy
+
+> vagrant destroy
+    default: Are you sure you want to destroy the 'default' VM? [y/N] y
+==> default: Destroying VM and associated drives...
+
+マシンが削除されました。
+
+さて、同じようなことをCentOS 6.5でもやってみましょう。
+
+
+----------------------------------------------------------------------------------------
+
+[root@yoshihama4 ~]# cat /etc/issue
+CentOS release 6.5 (Final)
+Kernel \r on an \m
+
+[root@yoshihama4 ~]# cat /etc/redhat-release 
+CentOS release 6.5 (Final)
+[root@yoshihama4 ~]# uname -a 
+Linux yoshihama4 2.6.32-431.17.1.el6.x86_64 #1 SMP Wed May 7 23:32:49 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+[root@yoshihama4 ~]# rpm -qa | grep ^kerne
+kernel-headers-2.6.32-431.17.1.el6.x86_64
+kernel-devel-2.6.32-431.17.1.el6.x86_64
+kernel-firmware-2.6.32-431.17.1.el6.noarch
+kernel-devel-2.6.32-431.20.5.el6.x86_64
+kernel-2.6.32-431.17.1.el6.x86_64
+[root@yoshihama4 ~]# 
+
+今起動しているカーネルバージョンに対応するkernel-headersとkernel-develをインストールしておいてください。一致していない場合、VirtualBoxが起動しません。
+yum installでインストール出来ないものは、CentOSのmirrorサイトからRPMを直接落としてきてインストールします。
+
+
+この環境
+
+[root@yoshihama4 ~]# free -m
+             total       used       free     shared    buffers     cached
+Mem:           996        654        341          0        179        337
+-/+ buffers/cache:        138        857
+Swap:         2015          0       2015
+[root@yoshihama4 ~]# df -h
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mapper/VolGroup-lv_root
+                       18G  1.6G   15G  10% /
+tmpfs                 499M     0  499M   0% /dev/shm
+/dev/vda1             485M   32M  428M   7% /boot
+/dev/vdb               79G  184M   75G   1% /data
+[root@yoshihama4 ~]# 
+
+
+wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.rpm
+yum install vagrant_1.6.3_x86_64.rpm 
+// rpm -ivh http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+// yum install dkms
+wget http://download.virtualbox.org/virtualbox/4.3.14/VirtualBox-4.3-4.3.14_95030_el6-1.x86_64.rpm
+yum install VirtualBox-4.3-4.3.14_95030_el6-1.x86_64.rpm
+
+Vagrantのサイトで最新のRPMパッケージを取得してインストールしました。
+VirtualBoxのrpmが75Mあったので、一旦ローカルにインストールしました。ネット回線が早い場合は、yum installの引数にとっても問題ありません。DigitalOceanのシンガポールリージョンのときは10分程度かかりました。
+
+VirtualBoxにカーネルモジュールの組み込みをさせる。数分かかかる
+
+[tboffice@yoshihama4 Vagrant]$ sudo /etc/init.d/vboxdrv setup
+Stopping VirtualBox kernel modules                         [  OK  ]
+Removing old VirtualBox pci kernel module                  [  OK  ]
+Removing old VirtualBox netadp kernel module               [  OK  ]
+Removing old VirtualBox netflt kernel module               [  OK  ]
+Removing old VirtualBox kernel module                      [  OK  ]
+Recompiling VirtualBox kernel modules                      [  OK  ]
+Starting VirtualBox kernel modules                         [  OK  ]
+
+一般ユーザになる
+$ mkdir Vagrant
+$ cd Vagrant/
+
+ちょうどいいBoxがあったので使ってみる
+
+$ vagrant init boxer/ubuntu-14.04-basic
+$ vagrant up
+
+https://github.com/tmknom/study-vagrant 参考になる
+
+box addして起動してもGUIを要求されて起動しなかった。以下は没にする
+======================================================================
+
+さきほどと同じUbuntuを持ってきても面白く無いので Vagrantbox.es: A list of base boxes for Vagrant [#iivagbox]_ を参照して別のOSを持ってきて起動させてみましょう。
+今回は、 box addという引数をつかって、仮想環境のBoxをVagrantに追加してみます。Boxを追加する方法は、このようにします。
+
+.. [#iivagbox] http://www.vagrantbox.es/ 
+
+$ vagrant box add {title} {url}
+$ vagrant init {title}
+$ vagrant up
+
+ここでは、FreeBSD 10.0 x86_64 Minimal (VirtualBox, ZFS)のBoxを追加してみましょう。
+
+vagrant box add freebsd-10 http://files.wunki.org/freebsd-10.0-amd64-wunki.box
+vagrant init freebsd-10
+vagrant up
+
+[tboffice@yoshihama4 Vagrant]$ vagrant box add freebsd-10 http://files.wunki.org/freebsd-10.0-amd64-wunki.box
+==> box: Adding box 'freebsd-10' (v0) for provider: 
+    box: Downloading: http://files.wunki.org/freebsd-10.0-amd64-wunki.box
+==> box: Successfully added box 'freebsd-10' (v0) for 'virtualbox'!
+
+
+メモ；FreeBSD 10.0 x86_64 Minimal (VirtualBox, ZFS)を持ってきたけどGUIが必要で起動しなかった。CentOS7.0 x86_64 Puppet and Dockerを持ってきたらHTTP 509で持ってこれなかった。
+========================================================================================================================
+
+
+
+ここでわかるように、VagrantにBoxファイルを追加すればそのBoxを起動することができます。Boxへの変更をパッケージ化することができます。Vagrantbox.esでは	
+
+内容を変更したBoxファイルを他の人と共有することが出来ます。
+https://vagrantcloud.com/
+なんとここには先ほど使った hashicorp/precise32 があります。https://vagrantcloud.com/hashicorp/precise32
+
+-----------------------
+
+なお、DigitalOceanの最小インスタンスでVagrant+VirtualBoxを試した所、メモリが足りなくてvagrant sshができなかった
+
+
+あとで。packerにも触れる
+
+https://github.com/eigo-s/packer_templates
+

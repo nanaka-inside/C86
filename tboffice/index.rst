@@ -801,6 +801,10 @@ hostsファイルを以下のように書き換えます。
 
 * vagrantとは
 
+  * 簡単に言うとOracleVirtualBoxのゲストOSを作るもの。最近は、AWSとかDigitalOceanとかVMwareのOSファイルを作ることができる。作ることができるものをProviderという
+  * Githubを見てみるとruby製ということが分かる。https://github.com/mitchellh/vagrant　
+  * rpm -ivh https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.rpm // wgetするときちょっと時間かかる
+
   * Hashicorpのやつ
   * VirtualBoxのイメージを作成するツール
   * VMwareでも可
