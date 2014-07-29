@@ -197,6 +197,7 @@ middleware
   io.emit('eventName', data);
 
 Socket.IOサーバの起動::
+
   // 0.9
   var io = require('socket.io');
   var socket = io.listen(80, {});
