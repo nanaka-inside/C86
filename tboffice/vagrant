@@ -285,6 +285,19 @@ vagrant up
 ==> box: Successfully added box 'freebsd-10' (v0) for 'virtualbox'!
 
 
+The guest machine entered an invalid state while waiting for it
+to boot. Valid states are 'starting, running'. The machine is in the
+'poweroff' state. Please verify everything is configured
+properly and try again.
+
+If the provider you're using has a GUI that comes with it,
+it is often helpful to open that and watch the machine, since the
+GUI often has more helpful error messages than Vagrant can retrieve.
+For example, if you're using VirtualBox, run `vagrant up` while the
+VirtualBox GUI is open.
+
+死ぬ
+
 メモ；FreeBSD 10.0 x86_64 Minimal (VirtualBox, ZFS)を持ってきたけどGUIが必要で起動しなかった。CentOS7.0 x86_64 Puppet and Dockerを持ってきたらHTTP 509で持ってこれなかった。
 ========================================================================================================================
 
