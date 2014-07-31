@@ -796,24 +796,121 @@ hostsファイルを以下のように書き換えます。
 * 今日からすぐに使えるデプロイ・システム管理ツール ansible 入門 - http://tdoc.info/blog/2013/05/10/ansible_for_beginners.html
 
 
-仮想化そのいち Vagrant
-^^^^^^^^^^^^^^^^^^^^^
+仮想化・その1 Vagrant編
+^^^^^^^^^^^^^^^^^^^^^^
 
-* vagrantとは
+仮想化のツールとして、HashiCorp [#iihashi]_ が提供しているVagrant [#iiveg]_ を取り上げます。Vagrantとは、ホストOS上に独立した仮想マシンを立ち上げることができるツールです。
+vagrantとは浮浪者という意味です。Vagrantの仮想マシンは、Boxというファイルに保存することができます。
+Vagrantがインストールされているマシンに、Boxファイルを読み込ませれば、保存されたマシンが起動します。仮想マシンを気軽に作ったり壊したりできます。
 
-  * 簡単に言うとOracleVirtualBoxのゲストOSを作るもの。最近は、AWSとかDigitalOceanとかVMwareのOSファイルを作ることができる。作ることができるものをProviderという
-  * Githubを見てみるとruby製ということが分かる。https://github.com/mitchellh/vagrant　
-  * rpm -ivh https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.rpm // wgetするときちょっと時間かかる
+Vagrantはruby [#iivaggh]_ で書かれています。対応しているOSは、Max OS X、主要なLinuxのディストリビューション、Windowsです。設定ファイルは、Vagrantfileというファイルに記述します。
+仮想マシンは、デフォルトではVirtualBox上で起動します。それ以外にも、VMwareやAWS、DigitalOceanにも仮想マシンを立てることができます。
 
-  * Hashicorpのやつ
-  * VirtualBoxのイメージを作成するツール
-  * VMwareでも可
-  * Boxと呼ばれるイメージを拾ってきてその中に入ってるOSを起動する
-  * Boxはつくれる！かわいいは正義
+.. [#iihashi] http://www.hashicorp.com/
+.. [#iiveg] http://www.vagrantup.com/
+.. [#iivaggh] https://github.com/mitchellh/vagrant
 
-* 使ってみる
 
-  * DigitalOceanつかってみよう
+インストール
+""""""""""""
+
+まずは、Vagrant + VirtualBox の組み合わせを試します。
+
+* Max OS X へインストール
+
+Vagrant [#iivagmacin]_ , VirtualBox [#iivagvbin]_ とも、公式サイトでMac OS X用のインストーラが用意されています。特に苦労することはありません。
+
+.. [#iivagmacin] http://www.vagrantup.com/downloads.html インストーラはここからダウンロード
+.. [#iivagvbin] https://www.virtualbox.org/wiki/Downloads インストーラはここからダウンロード
+
+.. figure:: img/vagrant-mac.eps
+  :scale: 50%
+  :alt: vagrant-mac
+  :align: center
+
+  Vagrantのインストーラ
+
+.. figure:: img/virtualbox-mac.eps
+  :scale: 50%
+  :alt: virtualbox-mac
+  :align: center
+
+  VirtualBoxのインストーラ
+
+* CentOS 6.5にインストール
+
+Vagrant は RPM でリリースされています。ホストOSのカーネルバージョンに依存します。起動しているカーネルと同じバージョンの ``kernel-devel`` ``kernerl-headers`` がインストールされていないとVirtualBoxが起動しません。もしなければ、RPMを探してインストールしましょう [#iivagker]_ 。
+
+.. [#iivagker] DigitalOceanのDropletsでやってみたところ、起動しているカーネルとインストールされているkernel-develなどのバージョンが違い、ハマる
+
+kernelに依存するので、カーネルが変わってもモジュールを再コンパイルしてくれる ``dkms`` [#dkms]_ も合わせてインストールしておきます [#iivagperl]_ 。
+VirtualBoxのRPMのファイルサイズが大きいので、一旦wgetしてから ``yum install`` に噛ませます [#iivagdl]_  。
+
+.. [#dkms] Dynamic Kernel Module Support - http://linux.dell.com/dkms/
+.. [#iivagperl] perlが入っていないとインストール出来ないので注意。DigitalOceanのCentOS6.5でハマるなど
+.. [#iivagdl] VPS上でのwgetが遅ければ、一旦ローカルにダウンロードしてきてDropboxか何かでファイル共有するのが早い
+
+.. code-block:: sh
+
+   [root@rin ~]# rpm -ivh vagrant_1.6.3_x86_64.rpm 
+   Preparing...                ########################################### [100%]
+      1:vagrant                ########################################### [100%]
+   [root@rin ~]# rpm -ivh http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+   [root@rin ~]# yum install dkms
+   [root@rin ~]# wget http://download.virtualbox.org/virtualbox/4.3.14/VirtualBox-4.3-4.3.14_95030_el6-1.x86_64.rpm
+   [root@rin ~]# yum install http://download.virtualbox.org/virtualbox/4.3.14/VirtualBox-4.3-4.3.14_95030_el6-1.x86_64.rpm
+   [root@rin ~]# /etc/init.d/vboxdrv setup
+
+
+vagrant upして仮想マシンを起動
+"""""""""""""""""""""""""""""
+
+仮想マシンを起動してみましょう。ここでは、CentOS 6.5 をホストOSとして仮想マシンを起動してみます。
+
+.. code-block:: sh
+
+   [hoshizora@rin ~]# cd ; mkdir vmachine ; cd vmachine
+   [hoshizora@rin ~]$ vagrant init hashicorp/precise32
+   A `Vagrantfile` has been placed in this directory. You are now
+   ready to `vagrant up` your first virtual environment! Please read
+   the comments in the Vagrantfile as well as documentation on
+   `vagrantup.com` for more information on using Vagrant.
+   [hoshizora@rin ~]# vagrant up
+   [hoshizora@rin ~]# vagrant ssh
+
+一行目で、Vagrantを起動するためのファイル(Vagrantfile)を置くため、適当なディレクトリを作っています。
+次の行で、作成するBox名(hashicrop/precise32)を指定します。これが終わるとVagrantfileができています。コメントを外した中身は4行です。
+
+:: 
+
+   VAGRANTFILE_API_VERSION = "2"
+   Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+     config.vm.box = "hashicorp/precise32"
+   end
+
+これだけで仮想マシンの準備ができました。
+
+``vagrant up`` を実行すると、vagrantcloud.comからboxのダウンロードが始まります。vagrantcloud.comには様々なOS, アプリケーションがインストール済みのBoxファイルがあるので、目的に合わせたものを選択して使うことができます。
+
+コマンドの実行に若干時間がかかりますが、これらのコマンドでUbuntu 12.04 LTSの仮想マシンがVirtualBox上で立ち上がります。 ``vagrant ssh`` で、その仮想マシンにsshでログインできます。
+下記のディレクトリに、VirtualBoxのvmdkファイルがおいてあります。
+
+.. code-block:: sh
+
+   $ ll ~/.vagrant.d/boxes/hashicorp-VAGRANTSLASH-precise32/1.0.0/virtualbox/
+   total 288344
+   -rw------- 1 hoshizora hoshizora 295237632 Aug  1 04:32 box-disk1.vmdk
+   -rw------- 1 hoshizora hoshizora     14103 Aug  1 04:32 box.ovf
+   -rw-rw-r-- 1 hoshizora hoshizora        25 Aug  1 04:32 metadata.json
+   -rw-r--r-- 1 hoshizora hoshizora       505 Aug  1 04:32 Vagrantfile
+
+* Vagrantfile
+
+* provision 
+
+* vagrant share
+
+* DigitalOceanプラグイン
 
 * 参考
 
@@ -1382,82 +1479,3 @@ IIやる人はこれだけは最低限みておけリンク
 * 必要なければdevopsに触れなくていっかなー
 * 設定が漂流する。そこにIIを導入していくコスト。cultureは？
 * IIが出てきた根源的な点はどこか？メリットが上回るものなのか？現状維持ではダメなのか？何故ダメになったのか？
-
-みなおしする点
--------------
-
-* Serverspecの綴りは、Sが大文字ですね
-* 冪等性触れる
-
-
-壮大なメモ
-----------
-
-* PhoenixServer : http://martinfowler.com/bliki/PhoenixServer.html
-
-  * フェニックスサーバ。認証監査をしようと思った
-
-    * 今動いている本番環境を再度構築しなおすことになる
-    * 定期的にサーバを焼き払ったほうがいい
-    * サーバは灰の中から不死鳥のように蘇る。だからフェニックスサーバという
-    * 構成のズレ、アドホックな変更でサーバの設定が漂流する。SnowflakeServersにいきつく
-
-      * http://kief.com/configuration-drift.html Configration Drift
-
-    * このような漂流に対向するためにpuppetやchefをつかってサーバを同期し直す。
-    * netflixはランダムにサーバを落として大丈夫か試している（ひー
-
-* SnowflakeServer : http://martinfowler.com/bliki/SnowflakeServer.html
-
-  * スノーフレークサーバ。雪のかけらサーバという存在
-  * OSやアプリケーションにパッチを当てたりする必要がある
-  * 設定を調査すると、サーバによって微妙に違う
-  * スキー場にとっては良いが、データセンターではよくない
-  * スノーフレークサーバは再現が難しい
-  * 本番での障害を開発環境で再現させても調査できない
-　
-    * 参考文献・目に見えるOpsハンドブック　http://www.amazon.com/gp/product/0975568604
-   
-  * 芸術家はスノーフレークを好むのだそうだ　http://tatiyants.com/devops-is-ruining-my-craft/
-　
-    * （サーバ含めそのなかのアプリケーションも工業製品なんだよ！！！わかったか！！！（横暴
-    * （昔はひとつのサーバでなんとか出来たけど、今はアクセスも増えてサーバも増えたので芸術品はいらない！！
-    * （どーどー落ち着けー、なーー
-　
-  * スノーフレークのディスクイメージを造ればいいじゃんという議論
-  * だがこのディスクイメージはミスや不要な設定も一緒に入っている
-  * しかもそれを変更することもある。壊れやすさの真の理由となる（雪だけに
-  * 理解や修正がしにくくなる。変更したら影響がどこに及ぶかわからない
-  * そんなわけで古代のOSの上に重要なソフトウエアが動作している理由である
-  * スノーフレークを避けるためにはpuppetやchefを使って動作の確認のとれたサーバを保持すること
-  * レシピを使用すつと、簡単に再構築できる。または、イメージデータを作れる
-  * 構成はテキストファイルだから変更はバージョン管理される
-
-  * nologinにしてchefなどからレシピを実行すれば、変更はすべてログに残り監査に対して有効
-  * 構成の違いによるバグを減らし、全く同じ環境をつくれる。また、環境の違いに起因するバグを減らせる
-
-    * 継続的デリバリーの本に言及する　あっ
-
-* ConfigurationSynchronization : http://martinfowler.com/bliki/ConfigurationSynchronization.html
-
-  * あんまり重要じゃない
-
-* ImmutableServer : http://martinfowler.com/bliki/ImmutableServer.html
-
-  * やっともどってこれた。この文章からスノーフレークとフェニックスサーバに飛んでいる
-  * Netflixが実は実戦でやってたみたい　AMIつくってそれをAWS上に展開している
-
-    * http://techblog.netflix.com/2013/03/ami-creation-with-aminator.html
-    * AMIを作るツール　https://github.com/Netflix/aminator#readme
-
-
-* WEB+DB PRESS 81からメモ
-
-  - IIデメリット　サーバが立ち上がった状態からの変更を禁じているのでちょっとした変更を入れるのにもサーバを作りなおす必要がある
-  - サーバの生成廃棄コストが頻繁にあると運用コストが増大する
-  - サーバの作成や廃棄が簡単なクラウドを使うのが楽
-  - ホストの生成廃棄プロセスをAPIでやれると楽。LBとかもAPIでやれると楽
-  - クラスタ監視ツールにmackerel.ioを使おう
-  - dokku , flynn, apache mesos, Surf
-  - pakker
-  - BGDepではLBをAPIで変更できると楽
