@@ -62,10 +62,11 @@ Socket.IO1.0における主な変更点
 
 .. [#] http://socket.io/blog/introducing-socket-io-1-0/
 
-トランスポート層の実装をEngineIOに移譲した
+トランスポート層の実装をEngine.IOに移譲した
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Engine.IOは、ざっくばらんに言うと「Websocketでもhttp pollingでも何でもいいからとにかく通信できる状態を確立する」ライブラリです。以前は通信に関する部分もSocket.IOが内包していましたが、1.0からはそれらの機能をEngine.IOに移譲し、Socket.IOはルーム機能や接続要求などの、より高度な機能のみ実装されるようになりました。実際、Socket.IO自体のコードはサーバ、クライアントそれぞれ1000行前後と大幅にシンプルになりました。また、Engine.IOは通信方式に関わらずWebSocktとして利用できるインターフェースを提供してくれるので、仮にWebSocktのみをサポートするのであれば、Engine.IOを利用せずともSocket.IOは動作するでしょう。
+Engine.IOは、ざっくばらんに言うと「Websocketでもhttp pollingでも何でもいいからとにかく通信できる状態を確立する」ライブラリです。以前は通信に関する部分もSocket.IOが内包していましたが、1.0からはそれらの機能をEngine.IOに移譲し、Socket.IOはルーム機能や接続要求などの、より高度な機能のみ実装されるようになりました。実際、Socket.IO自体のコードはサーバ、クライアントそれぞれ1000行前後と大幅にシンプルになりました。また、Engine.IOは通信方式に関わらずWebSocktとして利用できるインターフェースを提供してくれるので、仮にWebSocktのみをサポートするのであれば、Engine.IOを利用せずともSocket.IOは問題なく動作できるという指針のもと開発されています。
+
 また、接続の確立方法がfallback形式からupgrade形式に変更になりました。
 
 **従来のfallback形式**
@@ -83,11 +84,34 @@ Engine.IOは、ざっくばらんに言うと「Websocketでもhttp pollingで�
 - pollingしたままWebSocktでパケット通信できるか試行する
 - WebSocktでの通信に成功したら、メインのトランスポートを変更する
 
-WebSocktの接続が確立できないということは、サービスを運営する中で、確かにしばしば見られました。この原因に関しては、0.9時代に調査がなされ（ソース見つからず）、ブラウザの問題というよりはプロキシやファイアウォールによってWebSocktの通信が阻まれることが多いと結果になりました。従来のfallback形式だと、構造的に接続確立までに大幅な時間を要することが避けられないという問題を孕んでいましたが、今回新たにupgrade方式を取ることによって、http pollingによる接続確立とWebSocktによる通信確立を並列で行うので、ユーザ体験を損なうことなく、タイムアウトして接続確立に時間がかかってしまう問題を解消しています。
+WebSocktの接続が確立できないということは、サービスを運営する中で、確かにしばしば見られました。この原因に関しては、0.9時代に調査がなされ（ソース見つからず）、ブラウザの問題というよりはプロキシやファイアウォールによってWebSocktの通信が阻まれることが多いと結果になりました。従来のfallback形式だと、構造的に接続確立までに大幅な時間を要することが避けられないという問題を孕んでいましたが、今回新たにupgrade方式を取ることによって、http pollingによる接続確立とWebSocktによる通信確立を平行して行うので、ユーザ体験を損なうことなく、タイムアウトして接続確立に時間がかかってしまう問題を解消しています。
 
-一応、自分で通信プロトコルの選択したり再接続時の確立方式を選択できるオプションもあります。
+「WebSocket対応できてない環境は対応しないんだけど」「クライアントを作るとしたらWebSocket対応だけじゃだめ？」という疑問が湧きますが、問題ありません。クライアントから接続するときにtrasportsオプション [#]_ に配列を渡してやることで対応できます。::
 
-.. transportsオプションやrememberUpgradeオプションに関するサンプルがあるとよさそう?
+  // デフォルトの場合
+  var socket = io('http://localhost:3000');
+  socket.on('connect', function() {
+    console.log(socket.io.engine.transport);   // xhr
+    setTimeout(function() {
+      console.log(socket.io.engine.transport); // ws
+    }, 3000);
+   });
+
+  // WebSocketのみで通信する場合
+  var socket = io('http://localhost', {
+    transports: ['websocket']
+  });
+  socket.on('connect', function() {
+    console.log(socket.io.engine.transport)     // ws
+    setTimeout(function() {
+      console.log(socket.io.engine.transport);  // ws
+    }, 3000);
+  });
+
+
+.. [#] デフォルトでは transports = ['polling','websocket']
+       https://github.com/Automattic/socket.io-client/blob/b537b8edf9494f08c81ba83948591c1cb961305f/socket.io.js#L1459
+
 
 バイナリデータの送信をサポートした
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -98,39 +122,101 @@ WebSocktプロトコルは既にバイナリデータの送信をサポートし
 
 WebSocktのバイナリフレームはBlobかArrayBuffer形式で送受信することが可能です。しかしながら、その他の形式には対応していなかったり、送信時にstring modeなのかbinary modeなのか明示する必要があったりと、決して使い勝手が良いとは言い難い部分もあります。Socket.IOはこれらの問題を解決しており、BufferやFileといったデータの送信もサポートしています。また、それを明示する必要もありません。複数のバイナリを同時に送受信することや、オブジェクトの中に埋め込んだりすることも可能です。
 
-.. 0.9までのコード base64
+以下に0.9と1.0で画像データを送受信するサンプルを示します。::
 
-.. WebSocktでのバイナリ送信
+  // 0.9
+  // client
+  document.getElementById('input_tag_file').addEventListener('change', function(e) {
+    var fileList = e.target.files,
+        file     = fileList[0],
+        reader = new FileReader();
+    reader.onload = function(e) {
+      socket.emit('image_from_client', e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+  // server
+  socket.on('image_from_client', function(data) {
+    // 適当な処理。場合によってデコードが必要
+  });
 
-.. 1.0でのサンプル socket.emit('event', new Buffer([0, 1]); みたいな
+  // 1.0
+  // client
+  document.getElementById('input_tag_file').addEventListener('change', function(e) {
+    var fileList = e.target.files,
+        file     = fileList[0];
+        reader   = new FileReader();
+    reader.onload = function(e) {
+      socket.emit('image_from_client', e.target.result);
+    };
+    reader.readAsArrayBuffer(file);
+  }, false)
+  // server
+  socket.on('image_from_client', function(buf) {
+    // デコードせず処理が書ける
+    socket.emit('image_from_server', buf);
+  });
+  // client
+  socket.on('image_from_server', function(buf) {
+    var view = new Uint8Array(buf),
+        blob = new Blob([view], {type: 'image/jpg'}),
+        url  = URL.createObjectURL(blob),
+        elm  = document.createElement('img').setAttribute('src', url);
+    document.body.appendChild(elm);
+  });
 
-..あと、公式にバイナリ送信を検証するために作成されたポケモンのクローンやwindows XPのサンプルが面白いです。
+クライアントで扱う部分に限っては、際はbase64エンコードした文字列を送受信する方が（慣れているという側面もありますが）使いやすく感じました。転送量やパフォーマンスをあまり気にする必要がないのであれば、無理にBlobやArrayBufferで扱う必要もないかもしれません。サーバ側でデータを保存・加工する場合は、やはりバイナリ送信ができた方がラクかと思います。
+
+余談ですが、xhr2に対応していない環境であるか、もしくはオプションでforceBase64を指定した場合は、バイナリデータはbase64エンコードした状態で通信されます。透過的に扱うことができて便利にも思えますが、意図しない挙動を産むかもしれないので、注意が必要ですね。あと、公式にバイナリ送信を検証するために作成されたポケモンのクローン [#]_ やwindows XPのサンプル [#]_ が面白いです。
+
+.. [#] http://weplay.io/
+.. [#] http://socket.computer/
+
 
 スケーラビリティが向上した（よりシンプルになった）
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Socket.IO(+Node.js)で大規模なチャットアプリケーションなどを実装するのは、少々骨の折れる作業でした。Node.js自体はシングルスレッドで動作するため、多くのリソースを消費するプログラムを書くとたちまちレスポンスは遅延しますし、CPU性能を十分に発揮できません。このような場合はcluster moduleとsticky sessionを組み合わせたり、プロセスマネージャとしてpm2、passangerなどを利用して、複数プロセスでアプリケーションを起動し、nginxをフロントに置いて振り分けたりする構成が一般的かと思われます。
 
-.. 図
-
 マルチプロセスでアプリケーションを運用する場合、プロセス間でセッション情報の共有が必須になってきます。0.9までのSocket.IOの場合、Storeという機能でRedisのPub/Subを用いる機能が一般的でしたが、1.0からはAdapterという機能を利用して実現するようになっています。
 
-.. 0.9でのRedisStore
+0.9までのRedisStore::
+
+  var io    = require('socket.io').listen(3000),
+      redis = require('socket.io/lib/stores/redis'),
+      opts  = {
+        host: 'localhost',
+        port: 6379
+      };
+  io.set('store', new redis({
+    redisPub: opts,
+    redisSub: opts,
+    redisClient: opts
+  }));
 
 0.9まではRedisStoreとしてSocket.IOに内包されていましたが、1.0からは本体から切り離され、別途インストールする必要があります。ちなみに、デフォルトはメモリストアですが、そちらもSocket.IO-adapterとして切り離されています。
 
-.. 1.0でのRedis adapter
+1.0でのRedisAdapter::
 
-かなりシンプルになりましたが、これだけでプロセス間のやり取りは可能です。pubClient/subClientなどはオプションで指定することもできます。
+  var io    = require('socket.io')(3000),
+      redis = require('socket.io-redis');
+  io.adapter(redis({
+    host: 'localhost',
+    port: 6379 
+  }));
 
-.. Socket.set()やSocket.get()はdeprecatedに。何で？
+かなりシンプルになりましたが、これだけでプロセス間のやり取りは可能です。pubClient/subClientなどはオプションで指定することもできます。また、Socket.set()やSocket.get()はdeprecatedになったので、0.9からのバージョンアップ時には気をつけなければならないかもしれません。
 
-0.9までは、プロセス間で共有するクライアントの接続データをプロセスがそれぞれ保持していましたが、1.0以降は、プロセス間でデータの多重保持は行わないような設計になっています。今まで全クライアントのデータをそれぞれのプロセスが持っていたわけですから、決して効率的だとはいえず（これはこれで利点もあるとは思いますが）、今回の変更によりスケーラビリティの向上が見込まれます。
+0.9までは、プロセス間で共有するクライアントの接続データをプロセスがそれぞれ保持していましたが、1.0以降は、プロセス間でデータの多重保持は行わないような設計になっています。今まで全クライアントのデータをそれぞれのプロセスが持っていたわけですから、決して効率的だとはいえず（これはこれで利点でもあるとは思いますが）、今回の変更によりスケーラビリティの向上が見込まれます。
 
 バックエンドでのSocket.IO連携が可能になった
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.0からは、Socket.IOサーバ単体、もしくはNode.jsを利用した場面以外にも、どこからでもSocket.IOサーバにイベントを送ることができるようになりました。本体には同梱されていませんが、socket.io-emitterというプロジェクトがその役割を果たします。例えば、別プロセスで他のプログラムが処理を実行し、Socket.IOには双方向通信の役割のみに専念させたい場合や、既存のアプリケーションにSocket.IOサーバを組み込みたい場合などに便利でしょう。Ruby, PHP, Goなどによる実装が既に公開されていますし、コード量もそれほど多くないので学習も兼ねて自分で作ってしてしまうのもよさそうだな、と個人的に考えています。
+1.0からは、Socket.IOサーバ単体、もしくはNode.jsを利用した場面以外にも、どこからでもSocket.IOサーバにイベントを送ることができるようになりました。本体には同梱されていませんが、socket.io-emitterというプロジェクトがその役割を果たします。例えば、別プロセスで他のプログラムが処理を実行し、Socket.IOには双方向通信の役割のみに専念させたい場合や、既存のアプリケーションにSocket.IOサーバを組み込みたい場合などに便利でしょう。Ruby [#]_ , PHP [#]_ , Go [#]_ などによる実装が既に公開されていますし、コード量もそれほど多くないので学習も兼ねて自分で作ってしてしまうのもよさそうだな、と個人的に考えています。
+
+.. [#] https://github.com/nulltask/socket.io-ruby-emitter
+.. [#] https://github.com/rase-/socket.io-php-emitter
+.. [#] https://github.com/yosuke-furukawa/socket.io-go-emitter
 
 その他の変更点
 -------------
@@ -205,9 +291,6 @@ Socket.IOサーバの起動::
   var io = require('socket.io');
   var socket = io({});
 
-ログ出力の変更
-^^^^^^^^^^^^^
-
 まとめ
 ------
-.. 時間があれば面白いサンプル（リポジトリだけ作っておく作戦もあり
+駆け足でしたが、Socket.IO1.0についての主な変更点について解説させていただきました。リリースされてからまだ日が浅いですが、そろそろプロダクションで1.0が動くサービスも出てくるのではないでしょうか。この記事が読者の方々の開発に貢献できたら幸いです（自分が扱っているプロダクトも1.0にバージョンアップしなければ...）。

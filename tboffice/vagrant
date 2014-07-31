@@ -3,9 +3,8 @@
   
   * 仮想マシンを自動作成するツール
   * Linuxなどの仮想環境を起動することができる
-  * Ruby
-    で実装されている。Mac OS、Linuxで動作する
-    Windowsでは制限あり（用調査
+  * Rubyで実装されている。Mac OS、Linuxで動作する
+  * Windowsでは制限あり（用調査
   * MacOS
     だとインストーラがある
   * 今回
@@ -296,7 +295,7 @@ GUI often has more helpful error messages than Vagrant can retrieve.
 For example, if you're using VirtualBox, run `vagrant up` while the
 VirtualBox GUI is open.
 
-死ぬ
+死ぬ  
 
 メモ；FreeBSD 10.0 x86_64 Minimal (VirtualBox, ZFS)を持ってきたけどGUIが必要で起動しなかった。CentOS7.0 x86_64 Puppet and Dockerを持ってきたらHTTP 509で持ってこれなかった。
 ========================================================================================================================
