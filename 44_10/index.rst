@@ -62,10 +62,11 @@ Socket.IO1.0における主な変更点
 
 .. [#] http://socket.io/blog/introducing-socket-io-1-0/
 
-トランスポート層の実装をEngineIOに移譲した
+トランスポート層の実装をEngine.IOに移譲した
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Engine.IOは、ざっくばらんに言うと「Websocketでもhttp pollingでも何でもいいからとにかく通信できる状態を確立する」ライブラリです。以前は通信に関する部分もSocket.IOが内包していましたが、1.0からはそれらの機能をEngine.IOに移譲し、Socket.IOはルーム機能や接続要求などの、より高度な機能のみ実装されるようになりました。実際、Socket.IO自体のコードはサーバ、クライアントそれぞれ1000行前後と大幅にシンプルになりました。また、Engine.IOは通信方式に関わらずWebSocktとして利用できるインターフェースを提供してくれるので、仮にWebSocktのみをサポートするのであれば、Engine.IOを利用せずともSocket.IOは動作するでしょう。
+Engine.IOは、ざっくばらんに言うと「Websocketでもhttp pollingでも何でもいいからとにかく通信できる状態を確立する」ライブラリです。以前は通信に関する部分もSocket.IOが内包していましたが、1.0からはそれらの機能をEngine.IOに移譲し、Socket.IOはルーム機能や接続要求などの、より高度な機能のみ実装されるようになりました。実際、Socket.IO自体のコードはサーバ、クライアントそれぞれ1000行前後と大幅にシンプルになりました。また、Engine.IOは通信方式に関わらずWebSocktとして利用できるインターフェースを提供してくれるので、仮にWebSocktのみをサポートするのであれば、Engine.IOを利用せずともSocket.IOは問題なく動作できるという指針のもと開発されています。
+
 また、接続の確立方法がfallback形式からupgrade形式に変更になりました。
 
 **従来のfallback形式**
@@ -83,11 +84,34 @@ Engine.IOは、ざっくばらんに言うと「Websocketでもhttp pollingで�
 - pollingしたままWebSocktでパケット通信できるか試行する
 - WebSocktでの通信に成功したら、メインのトランスポートを変更する
 
-WebSocktの接続が確立できないということは、サービスを運営する中で、確かにしばしば見られました。この原因に関しては、0.9時代に調査がなされ（ソース見つからず）、ブラウザの問題というよりはプロキシやファイアウォールによってWebSocktの通信が阻まれることが多いと結果になりました。従来のfallback形式だと、構造的に接続確立までに大幅な時間を要することが避けられないという問題を孕んでいましたが、今回新たにupgrade方式を取ることによって、http pollingによる接続確立とWebSocktによる通信確立を並列で行うので、ユーザ体験を損なうことなく、タイムアウトして接続確立に時間がかかってしまう問題を解消しています。
+WebSocktの接続が確立できないということは、サービスを運営する中で、確かにしばしば見られました。この原因に関しては、0.9時代に調査がなされ（ソース見つからず）、ブラウザの問題というよりはプロキシやファイアウォールによってWebSocktの通信が阻まれることが多いと結果になりました。従来のfallback形式だと、構造的に接続確立までに大幅な時間を要することが避けられないという問題を孕んでいましたが、今回新たにupgrade方式を取ることによって、http pollingによる接続確立とWebSocktによる通信確立を平行して行うので、ユーザ体験を損なうことなく、タイムアウトして接続確立に時間がかかってしまう問題を解消しています。
 
-一応、自分で通信プロトコルの選択したり再接続時の確立方式を選択できるオプションもあります。
+「WebSocket対応できてない環境は対応しないんだけど」「クライアントを作るとしたらWebSocket対応だけじゃだめ？」という疑問が湧きますが、問題ありません。クライアントから接続するときにtrasportsオプション [#]_ に配列を渡してやることで対応できます。::
 
-.. transportsオプションやrememberUpgradeオプションに関するサンプルがあるとよさそう?
+  // デフォルトの場合
+  var socket = io('http://localhost:3000');
+  socket.on('connect', function() {
+    console.log(socket.io.engine.transport);   // xhr
+    setTimeout(function() {
+      console.log(socket.io.engine.transport); // ws
+    }, 3000);
+   });
+
+  // WebSocketのみで通信する場合
+  var socket = io('http://localhost', {
+    transports: ['websocket']
+  });
+  socket.on('connect', function() {
+    console.log(socket.io.engine.transport)     // ws
+    setTimeout(function() {
+      console.log(socket.io.engine.transport);  // ws
+    }, 3000);
+  });
+
+
+.. [#] デフォルトでは transports = ['polling','websocket']
+       https://github.com/Automattic/socket.io-client/blob/b537b8edf9494f08c81ba83948591c1cb961305f/socket.io.js#L1459
+
 
 バイナリデータの送信をサポートした
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -98,13 +122,57 @@ WebSocktプロトコルは既にバイナリデータの送信をサポートし
 
 WebSocktのバイナリフレームはBlobかArrayBuffer形式で送受信することが可能です。しかしながら、その他の形式には対応していなかったり、送信時にstring modeなのかbinary modeなのか明示する必要があったりと、決して使い勝手が良いとは言い難い部分もあります。Socket.IOはこれらの問題を解決しており、BufferやFileといったデータの送信もサポートしています。また、それを明示する必要もありません。複数のバイナリを同時に送受信することや、オブジェクトの中に埋め込んだりすることも可能です。
 
+以下に0.9と1.0で画像データを送受信するサンプルを示します。::
+
 .. 0.9までのコード base64
+  // 0.9
+  // client
+  document.getElementById('input_tag_file').addEventListener('change', function(e) {
+    var fileList = e.target.files,
+        file     = fileList[0],
+        reader = new FileReader();
+    reader.onload = function(e) {
+      socket.emit('image_from_client', e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+  // server
+  socket.on('image_from_client', function(data) {
+    // 適当な処理。場合によってデコードが必要
+  });
 
-.. WebSocktでのバイナリ送信
+  // 1.0
+  // client
+  document.getElementById('input_tag_file').addEventListener('change', function(e) {
+    var fileList = e.target.files,
+        file     = fileList[0];
+        reader   = new FileReader();
+    reader.onload = function(e) {
+      socket.emit('image_from_client', e.target.result);
+    };
+    reader.readAsArrayBuffer(file);
+  }, false)
+  // server
+  socket.on('image_from_client', function(buf) {
+    // デコードせず処理が書ける
+    socket.emit('image_from_server', buf);
+  });
+  // client
+  socket.on('image_from_server', function(buf) {
+    var view = new Uint8Array(buf),
+        blob = new Blob([view], {type: 'image/jpg'}),
+        url  = URL.createObjectURL(blob),
+        elm  = document.createElement('img').setAttribute('src', url);
+    document.body.appendChild(elm);
+  });
 
-.. 1.0でのサンプル socket.emit('event', new Buffer([0, 1]); みたいな
+画像をやりとりする際はbase64エンコードした文字列を送受信する方が（慣れているという側面もありますが）使いやすく感じました。転送量やパフォーマンスをあまり気にする必要がないのであれば、無理にBlobやArrayBufferで扱う必要もないかもしれません。
 
-..あと、公式にバイナリ送信を検証するために作成されたポケモンのクローンやwindows XPのサンプルが面白いです。
+余談ですが、xhr2に対応していない環境であるか、もしくはオプションでforceBase64を指定した場合は、バイナリデータはbase64エンコードした状態で通信されます。透過的に扱うことができて便利にも思えますが、意図しない挙動を産むかもしれないので、注意が必要ですね。あと、公式にバイナリ送信を検証するために作成されたポケモンのクローン [#]_ やwindows XPのサンプル [#]_ が面白いです。
+
+.. [#] http://weplay.io/
+.. [#] http://socket.computer/
+
 
 スケーラビリティが向上した（よりシンプルになった）
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
