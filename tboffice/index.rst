@@ -382,9 +382,9 @@ CentOS 7 では、こんな感じでした [#iianepel]_
 
 .. code-block:: sh
 
-   sudo yum install -y gcc python-devel python-paramiko
-   sudo easy_install pip
-   sudo pip install ansible
+   $ sudo yum install -y gcc python-devel python-paramiko
+   $ sudo easy_install pip
+   $ sudo pip install ansible
 
 Ansibleは、Python 2.4以上で動作し、Python 2.6以上の環境が推奨されます。Python 2.5以下では、 ``python-simplejson`` パッケージが必要です。CentOS 5などでインストールするときは注意してください。pip [#iipip]_ があるなら、 ``sudo pip install simplejson`` でいけるはずです。今回、Ansible 1.6.6を使いました。
  
@@ -800,7 +800,7 @@ hostsファイルを以下のように書き換えます。
 ^^^^^^^^^^^^^^^^^^^^^^
 
 仮想化のツールとして、HashiCorp [#iihashi]_ が提供しているVagrant [#iiveg]_ を取り上げます。Vagrantとは、ホストOS上に独立した仮想マシンを立ち上げることができるツールです。
-vagrantとは浮浪者という意味です。Vagrantの仮想マシンは、Boxというファイルに保存することができます。
+Vagrantの仮想マシンは、Boxというファイルに保存することができます。
 Vagrantがインストールされているマシンに、Boxファイルを読み込ませれば、保存されたマシンが起動します。仮想マシンを気軽に作ったり壊したりできます。
 
 Vagrantはruby [#iivaggh]_ で書かれています。対応しているOSは、Max OS X、主要なLinuxのディストリビューション、Windowsです。設定ファイルは、Vagrantfileというファイルに記述します。
@@ -865,7 +865,7 @@ VirtualBoxのRPMのファイルサイズが大きいので、一旦wgetしてか
 vagrant upして仮想マシンを起動
 """""""""""""""""""""""""""""
 
-仮想マシンを起動してみましょう。ここでは、CentOS 6.5 をホストOSとして仮想マシンを起動してみます。
+仮想マシンを起動してみましょう。ここでは、CentOS 6.5 をホストOSとして仮想マシンを起動して、その仮想マシンにsshでログインするまでのコマンドです。
 
 .. code-block:: sh
 
@@ -879,7 +879,7 @@ vagrant upして仮想マシンを起動
    [hoshizora@rin ~]# vagrant ssh
 
 一行目で、Vagrantを起動するためのファイル(Vagrantfile)を置くため、適当なディレクトリを作っています。
-次の行で、作成するBox名(hashicrop/precise32)を指定します。これが終わるとVagrantfileができています。コメントを外した中身は4行です。
+次の行で、作成するBox名(hashicrop/precise32)を指定します。これが終わるとVagrantfileが作られています。コメントを外した中身はたった4行です。
 
 :: 
 
@@ -893,7 +893,7 @@ vagrant upして仮想マシンを起動
 ``vagrant up`` を実行すると、vagrantcloud.comからboxのダウンロードが始まります。vagrantcloud.comには様々なOS, アプリケーションがインストール済みのBoxファイルがあるので、目的に合わせたものを選択して使うことができます。
 
 コマンドの実行に若干時間がかかりますが、これらのコマンドでUbuntu 12.04 LTSの仮想マシンがVirtualBox上で立ち上がります。 ``vagrant ssh`` で、その仮想マシンにsshでログインできます。
-下記のディレクトリに、VirtualBoxのvmdkファイルがおいてあります。
+下記のディレクトリに、VirtualBoxのvmdkなどのファイルがおいてあります。
 
 .. code-block:: sh
 
@@ -904,11 +904,174 @@ vagrant upして仮想マシンを起動
    -rw-rw-r-- 1 hoshizora hoshizora        25 Aug  1 04:32 metadata.json
    -rw-r--r-- 1 hoshizora hoshizora       505 Aug  1 04:32 Vagrantfile
 
+
+* vagrant command
+
+ここで、vagrantのコマンドを見ていきます。vagrantコマンドを単体で打つとヘルプが表示されます。仮想マシンの様子を見てみます。
+
+.. code-block:: sh
+
+   $ vagrant status
+   Current machine states:
+   
+   default                   running (virtualbox)
+   
+   The VM is running. To stop this VM, you can run `vagrant halt` to
+   shut it down forcefully, or you can run `vagrant suspend` to simply
+   suspend the virtual machine. In either case, to restart it again,
+   simply run `vagrant up`.
+
+``vagrant box list`` で仮想マシンのBoxのリストが表示されます。 ``vagrant halt`` で仮想マシンの電源を切ります。 ``vagrant suspend`` というコマンドもあり、その名の通り仮想マシンがsuspend状態になります。destroyで仮想マシンの削除です。これらのコマンドは、Vagrantfileがあるディレクトリで実行しないと怒られます。激おこです。
+
+.. code-block:: sh
+
+   $ vagrant box list
+   hashicorp/precise32 (virtualbox, 1.0.0)
+
+   $ vagrant halt
+   ==> default: Attempting graceful shutdown of VM...
+
+   $ vagrant destroy
+       default: Are you sure you want to destroy the 'default' VM? [y/N] y
+
+
 * Vagrantfile
 
-* provision 
+Vagrantfileを編集してみましょう。ホストOSとディレクトリの共有の設定を書きます。ホストファイルの /hoge ディレクトリ(絶対パスでかけばどこでもおｋ)を、仮想マシンの /tmp にマウントしてみます。
+仮想マシンに適当なディレクトリを作っておくのがセオリーです。今さっきdestroyしてしまったので、ありもののディレクトリにマウントします。
+Vagrantfileを下記のように編集します。
+
+:: 
+
+   config.vm.box = "hashicorp/precise32"
+   config.vm.synced_folder "/hoge", "/var/tmp" # この行を追記
+
+``vagrant up`` して、 ``vagrant ssh`` するとマウントされていることが確認できます。今回は問題ないのですが、次回以降、Vagrantfileを書き換えたら、 ``vagrant reload`` すると変更が適用されます。再起動するのでご注意。次の準備があるので、ここで仮想マシンをdestroyしておきましょう。
+
+
+* provisioning
+
+サーバの基本的な設定やソフトウエアのインストールを自動化することができます。これを提供するのがプロビジョニングという機能です。
+手元に用意したシェルスクリプト(script.sh)を、仮想のマシンに実行してみます。
+Vagrantfileと同じディレクトリにscript.shを用意します。 ``date`` の内容をファイルに書き出す簡単なものです。
+
+:: 
+
+   #!/bin/sh
+   date > /tmp/nya
+
+先ほどのVagrantfileを編集します。inlineでコマンドを直接書くことも出来ます。また、pathにファイルを渡すと実行してくれます。
+
+:: 
+
+   config.vm.box = "hashicorp/precise32"
+   config.vm.provision "shell", inline: "echo hello" # この行を追加
+   config.vm.provision "shell", path: "script.sh" #この行も追加
+
+プロビジョニングを実行します。
+
+.. code-block:: sh
+
+   $ vagrant provision
+   ==> default: Running provisioner: shell...
+       default: Running: inline script
+   ==> default: stdin: is not a tty
+   ==> default: hello
+   ==> default: Running provisioner: shell...
+       default: Running: /tmp/vagrant-shell20140802-28134-1xoahlm.sh
+   ==> default: stdin: is not a tty
+
+``vagrant ssh`` すると、 /tmp/nya ファイルができています。プロビジョニングが実行されるタイミングについては、Vagrantのドキュメント [#iivagpro]_ を参照して下さい。
+
+.. [#iivagpro] https://docs.vagrantup.com/v2/provisioning/index.html
+
+* provisoning - ansible編
+
+プロビジョニングの例では、コマンド呼び出しやシェルスクリプトの実行を行いました。その他に、ChefやPuppet、Ansibleも呼び出すことができます。
+Ansibleに触れたところなので、今回はプロビジョニングにAnsibleを使ってみます。仮想マシンは2台立ち上げて、ホストOSのVagrantfileからAnsibleを実行してみます。
+
+Vagrantfileの設定です。下記のようにします。
+
+:: 
+
+   VAGRANTFILE_API_VERSION = "2"
+   
+   Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+     config.vm.define :honoka do |node|
+       node.vm.box = "hashicorp/precise32"
+       node.vm.network :forwarded_port, guest: 22, host: 2001, id: "ssh"
+       node.vm.network :private_network, ip: "192.168.56.101"
+       config.vm.provision "ansible" do |ansible|
+         ansible.playbook = "playbook.yml"
+         ansible.extra_vars = { ansible_ssh_user: 'vagrant' }
+         ansible.sudo = true
+       end
+     end
+     
+     config.vm.define :rin do |node|
+       node.vm.box = "hashicorp/precise32"
+       node.vm.network :forwarded_port, guest: 22, host: 2002, id: "ssh"
+       node.vm.network :forwarded_port, guest: 80, host: 8000, id: "http"
+       node.vm.network :private_network, ip: "192.168.56.102"
+     end
+   end
+
+config.vm.defineが2回登場します。仮想マシンを2つ起動する設定です。それぞれの仮想マシンに設定を行います。各オプションの簡単な解説です。
+
+forwarded_port
+  仮想マシンのポートをホストOSのどのポートに割り当てるかを指定します
+
+private_network
+  VirtualBox上の仮想マシンのプライベートネットワークとIPアドレスを設定します。実は今回のプロビジョニングでは使用しません。仮想マシンから他の仮想マシンへのアクセスの必要があるときに使います。もちろん、ホストOSからこの指定したアドレス(例えば192.168.56.101)にアクセスすることができます
+
+ansible.playbook
+  ansibleで実行するPlaybookのファイル名を指定します。playbook.ymlはカレントディレクトリに配置します
+
+ansible.extra_vars
+  sshのログインアカウントはデフォルトvagrantが作られているため、そのユーザ名を利用します
+
+ansible.sudo
+  ansibleコマンドに ``--sudo`` が付きます
+
+
+``host`` ファイルに、仮想マシンのホスト名を書きます。
+
+::
+   
+   # host
+   [otonoki]
+   honoka ansible_connection=ssh 
+   rin ansible_connection=ssh 
+
+CentOS 6系では、``~./.ssh/config`` を読んでくれない問題の回避をするため、ansible.cfgに下記を書きます。
+
+::  
+   
+   # ansible.cfg
+   [ssh_connection]
+   ssh_args = 
+
+最後にPlaybookです。apacheのインストールを行います。
+
+:: 
+
+   ---
+   - hosts: all
+     tasks:
+     - name: ensure apache is at the latest version
+       apt: pkg=apache2 state=latest
+     - name: ensure apache is running
+       service: name=apache2 state=started
+
+
+``vagrant up`` で仮想マシンを起動します。無事に仮想マシンが立ち上がり、apacheがインストールされたでしょうか。
+初回起動時に、provisionの設定があると自動的にprovisionを実行します。playbook.ymlなどを変更してプロビジョニングをやり直したいときは、 ``vagrant provision`` を実行して下さい。
+なお、上記の設定だと、rinの仮想マシンでもplaybook.ymlが適用されてしまいます。各自直してみてください。
+
 
 * vagrant share
+
+変更を加えた仮想マシンを公開してみましょう。
 
 * DigitalOceanプラグイン
 
