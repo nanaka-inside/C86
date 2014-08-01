@@ -79,7 +79,7 @@
 私が実践している風水プログラミングをご紹介します。
 コンソールに竜を置いています。
 
-.. |screenshot| image:: ./irimo-screenshot.png
+.. |screenshot| image:: ./irimo-screenshot.eps
 
 |screenshot|
 
