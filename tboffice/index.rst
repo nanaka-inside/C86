@@ -804,7 +804,7 @@ Vagrantの仮想マシンは、Boxというファイルに保存することが�
 Vagrantがインストールされているマシンに、Boxファイルを読み込ませれば、保存されたマシンが起動します。仮想マシンを気軽に作ったり壊したりできます。
 
 Vagrantはruby [#iivaggh]_ で書かれています。対応しているOSは、Max OS X、主要なLinuxのディストリビューション、Windowsです。設定ファイルは、Vagrantfileというファイルに記述します。
-仮想マシンは、デフォルトではVirtualBox上で起動します。それ以外にも、VMwareやAWS、DigitalOceanにも仮想マシンを立てることができます。
+仮想マシンは、デフォルトではVirtualBox上で起動します。それ以外にも、VMwareやAWS、DigitalOceanにも仮想マシンを立てることができます。仮想マシンを立てられるプラットフォームをプロバイダーと呼びます。
 
 .. [#iihashi] http://www.hashicorp.com/
 .. [#iiveg] http://www.vagrantup.com/
@@ -818,7 +818,7 @@ Vagrantはruby [#iivaggh]_ で書かれています。対応しているOSは、
 
 * Max OS X へインストール
 
-Vagrant [#iivagmacin]_ , VirtualBox [#iivagvbin]_ とも、公式サイトでMac OS X用のインストーラが用意されています。特に苦労することはありません。
+Vagrant [#iivagmacin]_ , VirtualBox [#iivagvbin]_ とも、公式サイトでMac OS X用のインストーラが用意されています。
 
 .. [#iivagmacin] http://www.vagrantup.com/downloads.html インストーラはここからダウンロード
 .. [#iivagvbin] https://www.virtualbox.org/wiki/Downloads インストーラはここからダウンロード
@@ -960,6 +960,7 @@ Vagrantfileと同じディレクトリにscript.shを用意します。 ``date``
    #!/bin/sh
    date > /tmp/nya
 
+
 先ほどのVagrantfileを編集します。inlineでコマンドを直接書くことも出来ます。また、pathにファイルを渡すと実行してくれます。
 
 :: 
@@ -1051,7 +1052,12 @@ CentOS 6系では、``~./.ssh/config`` を読んでくれない問題の回避�
    [ssh_connection]
    ssh_args = 
 
-最後にPlaybookです。apacheのインストールを行います。
+最後にPlaybookです。apacheのインストールと、HTTPでアクセスしたときに表示するテキストを作っておきましょう。
+
+.. code-block:: sh
+
+   echo 雨やめー！！ > honoka
+
 
 :: 
 
@@ -1062,6 +1068,8 @@ CentOS 6系では、``~./.ssh/config`` を読んでくれない問題の回避�
        apt: pkg=apache2 state=latest
      - name: ensure apache is running
        service: name=apache2 state=started
+     - name: copy test file
+       copy: src=honoka dest=/var/www
 
 
 ``vagrant up`` で仮想マシンを起動します。無事に仮想マシンが立ち上がり、apacheがインストールされたでしょうか。
@@ -1071,15 +1079,191 @@ CentOS 6系では、``~./.ssh/config`` を読んでくれない問題の回避�
 
 * vagrant share
 
-変更を加えた仮想マシンを公開してみましょう。
+Vagrantには、作った仮想マシンをネット上に公開する機能があります。VAGRANT CLOUDのサイトからアカウントを登録して、コマンドラインから公開したい仮想マシンを ``vagrant share`` すると公開されます。
+
+まずは、VAGRAT CLOUD(https://vagrantcloud.com/)にアカウントを登録します。「JOIN VAGRANT CLOUD」というリンクがあるので、そこからメールアドレスとパスワードを登録します。
+
+.. figure:: img/vagrantc.eps
+  :scale: 70%
+  :alt: vagrantc
+  :align: center
+
+  Vagrant Cloudの画面(https://vagrantcloud.com/)
+
+登録が終わったら、コマンドラインに戻ります。登録時に入力したログインアカウントを入力します。
+
+.. code-block:: sh
+
+   $ vagrant login
+   In a moment we'll ask for your username and password to Vagrant Cloud.
+   After authenticating, we will store an access token locally. Your
+   login details will be transmitted over a secure connection, and are
+   never stored on disk locally.
+   
+   If you don't have a Vagrant Cloud account, sign up at vagrantcloud.com
+   
+   Username or Email: user@example.com
+   Password (will be hidden): 
+   You're now logged in!
+
+公開してみます。
+
+   $ vagrant status
+   Current machine states:
+   
+   honoka                    running (virtualbox)
+   rin                       running (virtualbox)
+
+   $ vagrant share honoka
+   ==> honoka: Detecting network information for machine...
+       honoka: Local machine address: 192.168.56.101
+       honoka: Local HTTP port: 80
+       honoka: Local HTTPS port: disabled
+   ==> honoka: Checking authentication and authorization...
+   ==> honoka: Creating Vagrant Share session...
+       honoka: Share will be at: dynamite-antelope-8007
+   ==> honoka: Your Vagrant Share is running! Name: dynamite-antelope-8007
+   ==> honoka: URL: http://dynamite-antelope-8007.vagrantshare.com
+
+
+この状態で放置します。別の端末からcurlコマンドを叩いて、応答が返ってくることを確認します。もちろんブラウザからURLを入力しても構いません。
+
+.. code-block:: sh
+
+   curl http://dynamite-antelope-8007.vagrantshare.com/honoka
+   雨やめー！！
+
+VAGRANT CLOUDのサイトからも共有されていることが確認できます。
+
+.. figure:: img/vagrant-share.eps
+  :scale: 70%
+  :alt: vagrant-share
+  :align: center
+
+  Vagrant Cloudの画面(https://vagrantcloud.com/shares)
+
+share中の状態では、仮想マシンをVAGRNT CLOUD上にアップロードしているわけではなく、プロキシされています [#ngrok]_ 。その証拠に、ApacheのアクセスログにNATされたIPアドレスが残ります。
+shareを終了するには、``vagrant share honoka`` のコマンドを叩いたところでCtrl+cを打ち込みます。
+設定次第で、SSHでも仮想マシンにアクセスすることができます。セキュリティには注意して下さい。
+
+.. [#ngrok] 外部からローカルホストにトンネルつくって、インターネットからアクセスできるツールにngrok(https://ngrok.com/)があります
+
 
 * DigitalOceanプラグイン
+
+プロバイダーとしてDigitalOceanが選択できます。内部では、DigitalOceanのAPI(v2)を叩いています。
+ここでは、ホストOSに引き続きCentOS 6.5を使っていきます。
+まずはDigitalOceanでClient IDとAPI Keyを取得します。このページのURL(https://cloud.digitalocean.com/api_access)へのリンクは見つけにくいので、URLを直にたたいた方が早いです。
+
+.. figure:: img/do-api-key.eps
+  :scale: 70%
+  :alt: do-api-key
+  :align: center
+
+  DigitalOceanでClient_idとAPI Keyを生成(https://cloud.digitalocean.com/api_access)
+
+token を取得します。tokenを作るときに、Write権限の設定にチェックを入れて下さい。Dropletが作れずDigitalOceanのAPIがエラーを返します。
+
+.. figure:: img/do-gen-token.eps
+  :scale: 70%
+  :alt: do-gen-token
+  :align: center
+
+  DigitalOceanでAPI(https://cloud.digitalocean.com/settings/applications)
+
+.. figure:: img/do-gen-token2.eps
+  :scale: 70%
+  :alt: do-gen-token2
+  :align: center
+
+  Writeにチェックを入れましょう
+
+DigitalOceanにSSH Keysの名前を登録していない場合はホストOSの公開鍵を登録します。登録した鍵の名前が必要です。ここではpublickeyとしています。
+ここまでできたら、適当なディレクトリにVafrantfileを作りましょう。取得したClient IDとAPI KEY、tokenを入力します。512MBの最小インスタンスで、Ubuntu 14.04 x64のイメージを使ってシンガポールリージョン(sgp1)にDropletを作成します。
+
+:: 
+
+   VAGRANTFILE_API_VERSION = "2"
+   Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+     config.vm.hostname              = 'umi'
+     config.vm.provider :digital_ocean do |provider, override|
+       override.ssh.private_key_path = '~/.ssh/id_rsa'
+       override.vm.box               = 'digital_ocean'
+       override.vm.box_url           = "https://github.com/smdahlen/vagrant-digitalocean/raw/master/box/digital_ocean.box"
+       provider.client_id            = 'Client IDを入力'
+       provider.api_key              = 'API KEYを入力'
+       provider.token                = 'tokenを入力'
+       provider.image                = 'Ubuntu 14.04 x64'
+       provider.region               = 'sgp1'
+       provider.size                 = '512mb'
+       provider.ssh_key_name         = 'publickey' # DigitalOceanに登録している公開鍵の名前
+     end
+     config.vm.provision "ansible" do |ansible|
+       ansible.playbook = "playbook.yml"
+       ansible.sudo = true
+     end
+   end
+
+
+ホストOSとなるマシンに、vagrant-digitalocean プラグインをインストールします。プラグインの詳細はこちらから：https://github.com/smdahlen/vagrant-digitalocean [#iivagdoa]_ 
+また、MacをホストOSにする場合は、DigitalOceanのAPIを叩く都合上、 ``brew install curl-ca-bundle`` でCA bundleのインストールを行って下さい。
+
+.. [#iivagdoa] 私が確認した時は、README.mdのConfigureの設定が足りませんでした
+
+.. code-block:: sh
+
+   $ vagrant plugin install vagrant-digitalocean
+
+
+playbook.ymlの内容は、apacheをインストールして、起動、ホストOSにあるファイルを仮想マシンのドキュメントルートに配置します。
+
+:: 
+
+   ---
+   - hosts: all
+     tasks:
+     - name: ensure apache is at the latest version
+       apt: pkg=apache2 state=latest
+     - name: ensure apache is running
+       service: name=apache2 state=started
+     - name: copy test file
+       copy: src=umi dest=/var/www/html
+
+ドキュメントルートに置くファイルをバーンと作成。
+
+.. code-block:: sh
+
+   echo "みんなのハート打ち抜くゾ！　バーン！" > umi
+
+仮想マシンを立ち上げます。今回は、DigitalOceanのAPIにアクセスしてDropletを作っています。
+
+.. code-block:: sh
+
+   $ vagrant up --provider=digital_ocean
+   Bringing machine 'default' up with 'digital_ocean' provider...
+   ==> default: Using existing SSH key: yoshihama4
+   ==> default: Creating a new droplet...
+   
+   ==> default: Assigned IP address: 128.199.134.160
+   ==> default: Rsyncing folder: /home/tboffice/precise32/ => /vagrant...
+   ==> default: Running provisioner: ansible...
+   (略)
+
+   $ curl 128.199.134.160/umi
+   みんなのハート打ち抜くゾ！　バーン！
+
+無事に起動しましたね。Playbookを変更したら、 ``vagrant provision`` で反映できます。使い終わったら、 ``vagrant destroy`` でDropletを削除しましょう。
+
 
 * 参考
 
   * 仮想環境構築ツール「Vagrant」で開発環境を仮想マシン上に自動作成する : http://knowledge.sakura.ad.jp/tech/1552/
   * Windows7にVirtualBoxとVagrantをインストールしたメモ : http://k-holy.hatenablog.com/entry/2013/08/30/192243 
   * 1円クラウド・ホスティングDigitalOceanを、Vagrantから使ってみる : http://d.hatena.ne.jp/m-hiyama/20140301/1393669079
+  * VagrantとSSDなVPS(Digital Ocean)で1時間1円の使い捨て高速サーバ環境を構築する : http://blog.glidenote.com/blog/2013/12/05/digital-ocean-with-vagrant/
+  * Vagrant ShareでVagrant環境をインターネット上へ公開する : http://qiita.com/y-mori/items/1f70e7c9d8771f0d939a
+  * Vagrant超入門：Vagrant初心者向けの解説だよ！ : https://github.com/tmknom/study-vagrant
+  * smdahlen/vagrant-digitalocean : https://github.com/smdahlen/vagrant-digitalocean
 
 
 仮想化そのに docker
