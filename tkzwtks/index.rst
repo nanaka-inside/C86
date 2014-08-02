@@ -14,10 +14,8 @@
 ところで「バランスWiiボード」は皆さんご存知でしょうか。Wii/WiiUとつないで使える板状のコントローラです。
 
 .. figure:: img/barance_wii_board.eps
-    :scale: 50%
-    :align: center
-
-   ホコリ被ってたバランスWiiボード
+  :scale: 50%
+  :align: center
             
 現在（2014年現在）だと「WiiFit U」とセットで販売されていて、遊ぶときもWiiFit Uで遊びます。
 WiiFit UではバランスWiiボードの上に乗ることで体重を測ったり、ランニングっぽい何かをしたり、Wiiリモコンを持ってボクササイズ的なことができるのです。
@@ -54,8 +52,6 @@ WiiFit UではバランスWiiボードの上に乗ることで体重を測った
     :scale: 50%
     :align: center
 
-   OSCulator
-   
 .. [#osculator] http://www.osculator.net/
 .. [#fitbit] https://www.fitbit.com/                
 .. [#ichiman] 一日中座ってるような仕事なので一万歩は結構きついんですよね
