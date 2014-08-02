@@ -393,12 +393,29 @@ Ansibleは、Python 2.4以上で動作し、Python 2.6以上の環境が推奨�
 つかう
 """"""""""
 
-Ansibleがインストールできたところで実行してみましょう。Ansibleを実行するサーバ(CM)は、お名前.comのVPS(CentOS 6.5)で、リモートマシン(MN)は DigitalOceanで2つ作ります。
+Ansibleを実行するサーバ(CM)は、お名前.comのVPS(CentOS 6.5)で、リモートマシン(MN)は DigitalOcean を使って、2つのDroplets [#]_ を作ります。
 リモートマシンを作る前にsshの公開鍵を、DigitalOceanに登録しておきましょう。
 
-#TODO手順を書く DigitalOceanの説明。SSDを使えるVPSサービス。AWS上に構築されてる
+.. [#] DigitalOceanでのインスタンスの呼称です。仮想サーバ1つのことを指します
 
-インスタンス(Droplets)を作るときに、登録したsshキーを登録するとrootでログインできます。インスタンスは1分くらいで起動してきます。
+.. topic:: DigitalOcean
+
+   DigitalOceanとは、1時間1円くらいで使えるVPSです。最小構成では、1CPU(2-3GHz) メモリ512MB SSDのディスク20GB 転送量1GB です。そのプランでは、1時間0.007ドル(約0.7円) [#]_ 、1ヶ月立ち上げっぱなしだと月5ドル(約500円)かかります。検証環境や、静的なコンテンツを配信するサイトであれば十分なスペックです。課金対象は、電源が入っているか入っていないかにかかわらずDropletが存在している時です。Dropletの電源を落としてイメージのスナップショットをとってからDropletを削除すると課金されなくなります。
+
+   リージョンは、ロンドンや、ニューヨーク、アムステルダムがあります。最近シンガポールができました。sshの遅延は気にならないので、私はもっぱらシンガポールを使っています。
+
+   選択できるOSはUbuntu、Fedora、Debian、CentOSです。この他に、LAMPなどのアプリケーションがインストール済みのイメージもあります。
+
+   Dropletは1分程度で起動します。その間、トイレに行ったり、遠征 [#]_ に出したり、道場 [#]_ を利用したりします。
+
+   .. [#] 2014年8月現在
+   .. [#] 艦これのことらしい
+   .. [#] モバマスの道場のこと
+
+   Dropletを作成すると、Global IPアドレスが1つ払いだされます。あらかじめダッシュボードからSSHの公開鍵を登録しておくと、rootユーザでsshのログインできます。
+
+   設備はネットの記事をあさったところ、DigitalOceanはデータセンターを借りて自社でサーバを持っているようです。
+   
 
 .. figure:: img/an-do-dl.eps
   :scale: 70%
@@ -407,36 +424,32 @@ Ansibleがインストールできたところで実行してみましょう。A
 
   nozomiとeriのDroplets
 
-``/etc/hosts`` にDropletsのIPアドレスを追記します [#iiandhosts]_ 。
-TODO このへんもいらない
-
-:: 
-
-   104.131.231.95 nozomi
-   128.199.140.147 eri
-
-
-.. [#iiandhosts] 分かってる方は別の方法でどうぞ
-
-ログインしてみましょう。
+nozomiはUbuntu 14.04 x86、eriはCentOS 6.5 x86を選択しました。nozomiにログインしてみましょう。
 
 .. code-block:: bash
    
-   [tboffice@yoshihama4 ~]$ ssh root@104.131.231.95
-   Welcome to Ubuntu 14.04 LTS (GNU/Linux 3.13.0-24-generic x86_64)
+   $ ssh root@128.199.134.160
+   Welcome to Ubuntu 14.04.1 LTS (GNU/Linux 3.13.0-24-generic x86_64)
    
-   * Documentation:  https://help.ubuntu.com/
-    
-   System information as of Sat Jul 19 15:29:53 EDT 2014
+    * Documentation:  https://help.ubuntu.com/
    
-   System load: 0.08              Memory usage: 9%   Processes:       81
-   Usage of /:  6.1% of 19.56GB   Swap usage:   0%   Users logged in: 0
-
-   Graph this data and manage this system at:
-        https://landscape.canonical.com/
+     System information as of Sat Aug  2 17:20:58 EDT 2014
+   
+     System load:  0.21              Processes:           69
+     Usage of /:   7.7% of 19.56GB   Users logged in:     0
+     Memory usage: 10%               IP address for eth0: 128.199.134.160
+     Swap usage:   0%
+   
+     Graph this data and manage this system at:
+       https://landscape.canonical.com/
+   
+   0 packages can be updated.
+   0 updates are security updates.
+   
+   Last login: Sat Aug  2 17:20:58 2014 from v157-7-197-175.myvps.jp
    root@nozomi:~# 
 
-ログイン成功。ユーザを作ります。Ubuntuだと ``adduser`` ですね。あとは公開鍵をそのユーザにコピーしてsudoできるようにします [#iiansinstallcom]_ 。
+ログインに成功しました。まずはユーザを作ります。Ubuntuだと ``adduser`` ですね。あとは公開鍵をそのユーザにコピーしてsudoできるようにします [#iiansinstallcom]_ 。
 
 .. code-block:: bash
 
@@ -449,18 +462,41 @@ TODO このへんもいらない
 
 .. [#iiansinstallcom] cpとchownのところ、installコマンドを使って一行で書けないかと試行錯誤したんですが、うまくいきませんでした
 
-ここまでくればCMサーバから ``$ ssh nozomi`` で入れます。 ``sudo ls -la /root/`` で、何か見れたら完了です。
-ここからは、CMサーバの構築です。ansibleのhostsファイルを作ります。
-
-TODO .ssh/configを作る話
-
-pip経由でansibleをインストールすると ``/etc/ansible`` ディレクトリが作られていないので作って下さい。 ``/etc/ansible/hosts`` ファイルの中身はこんな感じです。
+今のうちにCMサーバに ``~/.ssh/config`` を作っておきましょう。DigitalOceanのダッシュボードを見ながらこんな感じで作成します。
 
 :: 
 
-   nozomi 
-   eri 
+   Host nozomi
+     Hostname 128.199.134.160
+     Port 22
+     User tojo
+   Host eri
+     Hostname 128.199.140.147
+     Port 22
+     User ayase
 
+
+CMサーバから ``$ ssh nozomi`` でログインできることを確認します。 ``sudo ls -la /root/`` で、怒られなければ完了です。
+ここからは、CMサーバの構築です。プロジェクト用のディレクトリをつくり、設定ファイルを置いていきます。
+
+.. code-block:: sh
+
+   $ mkdir ansible-test ; cd ansible-test
+
+このディレクトリに、hostというファイルを作ります。MNサーバにsshでログインするときのホスト名を書きます。
+
+:: 
+
+   nozomi
+   eri
+
+Ansibeの設定ファイルを書きます。``ansible.cfg`` に下記を設定します。MNのサーバが CentOS 6.5 であるため、OpenSSHのバージョンが5.3と古く、ControlPersistオプションが処理できないためエラーになります。OpenSSH 5.6以降であればこの設定は不要です。 
+
+:: 
+
+   [ssh_connection]
+   ssh_args = 
+   
 
 ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
 
@@ -468,45 +504,29 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
 
 .. code-block:: bash
 
-   $ ansible all -m ping
-   
+   $ ansible all -m ping -i host -c ssh
+   eri | FAILED => SSH encountered an unknown error during the connection. We recommend you re-run the command using -vvvv, which will enable SSH debugging output to help diagnose the issue
    nozomi | success >> {
        "changed": false, 
        "ping": "pong"
    }
-   
-   eri | FAILED => FAILED: Authentication failed.
 
-失敗しましたね。エリチ(eri)サーバはセットアップしていませんでしたね。セットアップしてしまいましょう [#iianseri]_ 。
-
-.. [#iianseri] ん？エリチをセットアップ？なんか卑猥ですね（おいやめろ（なお、朝7時くらいに書いている模様
-
-起動しているので ``ssh root@eri`` でログイン。もし入れなかったらDigitalOceanのサイトのDropletsからeriサーバを選択してパスワードリセットしましょう [#iianslogin]_ 。
-
-.. [#iianslogin] 筆者の場合はなぜか.sshディレクトリが600になってた...
-
-.. figure:: img/an-do-passwdreset.eps
-  :scale: 70%
-  :alt: appprotweet
-  :align: center
-
-  DigitalOcean上でDropletsのパスワードリセット
-
+失敗しましたね。エリチ(eri)サーバはセットアップしていませんでしたね。セットアップしてしまいましょう。 ``ssh root@eri`` でログインしてセットアップ開始。今度はCentOSです。
 
 .. code-block:: bash
 
    [root@eri ~]# useradd -G wheel ayase
-   [root@eri ~]# yum install -y python-simplejson
+   [root@eri ~]# yum install -y python-simplejson # やらなくてもいいかもTODO
    [root@eri ~]# visudo
    %wheel  ALL=(ALL)       NOPASSWD: ALL # コメントになっているので有効化
    [root@eri ~]# cp -a .ssh/ /home/ayase/
    [root@eri ~]# chown -R ayase. /home/ayase/.ssh
 
-ここまでやればCMのサーバで ``ssh eri`` でログイン可能。再度 ansible コマンドを実行。
+ここまでやればCMサーバで ``ssh eri`` でログイン可能。再度 ansible コマンドを実行します。デフォルトではsshのクライアントにparamikoを使いますが、 ``~/.ssh/config`` を読んでくれません。 ``-c ssh`` オプションをつけて、OpenSSHを使ってsshの接続を行います。
 
 .. code-block:: bash
 
-   [tboffice@yoshihama4 ~]$ ansible all -m ping 
+   $ ansible all -m ping -i host -c ssh
    eri | success >> {
        "changed": false, 
        "ping": "pong"
@@ -517,7 +537,7 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
        "ping": "pong"
    }
 
-pingに対してpongが帰ってきました。成功です。うまくいかない時は、ansibleのコマンドに-vvvオプションをつけると何をやっているかわかります [#iiansvvv]_ 。
+``-i hosts`` は、対象のサーバが書かれたhostsファイルを指定しています。 ``-m ping`` はpingモジュールを使うことを示しています。その他のモジュールについてはあとで説明します。 最後の ``all`` は、hostsファイルの全てのMNサーバを対象にします。今回、pingに対してpongが帰ってきました。成功です。うまくいかない時は、ansibleのコマンドに ``-vvv`` オプションをつけると、内部の動作が見えます。
 
 .. topic:: known_hostsを無視する方法
 
@@ -529,88 +549,78 @@ pingに対してpongが帰ってきました。成功です。うまくいかな
       [defaults]
       host_key_checking=False
 
+勘の良い方はお気づきかもしれませんが、rootでsshログインできるということは、MNサーバ側で実行したコマンドをAnsibleのPlaybookにできますね。暇な人はやってみましょう。
 
 
-.. [#iiansvvv] ansible all -m ping 
+アドホックコマンド
+""""""""""""""""
 
-お気づきですか？rootで入れるのであれば、MNサーバ側で実行したコマンドをAnsibleのPlaybookにできそうですね。
-
-
-出没！アドホックコマンド投げつけック天国
-""""""""""""""""""""""""""""""""""""
-
-タイトル無理やり過ぎないですかね。ええ。筆者もそう思っています [#iiansnande]_ 。
-
-.. [#iiansnande] なぜつけたし
-
-Ansibleといえば、Inventry とか Playbook の解説だとおもった？後回しにしますね。ここでは、アドホックコマンド [#iiansad]_ に手を出してみましょう。サーバを作ったんだけど壊せなくて、本番サーバに更新を加えることが一度や二度、いや、もっとあったかな。毎日かな？　
-対象となっているサーバに、泥臭くコマンドを投げ込む方法を実践してみましょう。一例として、OSのディストリビューションを見てみましょう。
-
-.. code-block:: sh
-   
-   $ ansible all -a "cat /etc/issue"
-   eri | success | rc=0 >>
-   CentOS release 5.8 (Final)
-   Kernel \r on an \m
-
-   nozomi | success | rc=0 >>
-   Ubuntu 14.04 LTS \n \l
-
-nozomiに対して ``sudo`` しないと実行できないコマンドを送ってみましょう。 ``--sudo`` オプションを付けます。
-
-.. code-block:: sh
-
-   $ ansible nozomi -a "ls -l /root/.ssh" --sudo 
-   nozomi | success | rc=0 >>
-   total 4
-   -rw------- 1 root root 402 Jul 20 07:03 authorized_keys
+Ansibleの引数に、コマンドを指定することができます。これをアドホックコマンド [#iiansad]_ といいます。早速やってみましょう。OSのディストリビューションを見るコマンドを指定します。
 
 .. [#iiansad] http://docs.ansible.com/intro_adhoc.html
 
-ファイルをコピーしてみます。
+.. code-block:: sh
+   
+   $ ansible all -a "cat /etc/issue" -i host -c ssh
+   eri | success | rc=0 >>
+   CentOS release 6.5 (Final)
+   Kernel \r on an \m
+   
+   nozomi | success | rc=0 >>
+   Ubuntu 14.04.1 LTS \n \l
+
+次に、allではなく、nozomiに対して ``sudo`` しないと実行できないコマンドを送ってみましょう。 ``--sudo`` オプションを付けます。
+
+.. code-block:: sh
+
+   $ ansible nozomi -a "ls -l /root/.ssh" -i host -c ssh --sudo 
+   nozomi | success | rc=0 >>
+   total 4
+   -rw-r--r-- 1 root root 401 Aug  2 17:17 authorized_keys
+
+ファイルをコピーしてみます。``copy`` というモジュールがあるので、それを使います。今回はeriに対して実行してみます。
 
 .. code-block:: sh
   
-   $ ansible eri -m copy -a "src=/etc/hosts dest=/tmp/hosts"
-    eri | success >> {
-        "changed": true, 
-        "dest": "/tmp/hosts", 
-        "gid": 500, 
-        "group": "ayase", 
-        "md5sum": "fe54ebbbad6eb65cc89ecdfb79d80526", 
-        "mode": "0664", 
-        "owner": "ayase", 
-        "size": 240, 
-        "src": "/home/ayase/.ansible/tmp/ansible-tmp-1405855702.69-264966159997730/source", 
-        "state": "file", 
-        "uid": 500
-    }
+   $ ansible eri -m copy -a "src=/etc/hosts dest=/tmp/hosts" -i host -c ssh 
+   eri | success >> {
+       "changed": true, 
+       "dest": "/tmp/hosts", 
+       "gid": 500, 
+       "group": "ayase", 
+       "md5sum": "16be12ab0549a622c8fc02d6b6560afb", 
+       "mode": "0664", 
+       "owner": "ayase", 
+       "size": 244, 
+       "src": "/home/ayase/.ansible/tmp/ansible-tmp-1407017000.41-77226202096082/source", 
+       "state": "file", 
+       "uid": 500
+   }
 
-``-m`` オプションでモジュールを指定することが出来ます。モジュールの一覧は、``ansible-doc -l`` で見られます。copyモジュールの詳細を知りたい場合は ``ansible-doc copy`` と打って下さい。
-CentOSの場合、yum経由で apache をインストールするので 
+
+``-m`` オプションでモジュールを指定することが出来ます。モジュールの一覧は、``ansible-doc -l`` とすると見られます。copyモジュールの詳細を知りたい場合は ``ansible-doc copy`` と打って下さい。アプリケーションをインストールしたい場合は、yumモジュールや、aptモジュールがあります。CentOSの場合、yum経由で apache をインストールするので 
 
 .. code-block:: sh
 
-   ansible eri -m yum -a "name=httpd state=latest" --sudo
+   $ ansible eri -m yum -a "name=httpd state=latest" --sudo -i host -c ssh
 
 と実行します。Ubuntuの場合は 
 
 .. code-block:: sh
 
-   ansible nozomi -m apt -a "name=apache2 state=latest" --sudo
+   $ ansible nozomi -m apt -a "name=apache2 state=latest" --sudo -i host -c ssh
 
-でインストールできます。``ansible all -m setup`` とすると、OSやIPアドレス、ansibleの変数などの情報が取得できます。
-
+でインストールできます。 ``ansible all -m setup`` とすると、OSやIPアドレス、ansibleの変数などの情報が取得できます。
 アドホックなコマンドはこのへんにして、Playbookへ話を移しましょう。
 
 
 Playbook
 """""""""
 
-Playbookとは、MNに対してどのような設定するかを書いたAnsibleの設定ファイルです。中身はYAML [#iiasnayaml]_ です。
-適当なディレクトリでPlaybookを作成しましょう。まずは ``yum-apache.yml`` というファイルに下記のように書きます。
+Playbookとは、MNに対してどのような設定するかを書いたAnsibleの設定ファイルです。中身はYAML [#iiasnayaml]_ です。Chefでいうところのレシピに当たります。
+Playbookを作成しましょう。まずは ``playbook.yml`` というファイルに下記のように書きます。
 
-.. [#iiasnayaml] YAMLの書き方はこちらを参照。jsonよりマシ。 http://docs.ansible.com/YAMLSyntax.html
+.. [#iiasnayaml] YAMLの書き方はこちらを参照。jsonよりマシ(脳内調べ) http://docs.ansible.com/YAMLSyntax.html
 
 .. code-block:: config
 
@@ -619,94 +629,72 @@ Playbookとは、MNに対してどのような設定するかを書いたAnsible
      user: root
      sudo: yes
      tasks:
-       - name: yumでapacheをインストール
-       - yum: name=httpd state=latest
+       - name: yumでphpをインストール
+         yum: name=php state=latest
+         when: ansible_os_family == 'RedHat'
+       - name: aptでphp5をインストール
+         apt: name=php5 state=latest
+         when: ansible_os_family == 'Debian'
 
-対象のhostsをどうしましょうか。AWSのEC2だと面白く無いので DigitalOcean を使います(またか)。
-honokaサーバ(IN LONDON)でCentOS 6.5の64bitで作りました。IPは178.62.48.99がとれてきました。
-
-.. figure:: img/an-do-honoka.eps
-  :scale: 80%
-  :alt: condel
-  :align: center
-
-  honoka(IN LONDON)
-
-SSHキーは作成済みなのでrootで入ってみましょう。
-
-.. code-block:: config
-
-   $ ssh root@178.62.48.99 cat /etc/redhat-release
-
-``CentOS release 6.5 (Final)`` と出てきたら成功です。次にAnsibleのhostsファイルを書きましょう。``hosts.list`` というファイル名でこんな感じで書いてやります。
-
-:: 
-
-   honoka ansible_connection=ssh ansible_ssh_port=22 ansible_ssh_host=178.62.48.99
-
-明示的に ``ansible_ssh_port=22`` としています。ポート番号を22から変更していれば、そのポート番号を指定して下さい。
-
-.. topic:: CentOS 6だと失敗する罠
-
-   対象サーバ(MN)であるhonokaはCentOS6.5を使いました。OpenSSHのバージョンがやや古く(5.3)、Ansibleを実行したとき、ControlPersistオプションが使えずエラーとなります。
-   OpenSSHを5.6以降にバージョンアップするか、ansible.cfgにsshのオプションを上書きしてやります [#iianscent6]_ 。ansible.cfgはPlaybookを実行するディレクトリにおいておけばOK。ssh_argsの行は一行で書いて下さい。
-   
-   .. [#iianscent6] https://groups.google.com/forum/#!msg/ansible-project/M_QmqhwNynE/wyz-c0bXZmUJ
-
-   .. code-block:: sh
-
-      [ssh_connection]
-      ssh_args = -o PasswordAuthentication=no -o ControlMaster=auto 
-        -o ControlPath=/tmp/ansible-ssh-%h-%p-%r
-
-
-ファイル一覧を見るとこんな感じです。
+hostファイルに書かれたホストで、rootユーザで、taskを実行します。RedHatのシステム(今回CentOS)では、yumモジュールでphpをインストールします。Debian(今回はUbuntu)では、aptモジュールでphp5をインストールしています。
+CentOSとUbuntuでパッケージ管理システムに違いがあるため、whenで場合分けしています。ここまで作成したファイルの一覧はこのようになっていると思います。
 
 .. code-block:: sh
 
    $ ls
-   ansible.cfg  hosts.list  yum-apache.yml
+   ansible.cfg  host  playbook.yml
 
 さてPlaybookを実行してみましょう。
 
 .. code-block:: sh
 
-   $ ansible-playbook yum-apache.yml -i hosts.list
-   
+   $ ansible-playbook playbook.yml -i host -c ssh --sudo 
+
    PLAY [all] ******************************************************************** 
-   
+
    GATHERING FACTS *************************************************************** 
-   ok: [honoka]
-   
-   TASK: [yumでgitをインストールする] ****************************************************** 
-   changed: [honoka]
-   
+   ok: [eri]
+   ok: [nozomi]
+
+   TASK: [yumでphpをインストール] ******************************************************** 
+   skipping: [nozomi]
+   changed: [eri]
+
+   TASK: [aptでphpをインストール] ******************************************************** 
+   skipping: [eri]
+   changed: [nozomi]
+
    PLAY RECAP ******************************************************************** 
-   honoka                     : ok=2    changed=1    unreachable=0    failed=0   
+   eri                        : ok=2    changed=1    unreachable=0    failed=0
+   nozomi                     : ok=2    changed=1    unreachable=0    failed=0 
 
-インストールできましたね。そろそろこのへんでネタばらしをすると、 ``/etc/ansible/hosts`` や ``/etc/hosts`` ファイルにクライアントのサーバの設定は必要ないんですねーやっちゃいましたね（何
-
-そういえばもう一回、さっきのansibleのコマンドを叩くとどうなるでしょうか？もうインストールされているのでエラーになってしまうんでしょうか。
+インストールできたようです。さて、ある概念を持ち出すためにもう一度、同じコマンドを実行してみましょう。
 
 .. code-block:: sh
 
-   $ ansible-playbook yum-apache.yml -i hosts.list
-   
+   $ ansible-playbook playbook.yml -i host -c ssh --sudo 
+
    PLAY [all] ******************************************************************** 
-   
+
    GATHERING FACTS *************************************************************** 
-   ok: [honoka]
-   
-   TASK: [yumでgitをインストールする] ******************************************************
-   ok: [honoka]
-   
+   ok: [eri]
+   ok: [nozomi]
+
+   TASK: [yumでphpをインストール] ******************************************************** 
+   skipping: [nozomi]
+   ok: [eri]
+
+   TASK: [aptでphpをインストール] ******************************************************** 
+   skipping: [eri]
+   ok: [nozomi]
+
    PLAY RECAP ******************************************************************** 
-   honoka                     : ok=2    changed=0    unreachable=0    failed=0  
+   eri                        : ok=2    changed=0    unreachable=0    failed=0   
+   nozomi                     : ok=2    changed=0    unreachable=0    failed=0   
 
+わざとこんなことをやっているのには理由があります。IIではおなじみの冪等性(べきとうせい)です。
 
-おや、エラーになっていませんね。わざとこんなことをやっているのには訳があります。IIではおなじみの冪等性(べきとうせい)です。
-
-.. topic:: 冪等性(べきとうせい)
+.. topic:: 冪等性
 
    何度やっても同じ結果になるという意味の言葉です。中途半端に構築したサーバでも、新規のサーバでも、同じPlaybook(Chefの場合はRecipe)を実行すれば、同じ状態になります。
    AnsibleやChefにあるモジュールは冪等性を担保しているので、何度実行してもサーバが同じ状態になります。それ以外の自分で書いたスクリプトは、自分で冪等性を担保しなければなりません(これがつらさを生み出す原因になることがあります)。
@@ -721,9 +709,7 @@ SSHキーは作成済みなのでrootで入ってみましょう。
 過去の遺産 Playback
 """"""""""""""""""
 
-俺は！！シェルスクリプトをッッッ！！！実行したいんだァァァァッ！！！！！という熱い方はPlaybookに下記のように書いてみてください。
-なお、 ``hoge.sh`` ファイルはこのPlaybookと同じディレクトリにおいてください。
-なお、このスクリプトは自分で冪等性を保証してください。もし環境を壊してしまったら、環境を一回壊して作りなおしてから再挑戦です。
+すでに手持ちのシェルスクリプトがある方は、 ``hoge.sh`` というファイル名でPlaybookと同じディレクトリにおいてください。そして、Playbookにはこのように書きます。
 
 .. code-block:: sh
 
@@ -734,6 +720,8 @@ SSHキーは作成済みなのでrootで入ってみましょう。
        - name: シェルスクリプトを実行
          script: hoge.sh
 
+なお、このスクリプトは自分で冪等性を保証してください。もし環境を壊してしまったら、環境を一回壊して作りなおしてから再挑戦です。
+
 
 実践する
 """"""""
@@ -743,7 +731,7 @@ AnsibleのPlaybookのサンプルが公開されています [#iiansexam]_ 。�
 .. [#iiansexam] https://github.com/ansible/ansible-examples
 
 まずはCMサーバの適当なディレクトリで ``git clone https://github.com/ansible/ansible-examples.git`` して持ってきます。
-webserverとdbserverの1つに役割が分かれています。DigitalOceanで、honokaとkotoriのDropletsを作成します [#iianshon]_ 。
+webserverとdbserverに役割が分かれています。DigitalOceanで、honokaとkotoriのDropletsを作成します [#iianshon]_ 。
 
 .. [#iiansreadme] https://github.com/ansible/ansible-examples/blob/master/lamp_simple/README.md
 .. [#iianshon] honokaはさっき作ったものをそのまま利用。やっぱりDropletsって言葉が（ｒｙ
@@ -755,21 +743,21 @@ webserverとdbserverの1つに役割が分かれています。DigitalOceanで�
 
   honokaとkotoriのDroplets
 
-hostsファイルを以下のように書き換えます。
+~/.ssh/configと、ansible.cfgに設定を適切に設定します。hostsファイルを以下のように書き換えます。
 
 :: 
 
    [webservers]
-   honoka ansible_ssh_host=178.62.48.99
+   honoka 
    
    [dbservers]
-   kotori ansible_ssh_host=128.199.140.147
+   kotori 
 
 あとはansibleを実行するだけです。
 
 .. code-block:: sh
 
-   $ ansible-playbook -i hosts site.yml 
+   $ ansible-playbook -i hosts site.yml -c ssh
 
 数分待てば、honokaにapacheが、dbserverにmysqlがそれぞれ立ち上がっていてhonokaにブラウザでアクセスするとDBの中身が読めた旨のメッセージがでてきます。
 
@@ -791,9 +779,12 @@ hostsファイルを以下のように書き換えます。
 参考
 """"
 
-* practice http://www.stavros.io/posts/example-provisioning-and-deployment-ansible/
+「入門Ansible」(http://www.amazon.co.jp/dp/B00MALTGDY/)がKindleで出版されました。この本を読めばAnsibleを使いこなせるようになります。オススメです。
+
+* An example of provisioning and deployment with Ansible Conceived on 22 May 2013 : http://www.stavros.io/posts/example-provisioning-and-deployment-ansible/
 * 不思議の国のAnsible – 第1話 : http://demand-side-science.jp/blog/2014/ansible-in-wonderland-01/
-* 今日からすぐに使えるデプロイ・システム管理ツール ansible 入門 - http://tdoc.info/blog/2013/05/10/ansible_for_beginners.html
+* 今日からすぐに使えるデプロイ・システム管理ツール ansible 入門 : http://tdoc.info/blog/2013/05/10/ansible_for_beginners.html
+* 入門Ansibleを出版しました : http://tdoc.info/blog/2014/08/01/ansible_book.html
 
 
 仮想化・その1 Vagrant編
@@ -1673,7 +1664,7 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
   コンテナのポート番号10022をホストOSのポート番号22へ、コンテナのポート番号80をホストOSのポート番号80にバインドしています。指定していない場合、たとえば ``run -d -p :22 -p :80 centos:ap`` とすると、ホストOSの49100-49199のポート番号へ自動的にバインドされます
 
 
-.. tip:: このDockerfileができるまで
+.. topic:: このDockerfileができるまで
 
    Dockerfileの中で、 ``yum install httpd`` ができません。こちらのバグを踏みます。Bug 1012952 - docker: error: unpacking of archive failed on file /usr/sbin/suexec: cpio: cap_set_file [#]_ 。apacheをソースからインストールすることになりました。
 
@@ -1693,15 +1684,17 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 補足
 ^^^^^^
 
-Dockerは新しいツールのため、枯れているという感じがありませんでした。このあともかなりの頻度でアップデートされることが予想されるので、この内容は役に立たないかもしれません。そのときはPull reqいただければありがたいです。
+* Dockerは新しいツールのため、枯れているという感じがありませんでした。このあともかなりの頻度でアップデートされることが予想されるので、この内容は役に立たないかもしれません。そのときはPull reqいただければありがたいです。
 
-ここで触れていない内容として、コンテナのデータの永続化があります。mopemopeさんの「Docker でデータのポータビリティをあげ永続化しよう」 [#]_ が参考になります。また、dockerはhostsが書き換えられないため、工夫が必要になります。JAGAxIMOさんの「Dockerで/etc/hostsファイルが操作出来ない対策」 [#]_ を参考にしてください。
+* ここで触れていない内容として、コンテナのデータの永続化があります。mopemopeさんの「Docker でデータのポータビリティをあげ永続化しよう」 [#]_ が参考になります。また、dockerはhostsが書き換えられないため、工夫が必要になります。JAGAxIMOさんの「Dockerで/etc/hostsファイルが操作出来ない対策」 [#]_ を参考にしてください。
 コマンドのチュートリアルは、curseoffさんの「Dockerコマンドメモ」が手堅くまとまっています。Vagrantを使って少し進んだチュートリアルはdeeeetさんの「実例で学ぶDockerコマンド」が有用です。
 
-docker runをしすぎて、コンテナがたくさん出来てしまった時は、 ``docker rm `docker ps -aq` `` で消えます。
+* docker runをしすぎて、コンテナがたくさん出来てしまった時は、 ``docker rm `docker ps -aq` `` で消えます。
 
+* VagrantでCoreOSの仮想マシンを立ち上げて、そこでDockerを使ってアプリケーションの開発を行うという手法が主流になっているそうです [#]_ 。
 
-VagrantでCoreOSの仮想マシンを立ち上げて、そこでDockerを使ってアプリケーションの開発を行うという手法が主流になっているそうです [#]_ 。
+* DaaS(Docker as a Service)の会社がでてきました。Orchard、Stackdock、tutumです
+
 
 .. [#] http://qiita.com/mopemope/items/b05ff7f603a5ad74bf55
 .. [#] http://qiita.com/curseoff/items/a9e64ad01d673abb6866
