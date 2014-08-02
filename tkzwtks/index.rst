@@ -97,7 +97,6 @@ OSCulatorからRoutingされるデータを受け取るために、node.jsでUDP
 
    var osc = require('osc-min');
    var udp = require('dgram');
-   
    sock = udp.createSocket("udp4", function(msg, rinfo) {
      var error;
      try {
@@ -107,7 +106,6 @@ OSCulatorからRoutingされるデータを受け取るために、node.jsでUDP
          return console.log("invalid OSC packet");
      }
    });
-
    sock.bind(9999);
 
 こんな感じです。と言うよりはサンプルそのままです。これを実行するとUDPのサーバーを立ちあがり、OSCのパケットを受信できるようになります。実際に受信すると、コンソールに受信されたOSCメッセージが出力されます。上のコードでOSCに関連するコードは7行目の
@@ -120,9 +118,6 @@ OSCulatorからRoutingされるデータを受け取るために、node.jsでUDP
 
 .. [#oscmin] https://github.com/russellmcc/node-osc-min
 
-Fitbitに記録
-++++++++++++
-             
 いざ計測！
 +++++++++++
 ここまでで体重を測ってデータを記録する前の段階まで準備ができました。そこで早速上に乗って値を取ってみようかな、と思った所、問題が2つあることに気づきました
@@ -134,13 +129,111 @@ Fitbitに記録
 
 2は今回の仕組みのなかでもかなり重要な問題です。一般のデジタル体重計がどうやって体重を確定させているのか、ということをちょっと調べてみましたがそれっぽい資料は出てきません。うーんうーんと悩みましたが、今回は、体重測定を開始してから10秒後に取れた数字を体重として利用することにしました。もっともっと精度の高い方法があるのかもしれませんが、僕しか使わない（予定）なので今回はこれでOKということにしましょう。
 
-体重についても、ただただコンソールを流れる数字を眺めていても面白くないですし、フォントが小さくて [#smallfont]_ 目が悪くなりそうですし、せっかく（？）node.jsを使っているのでWebページを作ってそこで数字を表示することにしました。node.js + express + socket.io の組み合わせで、数字が動く様子を見られるようにしたり、「体重測定開始」ボタンをつけたり、10秒のカウントダウンが出来るようにしました。socket.ioについてはこの本でも別の人が触れているのでそちらを参考にしてください。これで色々体重測定は楽になりました！
+体重についても、ただただコンソールを流れる数字を眺めていても面白くないですし、フォントが小さくて [#smallfont]_ 目が悪くなりそうですし、せっかく（？）node.jsを使っているのでWebページを作ってそこで数字を表示することにしました。node.js + express + socket.io の組み合わせで、数字が動く様子を見られるようにしたり、「体重測定開始」ボタンをつけたり、10秒のカウントダウンが出来るようにしました。socket.ioについてはこの本でも別の人が触れているのでそちらを参考にしてください。これでバランスWiiボードとMacを利用して体重が測れるようになりました！
 
 [このへんにwebページ画像]
 
-.. rubic:: Footnotes
-
 .. [#smallfont] 「フォントサイズを大きくすればええやろ」まあその通りですね・・・
+
+Fitbitに記録
+++++++++++++
+つぎにFitbitに記録をする準備をします。FitbitはRESTfulなAPIを公開していて、各種リソースにAPI経由でアクセスすることができます。 [#fitbit_dev]_ 当然ではありますが記録されている値を取得するだけでなく、記録自体も可能です。Fitbit APIを利用するためには、OAuthによる認証が必須です。OAuthに関しての詳細な説明はここでは省きますが、FitbitAPIのドキュメントにあった図 [#fitbit_oauth]_ は結構わかりやすい気がしたので参考にしてはいかがでしょうか。
+
+アプリケーションからOAuth認証可能にするため、https://dev.fitbit.com でアプリケーションを登録します。fitbitにログイン後、dev.fitbit.com内の"REGISTER AN APP"にて必要事項を入力します。ここで重要なのは"Callback URLの項です。ここにはアプリケーションのユーザーがfitbitでの認証後に戻ってくるURLを指定するのですが、今回は自分のローカル環境で動かすという理由もあり、"http://localhost:3000/callback" のようなURLを指定します [#callback]_ 。登録が終わると、"Consumer Key"と"Consumer Secret"が払い出されるので、それをアプリケーションで利用します。まずはnodeでoauthを使うための準備です。
+
+.. code-block:: javascript
+
+   var oauth = require('oauth').OAuth;
+   var oa = new oauth(
+      "https://api.fitbit.com/oauth/request_token",
+      "https://api.fitbit.com/oauth/access_token",
+      "CONSUMER_KEY",
+      "CONSUMER_SECRET",
+      "1.0",
+      null,
+      "HMAC-SHA1"
+   );
+
+node-oauth [#node-oauth]_ をつかいます。CONSUMER_KEY/CONSUMER_SECRETは先ほど払いだされたものを利用します。リクエストトークン要求処理はこんな感じ。
+
+.. code-block:: javascript
+
+   router.get('/authorize', function(req, res) {
+   oa.getOAuthRequestToken(function(error, oauth_token, oauth_token_secret, results) {
+      if(error) {
+        res.send("error");
+      } else {
+        req.session.oauth = {};
+        req.session.oauth.token = oauth_token;
+        req.session.oauth.token_secret = oauth_token_secret;
+        res.redirect("http://www.fitbit.com/oauth/authorize?oauth_token=" + oauth_token);
+      }
+    });
+   });
+
+最後に、ユーザーがfitbitで認証後に戻ってきた後のアクセストークン要求処理はこんな感じです。
+
+.. code-block:: javascript
+
+   router.get('/callback', function(req, res) {
+       if (req.session.oauth) {
+          req.session.oauth.verifier = req.query.oauth_verifier;
+          var oauth_session = req.session.oauth;
+          oa.getOAuthAccessToken(oauth_session.token, oauth_session.token_secret, oauth_session.verifier,
+                function(error, oauth_access_token, oauth_access_token_secret, results) {
+                    if (error) {
+                        res.send("error");
+                    } else {
+                        req.session.oauth.access_token = oauth_access_token;
+                        req.session.oauth.access_token_secret = oauth_access_token_secret;
+                        req.session.fitbit = results;
+                        res.redirect("/");
+                        }
+                    });
+                }
+          });
+
+認証後はaccess_tokenとaccess_token_secretをセッションに保存するなりして、実際にAPIを利用する時に使います。実際に体重を記録したり、体重のログを見たりする処理はこんな感じです。
+
+.. code-block:: javascript
+
+   // 体重更新
+   oa.post(
+      'https://api.fitbit.com//1/user/-/body/log/weight.json',
+      req.session.oauth.access_token,
+      req.session.oauth.access_token_secret,
+      {
+        "weight": weight,
+        "date": posted_date
+      },
+      function (err, data, response) {
+        if (err) {
+          res.send('too bad.' + JSON.stringify(err));
+        } else {
+          res.send("good");
+        }
+      });
+
+   // 記録済みの体重取得
+   oa.get(
+      'https://api.fitbit.com/1/user/-/body/log/weight/date/2014-07-01/2014-07-21.json',
+      req.session.oauth.access_token,
+      req.session.oauth.access_token_secret,
+      function (err, data, response) {
+        if (err) {
+          res.send('too bad.' + JSON.stringify(err));
+        } else {
+          console.log(response);
+          res.send(data);
+        }
+   });
+
+その他どんなAPIがあるかはドキュメントをご参照ください。こんな感じで記録していきます。
+
+.. [#fitbit_dev] https://dev.fitbit.com/
+.. [#fitbit_oauth] https://wiki.fitbit.com/display/API/OAuth+Authentication+in+the+Fitbit+API このへんです
+.. [#callback] "callback"のとこは別になんでもいいです
+
 
 実践！ダイエット！
 ------------------
