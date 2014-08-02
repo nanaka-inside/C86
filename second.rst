@@ -6,13 +6,7 @@
    clearpage.rst
    omegamega/index.rst
    clearpage.rst
-   binzume/index.rst
-   clearpage.rst
-   mtgto/index.rst
-   clearpage.rst
    tkzwtks/index.rst
-   clearpage.rst
-   saiten/index.rst
    clearpage.rst
    rosylilly/index.rst
    clearpage.rst
