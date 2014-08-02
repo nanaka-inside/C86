@@ -16,7 +16,9 @@
 .. figure:: img/barance_wii_board.eps
   :scale: 50%
   :align: center
-            
+
+  ホコリかぶってたバランスWiiボード
+          
 現在（2014年現在）だと「WiiFit U」とセットで販売されていて、遊ぶときもWiiFit Uで遊びます。
 WiiFit UではバランスWiiボードの上に乗ることで体重を測ったり、ランニングっぽい何かをしたり、Wiiリモコンを持ってボクササイズ的なことができるのです。
 さらに「WiiFitメーター」という万歩計的なものを使うことで「一日どれくらいの運動量があったか」を計測できるのです！
@@ -52,6 +54,8 @@ WiiFit UではバランスWiiボードの上に乗ることで体重を測った
     :scale: 50%
     :align: center
 
+   OSCulator
+
 .. [#osculator] http://www.osculator.net/
 .. [#fitbit] https://www.fitbit.com/                
 .. [#ichiman] 一日中座ってるような仕事なので一万歩は結構きついんですよね
@@ -73,6 +77,7 @@ OSCプロトコルは大きく分けて以下の2つのパートに分かれま�
   * 様々な型を送信できる。また、複数の値を同時に送受信することも可能
 
 実際にOSCulator経由で送られてくるメッセージはこんな感じです。
+
 .. code-block:: javascript
    
    { address: '/wii/1/balance/0',
@@ -188,14 +193,17 @@ node-oauth [#node-oauth]_ をつかいます。CONSUMER_KEY/CONSUMER_SECRETは�
 .. code-block:: javascript
 
    router.get('/authorize', function(req, res) {
-   oa.getOAuthRequestToken(function(error, oauth_token, oauth_token_secret, results) {
-      if(error) {
-        res.send("error");
-      } else {
+   oa.getOAuthRequestToken(
+       function(error, oauth_token, oauth_token_secret, results) {
+          if(error) {
+            res.send("error");
+        } else {
         req.session.oauth = {};
         req.session.oauth.token = oauth_token;
         req.session.oauth.token_secret = oauth_token_secret;
-        res.redirect("http://www.fitbit.com/oauth/authorize?oauth_token=" + oauth_token);
+        res.redirect(
+         "http://www.fitbit.com/oauth/authorize?oauth_token="
+         + oauth_token);
       }
     });
    });
@@ -208,15 +216,20 @@ node-oauth [#node-oauth]_ をつかいます。CONSUMER_KEY/CONSUMER_SECRETは�
        if (req.session.oauth) {
           req.session.oauth.verifier = req.query.oauth_verifier;
           var oauth_session = req.session.oauth;
-          oa.getOAuthAccessToken(oauth_session.token, oauth_session.token_secret, oauth_session.verifier,
-                function(error, oauth_access_token, oauth_access_token_secret, results) {
-                    if (error) {
-                        res.send("error");
-                    } else {
-                        req.session.oauth.access_token = oauth_access_token;
-                        req.session.oauth.access_token_secret = oauth_access_token_secret;
-                        req.session.fitbit = results;
-                        res.redirect("/");
+          oa.getOAuthAccessToken(oauth_session.token,
+                                 oauth_session.token_secret,
+                                 oauth_session.verifier,
+                function(error, oauth_access_token,
+                         oauth_access_token_secret, results) {
+                         if (error) {
+                            res.send("error");
+                         } else {
+                            req.session.oauth.access_token
+                                         = oauth_access_token;
+                            req.session.oauth.access_token_secret
+                                         = oauth_access_token_secret;
+                            req.session.fitbit = results;
+                            res.redirect("/");
                         }
                     });
                 }
@@ -245,7 +258,7 @@ node-oauth [#node-oauth]_ をつかいます。CONSUMER_KEY/CONSUMER_SECRETは�
 
    // 記録済みの体重取得
    oa.get(
-      'https://api.fitbit.com/1/user/-/body/log/weight/date/2014-07-01/2014-07-21.json',
+      'https://api.fitbit.com/1/user/-/body/log/weight/date/2014-07-01.json',
       req.session.oauth.access_token,
       req.session.oauth.access_token_secret,
       function (err, data, response) {
