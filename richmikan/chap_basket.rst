@@ -145,7 +145,7 @@ CGI変数を1行1変数化して更に区切り文字を半角スペース化す
 
 .. [#tempfile]    シェルスクリプトを書くとき、一時ファイルは変数の如く、とにかく躊躇わず利用せよ。頻繁に読み書きしたとしても、今どきのUNIX系OSはバカじゃないので、キャッシュメモリで済ませようとする。従って大して遅くなりはしないのだよ。
 .. [#percent_enc] 検索サイトで全角キーワードで検索した時、URLに出てくる ``%E3%81%82`` とかのアレだ。
-.. [#cginame_man} ``https://uec.usp-lab.com/TUKUBAI_MAN/CGI/TUKUBAI_MAN.CGI?POMPA=MAN1_cgi-name``
+.. [#cginame_man] ``https://uec.usp-lab.com/TUKUBAI_MAN/CGI/TUKUBAI_MAN.CGI?POMPA=MAN1_cgi-name``
 .. [#nameread_man] ``https://uec.usp-lab.com/TUKUBAI_MAN/CGI/TUKUBAI_MAN.CGI?POMPA=MAN1_nameread``
 
 
@@ -293,7 +293,7 @@ Webアプリ的に言えば、 **セッションファイル・セッション�
 
 というわけで、ここでキモになるのはCookieとセッションIDの発行だ。
 
-Cookieを喰わせたり回収するのはどうやるか?
+Cookieを喰わせて回収するのはどうやるか?
 ``````````````````````````````````````````````````````````````````````
 
 WebブラウザーからのCookieを回収するのは環境変数 ``HTTP_COOKIE`` を読み出して行う。
