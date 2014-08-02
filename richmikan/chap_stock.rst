@@ -57,7 +57,7 @@
 在庫追加は、店員の作業だからべつにCGIスクリプトにする間でもなく、
 作業時にログインして、上記のコマンドを一発実行したらおしまいだ。
 
-.. [#shoccar_spell]_ 言い忘れていたが、シェルショッカーの「ショッカー」の綴りは、SHOpping+CARtで“Shoccar”である。“C”がダブっているのは英語における発音上の事情による。
+.. [#shoccar_spell] 言い忘れていたが、シェルショッカーの「ショッカー」の綴りは、SHOpping+CARtで“Shoccar”である。“C”がダブっているのは英語における発音上の事情による。
 
 
 ファイルの中身ではなくてサイズを在庫数にしてるのか!?
@@ -121,16 +121,16 @@ echoやprintfコマンド一発で済ませるこのやり方を見て、
 
 .. code-block:: bash
 
-	$ ls -l STOCK | tail -n +2 | awk '{print $9,$5}'  # AWKコマンドを使う場合
+	$ ls -l STOCK | tail -n +2 | awk '{print $9,$5}'      # AWKコマンドを使う場合
 	
-	$ ls -l STOCK | tail -n +2 | self 9 5  # self(Tukubai)コマンドを使う場合
+	$ ls -l STOCK | tail -n +2 | self 9 5       # self(Tukubai)コマンドを使う場合
 
 なぜ ``tail`` コマンドが入っているかと言えば、ls -l実行時の1行目に ``total n`` という、ファイル名でない行が現れるのでそれを取り除くためだ。
 
 そしてこの後、もし「必要な商品IDだけ」とか「在庫数が一定数以下のものだけ」という条件で絞り込みたければ、
 その後にパイプで ``grep`` や ``AWK`` を繋げばよい。実に簡単だ。
 
-.. [#self_man]_ ``https://uec.usp-lab.com/TUKUBAI_MAN/CGI/TUKUBAI_MAN.CGI?POMPA=MAN1_self``
+.. [#self_man] ``https://uec.usp-lab.com/TUKUBAI_MAN/CGI/TUKUBAI_MAN.CGI?POMPA=MAN1_self``
 
 
 在庫持ち出しは、truncateで
@@ -233,7 +233,7 @@ SHELL/TAKEOUT_STOCKS.SHだ。コードを掻い摘んで見せてやる。
 	# ここで一つでも在庫不足な商品があれば、在庫持ち出しはキャンセルする
 	   :
 	   :
-	# --- 在庫を減らす ----------------------------------------- ←193行目あたり
+	# --- 在庫を減らす ------------------------------------------- ←193行目あたり
 	cat $Tmp-takingreqs |
 	while read prodid quantity; do
 	  File="$Dir_STOCK/$prodid"
