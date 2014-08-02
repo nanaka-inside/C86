@@ -54,7 +54,7 @@ WiiFit UではバランスWiiボードの上に乗ることで体重を測った
     :scale: 50%
     :align: center
 
-   OSCulator
+    OSCulatorの画面
 
 .. [#osculator] http://www.osculator.net/
 .. [#fitbit] https://www.fitbit.com/                
