@@ -13,7 +13,7 @@
 
 現在、 HTTP/2 は仕様策定中であり今後仕様に変更が掛かる可能性があるため、本稿の内容は時間が経過してしまうと役に立たなかったり不要な情報となってしまっている場合がありますので、あらかじめご了承ください。
 
-.. [#] http://tools.ietf.org/html/draft-ietf-httpbis-http2-13
+.. [#] http://tools.ietf.org/html/draft-ietf-httpbis-http2-14
 
 HTTP/2 の簡単な説明
 --------------------
@@ -88,7 +88,7 @@ HTTP/2 とは一体何者なのでしょうか？いかにして HTTP/1.1 の課
 
 Google の提唱するプロトコルである SPDY [#]_ についてご存知の方には、「SPDY に近い機能を含んだプロトコルである」というのが簡単な説明になると思います。
 それもそのはず、 HTTP/2 は SPDY をベースに仕様策定が進められている次世代 web プロトコルなのです。
-2014 年 7 月現在も未だ仕様策定中で、 13 番目のドラフトが発行されている状態です。 [#]_ 
+2014 年 7 月末現在も未だ仕様策定中ですが、 14 番目のドラフト [#]_ が発行されて Working Group Last Call が掛かっている状態であり、問題がなければ 9 月に仕様が固まります。
 
 HTTP/2 の特徴として下記が挙げられます。
 
@@ -127,7 +127,7 @@ HPACK は よく使用される HTTP ヘッダ（ステータスコードの組�
 
 .. [#] http://www.chromium.org/spdy/spdy-whitepaper
 
-.. [#] http://tools.ietf.org/html/draft-ietf-httpbis-http2-13
+.. [#] http://tools.ietf.org/html/draft-ietf-httpbis-http2-14
 
 .. [#] http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-09
 
@@ -146,9 +146,12 @@ HTTP/2 は未だ仕様策定中で、仕様の修正も頻繁に入っている�
 ただし仕様自体が固まりきっていない都合、多くの実装で試験的に機能提供されているという状態です。
 
 よく知られた実装については、 HTTP/2 の仕様策定について議論するための GitHub のリポジトリにある Wiki に記載されています。 [#]_ 
-
 ここではいくつかの HTTP/2 実装を挙げて、実際に動かしてみるまでの手順について（なるべく楽に環境構築できるように）説明します。
 （ただしここで挙げる実装は著者の使用したことのあるものに限っています。その他の実装に興味があるようでしたら、個々に調べてみてください）
+
+HTTP/2 のクライアント・サーバ実装は一致したバージョン番号を使用しないとうまく通信できない（先述のプロトコルネゴシエーションで失敗する）ことに注意してください。
+また、ここでは本稿執筆時点で多くの実装がサポートしている HTTP/2 のドラフト 13 番を使用する前提で記述しています。
+ここで紹介する Docker イメージを使用して試す場合はあまり問題にはなりませんが、自前でビルドした実装を用いる場合などには使用しているバージョンを意識して頂く必要があります。
 
 .. [#] https://github.com/http2/http2-spec/wiki/Implementations
 
@@ -180,7 +183,7 @@ docker pull して使用してみてください。
 
 ::
 
-   $ docker pull syucream/nghttp2
+   $ docker pull syucream/nghttp2:h2-13
 
 nghttp2 サーバ(nghttpd)をインストールした後は、 nghttpd コマンドで実行できます。
 鍵と証明書を用意するのが面倒という場合は、 --no-tls オプションを付けることですぐに起動可能です。
@@ -211,7 +214,7 @@ ATS の HTTP/2 対応は現在進行中です。 ATS の開発を管理する JI
 
 ::
 
-   $ docker pull syucream/h2ts
+   $ docker pull syucream/h2ts:h2-13
 
    # docker run して nginx と ATS を起動
    $ docker run -d -p 80:8080 -p 443:443 -t syucream/h2ts /bin/sh -c 'nginx && traffic_server'
@@ -252,8 +255,7 @@ curl についても本稿では Docker イメージを用意しました。
 
 ::
 
-    # docker pull
-    $ docker pull syucream/h2curl
+    $ docker pull syucream/h2curl:h2-13
 
     # コンテナ内に入る
     $ docker run -i -t syucream/h2curl /bin/bash
@@ -385,7 +387,7 @@ h2load も nghttp2 の Docker イメージを使用することで手軽に試�
 
 ::
 
-   $ docker pull syucream/nghttp2
+   $ docker pull syucream/nghttp2:h2-13
 
 h2load に関しては、作者の @tatsuhiro-t さんが Qiita に投稿した解説 [#]_ があるので、これも合わせて読んでおくとよいでしょう。
 
