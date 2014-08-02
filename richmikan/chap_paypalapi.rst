@@ -147,7 +147,7 @@ CGI/PAYPAL1.CGIのコード(抜粋)
 	    :
 	
 	    :
-	# 4)データを送信する                                          ←406行目あたり
+	# 4)データを送信する                                            ←406行目あたり
 	cat $Tmp-setexpco_data0 $Tmp-ppreceipt $Tmp-shipping  |
 	env - sed 's/^#.*$//'                                 | # コメント除去1
 	env - sed 's/[[:blank:]]\{1,\}#.*$//'                 | # コメント除去2
@@ -161,7 +161,7 @@ CGI/PAYPAL1.CGIのコード(抜粋)
 	        nameread TOKEN             |
 	        sed 's/[^A-Za-z0-9_.-]//g' )
 	    :
-	# --- お客様をPayPal決済ページへ案内する ----------------------- ←453行目あたり
+	# --- お客様をPayPal決済ページへ案内する ------------------------ ←453行目あたり
 	cat <<-HTTP
 	  Status: 303 See Other
 	  Location: ${PP_URL_SETTLEMENT_BASE}&token=$token
@@ -177,7 +177,7 @@ PayPal APIに送る変数は大きく3種類に分類できると言ったが、
 
 その後、 ``curl`` を渡す直前でCGI変数フォーマット( ``a=1&b=2&...`` )に変換している。
 この中で ``mkcgipost`` という見慣れないコマンドが出てきているが、これは我々自作のものだ。
-UTL/mkcgipost [#url_mkcgipost]_ を見ればわかるが、 ``AWK`` を使って生成している。
+UTL/mkcgipostのシェルスクリプトを見ればわかるが、 ``AWK`` を使って生成している。
 このコマンドの中にはfor文やif文が何度も出てくるが、
 このようにしてforやifといった制御構文が避けられない作業かつ汎用的な作業はなるべくコマンド化して、
 メインとなるシェルスクリプト(PAYPAL1.CGI)はスッキリさせることを心掛けている。
@@ -186,5 +186,3 @@ UTL/mkcgipost [#url_mkcgipost]_ を見ればわかるが、 ``AWK`` を使って
 Tukubaiの ``cgi-name`` コマンドを使い、これを ``token`` という変数に格納する。
 
 そして最後に、そのトークンIDを添えながら客(Webブラウザー)をPayPalサイトへリダイレクトするというわけだ。
-
-.. [#url_mkcgipost] ``https://github.com/ShellShoccar-jpn/shellshoccar1/blob/master/public_html/CART/UTL/mkcgipost``
