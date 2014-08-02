@@ -212,7 +212,7 @@ SHELL/TAKEOUT_STOCKS.SHだ。コードを掻い摘んで見せてやる。
 .. code-block:: bash
 
 	   :
-	# --- 対象在庫数ファイル全てをロックする(ロックに失敗したらエラー終了) ←157行目あたり
+	# --- 対象在庫数ファイル全てをロックする(ロックに失敗したらエラー終了) --- ←157行目あたり
 	: > $Tmp-flockids
 	for prodid in $(self 1 $Tmp-takingreqs); do
 	  File="$Dir_STOCK/$prodid"
@@ -224,7 +224,7 @@ SHELL/TAKEOUT_STOCKS.SHだ。コードを掻い摘んで見せてやる。
 	  [ $? -eq 0 ] || error_exit 7 "Failed to lock the stockqty file ($File)"
 	done
 	
-	# --- 現在庫数表を作る --------------------------------------- ←168行目あたり
+	# --- 現在庫数表を作る ----------------------------------------- ←168行目あたり
 	(cd "$Dir_STOCK"; ls -l) |
 	tail -n +2               |
 	self 9 5                 > $Tmp-stockqtys # 1:商品ID* 2:現在庫数
