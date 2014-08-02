@@ -1266,8 +1266,8 @@ playbook.ymlの内容は、apacheをインストールして、起動、ホス�
   * smdahlen/vagrant-digitalocean : https://github.com/smdahlen/vagrant-digitalocean
 
 
-仮想化そのに docker
-^^^^^^^^^^^^^^^^^^
+仮想化・その2 docker
+^^^^^^^^^^^^^^^^^^^
 
 .. figure:: img/docker-logo.eps
   :scale: 70%
@@ -1276,22 +1276,23 @@ playbook.ymlの内容は、apacheをインストールして、起動、ホス�
 
   Dockerのロゴ
 
-Dockerとは、たいそう面白いギャグを連発して観客を "どっかーどっかー" 沸かすソフトウエアです。違います。Dockerのgithub曰く「Docker: the Linux container engine」だそうです。LXCだったとかそういう歴史はふっ飛ばして、いきなり実践してみましょう。
-
+Dockerとは、たいそう面白いギャグを連発して観客を "どっかーどっかー" 沸かすツールです。違います。Dockerのgithubには「Docker: the Linux container engine」とあります。
+DockerはホストOSのカーネルを共有し、AUFSというファイルシステムを使って仮想化しています。
+予めインターネット上に用意されているDockerのイメージを元に、コンテナと呼ばれる仮想マシンを起動します。1つのコンテナには、1つのプロセスを起動するのが基本的な使い方です。
 
 インストール
 """"""""""""
 
-おや、こんなことろ(DigitalOcean)にDocker入りのイメージがあるじゃないですか。hanayoという名前でDropletsを作りました。OSが立ち上がればインストール完了です。ね、簡単でしょ？
+おや、こんなことろ(DigitalOcean)にDocker入りのイメージがあるじゃないですか。バージョンは1.1.1です。hanayoという名前でDropletを作りました。Dropletが立ち上がれば完了です。ね、簡単でしょ？
 
 .. figure:: img/dk-do-image.eps
   :scale: 70%
   :alt: dk-do-image
   :align: center
 
-  DigitalOceanのImageにDockerがすでにある！
+  DigitalOceanのImageにDockerがすでにあります
 
-
+ホストOSは、Ubuntu 14.04 で、マシンのスペックはメモリ512MB、ディスク20GBのSSDを使います。
 
 俺はッ！！本気で！！！！インストールしたいッヒョオッホーーー！！ウーハッフッハーン！！　ッウーン！ [#iidocun]_ な方は、インストールのドキュメントをご覧ください [#iidocins]_ 。CentOS [#iidoccentos]_ やAmazon EC2などにインストールすることができます。バイナリリリース [#iidocbin]_ もあります。
 
@@ -1304,14 +1305,15 @@ Dockerとは、たいそう面白いギャグを連発して観客を "どっか
 つかってみる
 """"""""""""
 
-何ができるか分かっていないのに、公式ドキュメントを読みつつ進めていきます。rootでログインして、 ``docker`` コマンドをたたいてみます。
+公式ドキュメントや野良チュートリアルを読みつつ進めていきます。先ほど起動したDroletにrootでログインして、 ``docker`` コマンドをたたいてみます。
 
 .. code-block:: sh
 
    # ssh root@128.199.140.147
    root@hanayo:~# docker
    Usage: docker [OPTIONS] COMMAND [arg...]
-    -H=[unix:///var/run/docker.sock]: tcp://host:port to bind/connect to or unix://path/to/socket to use
+    -H=[unix:///var/run/docker.sock]: tcp://host:port to bind/connect to or 
+    unix://path/to/socket to use
    
    A self-sufficient runtime for linux containers.
    
@@ -1319,20 +1321,9 @@ Dockerとは、たいそう面白いギャグを連発して観客を "どっか
        attach    Attach to a running container
        build     Build an image from a Dockerfile
        commit    Create a new image from a container's changes
-   
    (略)
 
-docker hubにログインします。アカウントを作ります。
-
-.. code-block:: sh
-
-   root@hanayo:~# docker login
-   Username: tboffice
-   Password: # 表示されません
-   Email: tbofficed@gmail.com
-   Account created. Please use the confirmation link we sent to your e-mail to activate it.
-
-メールが届くので、そこに書かれているURLをクリックして登録します。webサイト(https://hub.docker.com/account/signup/)であれば、githubのアカウントでログインアカウントを作ることもできます。次に、アプリケーションを起動してみます。アプリケーションといっても、 ``echo 'Hello World'`` ですが。
+``docker <command>`` でcommandのヘルプを表示します。オプションを探すときに使います。早速、簡単なアプリケーションを起動してみます。
 
 .. code-block:: sh
 
@@ -1347,33 +1338,21 @@ docker hubにログインします。アカウントを作ります。
    6c37f792ddac: Download complete 
    Hello world
 
-ubuntu:14.04というイメージを指定しています。そのイメージ(コンテナ)で ``/bin/echo 'Hello world'`` を実行しています。
-初回は、数分時間がかかります。実行すると、標準出力結果には残りませんがダウンロードが走ります。これについてはあとで触れます。
-いよいよ、コンテナに入ってみましょう。 ``docker run`` でコンテナに対してコマンドを打ちます。
+ubuntu:14.04というイメージを指定しています。そのイメージからコンテナを立ち上げ、そのコンテナで ``/bin/echo 'Hello world'`` を実行しています。
+初回は、数分かかります。上記の標準出力結果には残りませんが、ダウンロードが実行されます。これについてはあとで触れます。
+Hollo worldが表示されたら、コンテナに入ってみましょう。 ``docker run`` でコンテナに対してコマンドを打ちます。
 
 .. code-block:: sh
 
    # docker run -t -i ubuntu:14.04 /bin/bash
    root@37b8238dbcdd:/# 
+   root@37b8238dbcdd:/# exit
+   root@hanayo:~# 
 
-入れましたね。-tと-iオプションは、俗にいう、おまじないです。ubuntu:14.04というイメージで ``/bin/bash`` を実行してシェルを掴んできました。
+入れましたね。ubuntu:14.04というイメージで ``/bin/bash`` を実行してシェルを掴んできました。そして ``exit`` してホストOSへ戻ってきました。
 
-``df`` や ``free`` を打ってディスク、メモリの情報を打ってみたところ、hanayoで実行したときと同じ結果が返ってきます。
-ifconfigを打つと、ローカルIPがふられています。外からつなぐにはどうすればいいかは、後ほど。
-
-試しにファイルを置いてみます
-
-.. code-block:: sh
-
-   root@hanayo:~# docker run -t -i ubuntu:14.04 /bin/bash
-   root@fc9784ab3cc2:/# touch /tmp/a 
-   root@fc9784ab3cc2:/# exit
-   root@hanayo:~# ls /tmp/a
-   ls: cannot access /tmp/a: No such file or directory
-
-おや、ありませんね。当たり前ですね。hanayoとは独立のOSが立ち上がっています [#iidoca]_ 。次に、コマンドをデーモン化して実行してみましょう。 ``-d`` オプションをつけてデーモン化します。
-
-.. [#iidoca] ちなみにもう一回 bashでコンテナにログインすると、``touch a`` で作ったファイルは消えています
+コンテナでディスク、メモリの情報を探すと、hanayoで実行したときと同じ結果が返ってきます。
+ifconfigを打つと、ローカルIPがふられています。ホストOSからのアクセス方法については、後ほど。次に、コマンドをデーモン化( ``-d`` オプション)して実行してみましょう。
 
 .. code-block:: sh
 
@@ -1389,83 +1368,14 @@ ifconfigを打つと、ローカルIPがふられています。外からつな�
    64 bytes from 25.156.138.210.rev.iijgio.jp (210.138.156.25): icmp_seq=2 ttl=50 time=114 ms
    64 bytes from 25.156.138.210.rev.iijgio.jp (210.138.156.25): icmp_seq=3 ttl=50 time=114 ms
 
-コマンドの標準出力の内容が全て出てきます。もう一回、同じコマンドをたたいても最初から標準出力の内容がでてきます。プロセスを止めます。
+コマンドの標準出力の内容が全て出てきます。もう一回、同じコマンドをたたいても最初から標準出力の内容がでてきます。プロセスを止めます。コンテナ名の指定には ``docker ps`` をしたときの、NAMESか、あるいはCONTAINER IDを指定します。ここでは、NAMESの値を指定します。
 
 .. code-block:: sh
 
    # sudo docker stop happy_meitner 
    happy_meitner
 
-タスクの名前は、命名規則は「形容詞_人の名前」になってるみたいです。dockerコマンドを単体で叩くと、docker XXX のXXXにあたるオプションの一覧が出てきます。
-
-.. code-block:: sh
-
-   Commands:
-       attach    Attach to a running container
-       build     Build an image from a Dockerfile
-       commit    Create a new image from a container's changes
-
-さっき叩いた ``docker logs`` のヘルプを見てみましょう。
-
-.. code-block:: sh
-
-   root@hanayo:~# docker logs 
-   
-   Usage: docker logs CONTAINER
-   
-   Fetch the logs of a container
-   
-     -f, --follow=false        Follow log output
-     -t, --timestamps=false    Show timestamps
-     --tail="all"              Output the specified number of lines at the end of logs (defaults to all logs)
-
-Pythonのアプリケーションが入っているイメージを立ち上げてみます。
-
-.. code-block:: sh
-
-   root@hanayo:~# docker run -d -P training/webapp python app.py
-   root@hanayo:~# docker ps -l
-   CONTAINER ID        IMAGE                    COMMAND             CREATED             STATUS              PORTS                     NAMES
-   37179ec8e0bd        training/webapp:latest   python app.py       54 seconds ago      Up 53 seconds       0.0.0.0:49153->5000/tcp   sick_davinci     
-
-
-41953ポートで待ち受けているのでアクセスしてみしょう [#iidoc49]_ 。
-
-.. [#iidoc49] dockerで起動したアプリケーションは、49000から49900の間のポートを使います。
-
-.. code-block:: sh
-
-   root@hanayo:~# curl localhost:49153
-   Hello world!root@hanayo:~# 
-   root@hanayo:~# curl -I localhost:49153
-   HTTP/1.0 200 OK
-   Content-Type: text/html; charset=utf-8
-   Content-Length: 12
-   Server: Werkzeug/0.8.3 Python/2.7.3
-   Date: Mon, 21 Jul 2014 11:47:21 GMT
-
-HTTPサーバが応答していますね。それでは、アプリケーションを止めます。 ``stop`` してからアプリケーションを ``rm`` しましょう。
-
-.. code-block:: sh
-
-   root@hanayo:~# docker stop sick_davinci 
-   sick_davinci
-   root@hanayo:~# docker rm sick_davinci 
-   sick_davinci
-   root@hanayo:~# docker ps 
-   CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-
-
-病気のダビンチさんはいなくなりました。なお、イメージは残っています。
-
-.. code-block:: sh
-
-   root@hanayo:~# docker images
-   REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-   ubuntu              14.04               e54ca5efa2e9        4 weeks ago         276.5 MB
-   training/webapp     latest              31fa814ba25a        7 weeks ago         278.8 MB
-
-さてさて、ここまではubuntu:14:04を使っていました。ほかのOSも試してみましょう。
+タスクの名前は、命名規則は「形容詞_人の名前」になってるみたいです。ここまで、dockerのコンテナの立ち上げと削除を行いました。別のOSも使ってみましょう。
 
 .. code-block:: sh
 
@@ -1501,7 +1411,7 @@ CentOSなのに、Ubuntuって書いてありますね。ログアウトして�
    root@hanayo:~# uname -a 
    Linux hanayo 3.13.0-24-generic #46-Ubuntu SMP Thu Apr 10 19:11:08 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
 
-hanayoとカーネルが一致しますね。Dockerはカーネルだけを共有しています [#iidocker]_ 。公式サイトから図を引用してみます。VMとの違いがなんとなく。なんでしょう。なんですかね。
+hanayoとカーネルが一致しますね。Dockerはカーネルだけを共有しています [#iidocker]_ 。公式サイトから図を引用してみます。VMとの違いがなんとなく分かってきます。
 
 .. [#iidocker] http://stackoverflow.com/questions/18786209/what-is-the-relationship-between-the-docker-host-os-and-the-container-base-image
 
@@ -1512,7 +1422,7 @@ hanayoとカーネルが一致しますね。Dockerはカーネルだけを共�
 
   https://www.docker.com/whatisdocker/より引用。VMとDockerの違い
 
-そういえばCentOSがインストールされてしまいましたが、どこから持ってきたんでしょうか。答えは、docker hubに登録されているイメージファイルをもってきています。
+そういえば、このCentOSは、どこから持ってきたんでしょうか。答えは、docker hubに登録されているイメージファイルをもってきています。
 
 .. figure:: img/dk-hub-centos.eps
   :scale: 70%
@@ -1521,7 +1431,7 @@ hanayoとカーネルが一致しますね。Dockerはカーネルだけを共�
 
   https://registry.hub.docker.com/_/centos/
 
-Dockerのイメージファイルは https://hub.docker.com/ にあるので検索してみてください。え？ブラウザを開くのが面倒？そういう場合は、searchコマンドで探します。すげーたくさん出てきます [#iidocsb]_ 。
+Dockerのイメージファイルは https://hub.docker.com/ にあります。searchコマンドでも探すことが出来ます。たくさんあります [#iidocsb]_ 。
 
 .. code-block:: sh
 
@@ -1550,10 +1460,12 @@ Dockerのイメージファイルは https://hub.docker.com/ にあるので検�
    bash-4.2# exit
    root@hanayo:~# 
 
-おわかりいただけただろうか。 ``ps`` コマンドを打つと、bashのプロセスと自身の ps プロセスしかいないのだ。プロセスのおかわりはいただけないのだろうか。いただけないのである。
-何故、こんなことを書いているかというと、コンテナには1つのプロセスしか載せないのである。topを打つともちろん、bashとtopのプロセスしかないのだ！！！な、なんだって！！ ``ΩΩ Ω``
+なんとなく ``ps`` コマンドを打ってみました。
 
-茶番を終わらせるために、いったんbashを抜けて、コンテナをすべて表示してみます。centos:centos7というイメージ上に、0ab61f52d310と31318abf2f23というコンテナがあることがわかります。
+おわかりいただけただろうか。なんと ``ps`` コマンドを打つと、bashのプロセスと自身の ps プロセスしかいないのだ。プロセスのおかわりはいただけないのだろうか。いただけないのである。
+何故、こんなことを書いているかというと、コンテナには1つのプロセスしか起動しないのが基本的な使い方だからである。topを打つともちろん、bashとtopのプロセスしかないのだ！！！な、なんだって！！ ``ΩΩ Ω``
+
+茶番を終わらせるために、いったんbashを抜けて、コンテナをすべて表示してみます。centos:centos7というイメージを使って、2つのコンテナがあることが分かります。
 
 .. code-block:: sh
 
@@ -1562,8 +1474,8 @@ Dockerのイメージファイルは https://hub.docker.com/ にあるので検�
    0ab61f52d310        centos:centos7      /bin/bash           8 minutes ago       Exited (130) 4 seconds ago                       furious_mayer       
    31318abf2f23        centos:centos7      /bin/bash           11 minutes ago      Exited (130) 9 minutes ago                       prickly_bardeen     
 
-STATUSがExitedとなっていますね。bashプロセスから抜けると、コンテナは沈黙してしまうのです。では、このコンテナを起動させてみましょう。
-そのまえに、便利な ``dl`` コマンドを作りましょう [#iidocdl]_ 。
+STATUSがExitedとなっていますね。bashプロセスから抜けると、コンテナは起動をやめてしまうのです。では、このコンテナを起動させてみましょう。
+その前に、便利な ``dl`` コマンドを作りましょう [#iidocdl]_ 。一番直近に作られたコンテナの名前を返してくれるコマンドです。
 
 .. [#iidocdl] 15 Docker Tips in 5 Minutes - http://sssslide.com/speakerdeck.com/bmorearty/15-docker-tips-in-5-minutes
 
@@ -1585,7 +1497,9 @@ STATUSがExitedとなっていますね。bashプロセスから抜けると、�
    bash-4.2# rpm -qa | grep ^gcc 
    gcc-4.8.2-16.el7.x86_64
 
-ちゃんと gcc もインストールされていますね。今回はexitせず、 ``ctrl + p`` のあとに、 ``ctrl + q`` を押して抜けます。
+ちゃんと gcc もインストールされていますね。このまま ``exit`` すると、この仮想マシンはExitedの状態になってしまいます。起動したままにするには、 ``ctrl + p`` のあとに、 ``ctrl + q`` を押して抜けます [#iidockerctrlp]_ 。
+
+.. [#iidockerctrlp] ctrl+pがdockerに取られているので一つ前のコマンドを実行するときは crtl+pを二回押すか、↑キーを押す
 
 .. code-block:: sh
 
@@ -1593,8 +1507,7 @@ STATUSがExitedとなっていますね。bashプロセスから抜けると、�
    0ab61f52d310        centos:centos7      /bin/bash           20 minutes ago      Up 5 minutes                                      furious_mayer       
    31318abf2f23        centos:centos7      /bin/bash           23 minutes ago      Exited (130) 21 minutes ago                       prickly_bardeen     
 
-今度は、STATUSがUPになってますね。これで起動中のコンテナが出来ました！
-あとはいらないコンテナを削除しましょう。
+今度は、STATUSがUPになってますね。これで起動中のコンテナが出来ました！あとはいらないコンテナを削除しましょう。
 
 .. code-block:: sh
 
@@ -1602,131 +1515,203 @@ STATUSがExitedとなっていますね。bashプロセスから抜けると、�
    prickly_bardeen
 
 
-さあ、ここまできたら、sshで入ってみたいと思いませんか？そうですよね！！そうだと思いましたよ！！！そういうことにしておいてください！！！！
+簡単なアプリケーションを作ってみる
+"""""""""""""""""""""""""""""""
 
+redisのコンテナと、apache+phpが入ったコンテナを作って、redisの情報を取ってくるサンプルアプリケーションを作ってみます。まずは、redisのイメージ [#iidocredis]_ を取ってきてコンテナを起動します。
 
-sshでログインする
-""""""""""""""""
-
-http://mizzy.org/blog/2014/06/22/1/ を見ながら。
-
-Goが入っていなかったのでインストール。いまさらですけど、DockerはGo製です。
+.. [#iidocredis] https://registry.hub.docker.com/_/redis/
 
 .. code-block:: sh
 
-   root@hanayo:~# apt-get install gccgo-go golang
-   root@hanayo:~# export GOPATH=$HOME/_go
-   root@hanayo:~# export PATH=$PATH:$GOPATH/bin
-   root@hanayo:~# go get github.com/docker/libcontainer/nsinit
-   docker-attach()
-   {
-     id=`sudo docker ps -q --no-trunc $1`
-     root=/var/lib/docker/execdriver/native/$id
-     sudo sh -c "cd $root && $GOPATH/bin/nsinit exec $2"
-   }
+   root@hanayo:~# docker pull redis
+   root@hanayo:~# docker run -d -p 6379:6379 redis
+   root@hanayo:~# docker ps -a
+   CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                    NAMES
+   ccb90d29d571        redis:2.8           redis-server        13 seconds ago      Up 12 seconds       0.0.0.0:6379->6379/tcp   drunk_pike
+
+``-p`` オプションはホストOSと、コンテナのポートマッピングを指定しています。 ``docker ps -a`` で、redisのコンテナが起動したことが確認できました。
+ホストOSにredisのインスタンスが起動している感覚で、実はそのインスタンスは仮想マシンの中で起動しているというイメージです。
+ホストOSで、 ``telnet localhost 6379`` を打ってから info を打つと、redisの情報が返ってきます。なお、quitを打つと抜けられます。
+
+つぎに、apacheとphpの入ったコンテナを作ります。redisのような、ちょうどよいイメージが無いため自分で作ります。このようなコンテナを作ります：
+
+* centosのイメージを元にする
+* apacheとphp(with phpredis)をインストールする
+* apacheを起動する
+* sshでログイン可能にする
+
+プロジェクトのディレクトリを作ってsshでログインするために公開鍵を作ります。
+
+.. code-block:: sh
+
+   mkdir docker-centos
+   ssh-keygen -t rsa -N "" -f .ssh/id_rsa
+   cp .ssh/id_rsa.pub docker-centos
+
+docker-centosディレクトリの中に、Dockerfileを作ります。Dockerfileとは、どのようなイメージを元に、コンテナの中で実行するコマンドを書いたファイルです。
+Dockerfileのサンプルは、https://github.com/docker/docker/blob/master/Dockerfile にあります。今回はこのようなDockerfileをつくりました [#iidocredisd]_ 。
+
+.. [#iidocredisd] 先ほど使ったredisイメージにもDockerfile(https://github.com/dockerfile/redis/blob/master/Dockerfile)があります。
+
+:: 
+
+   FROM centos
+   RUN yum update -y
+   RUN yum install -y openssh-server wget unzip gcc make python-setuptools vim pcre-devel libxml2-devel autoconf
+   RUN yum install -y tar bzip2 apr-devel apr-util-devel ; true
+   RUN yum clean all
+   RUN easy_install supervisor
+   
+   # apache
+   RUN cd /tmp && wget http://ftp.kddilabs.jp/infosystems/apache//httpd/httpd-2.4.10.tar.bz2
+   RUN cd /tmp && tar jxvf httpd-2.4.10.tar.bz2
+   RUN cd /tmp/httpd-2.4.10 && ./configure --enable-so && make && make install 
+   RUN echo "みんなーっ！ご飯炊けたよっ♪" > /usr/local/apache2/htdocs/index.html
+   RUN echo "AddType application/x-httpd-php .php" >> /usr/local/apache2/conf/httpd.conf 
+   RUN echo "LoadModule php5_module modules/libphp5.so" >> /usr/local/apache2/conf/httpd.conf
+   ADD redis.php /usr/local/apache2/htdocs/redis.php
+   
+   # php 
+   RUN cd /tmp && wget http://jp2.php.net/distributions/php-5.5.15.tar.gz && tar zvxf php-5.5.15.tar.gz && cd php-5.5.15/ && ./configure  --with-apxs2=/usr/local/apache2/bin/apxs && make && make install
+   
+   # phpredis
+   RUN cd /tmp && wget https://github.com/nicolasff/phpredis/archive/master.zip
+   RUN cd /tmp && unzip master.zip
+   RUN cd /tmp/phpredis-master && phpize && ./configure && make && make install
+   RUN echo "extension=redis.so" >> /usr/local/lib/php.ini
+   RUN sed -i -e "s|;date.timezone =|date.timezone = Asia/Tokyo|" /usr/local/lib/php.ini
+   
+   # SSH
+   ADD id_rsa.pub /root/id_rsa.pub
+   RUN mkdir -p /root/.ssh/ /var/run/sshd
+   RUN cp /root/id_rsa.pub /root/.ssh/authorized_keys
+   RUN chmod 700 /root/.ssh && chmod 600 /root/.ssh/authorized_keys
+   RUN /usr/bin/ssh-keygen -t rsa  -f /etc/ssh/ssh_host_rsa_key -N ''
+   RUN /usr/bin/ssh-keygen -t ecdsa  -f /etc/ssh/ssh_host_ecdsa_key -N ''
+   RUN sed -i -e 's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
+
+   # supervisor
+   RUN mkdir -p /var/log/supervisor
+   ADD supervisord.conf /etc/supervisord.conf
+   EXPOSE 22 80
+   CMD ["/usr/bin/supervisord"]
 
 
-nsinitのバイナリができてなくてうまくいかなかった。
-どうもパッチ当てないと行けない模様 http://qiita.com/comutt/items/2f873a0e7eaddd3f647e
-nsenterでやってみる。gettextが0.18.3でぴったりだった。
+簡単にこのDockerfileの解説をします。
+
+FROM centos
+  centosのイメージを元に、それ以下のコマンドで変更を加えます
+
+RUN yum update -y
+  RUNの後に、コマンドが書けます
+
+ADD supervisord.conf /etc/supervisord.conf
+  ホストOSのファイルを、コンテナにコピーします
+
+# supervisor
+  sshd, apacheをsupervisordでデーモン化しています。本来、1つのコンテナには1つのプロセスしか立ち上げません。sshdでログインしたいのであれば、こうしてデーモン化できます [#iidockersup]_ 
+
+# apache
+  ソースからインストールしています。理由は後述します。また、phpの実行ができるように、設定ファイルに変更を加えます
+
+# php
+  apacheのインストールをソースから行ったため、phpもソースからインストールすることになりました
+
+EXPOSE
+  コンテナ内部でこのポート番号を使うというのを宣言する命令(INSTRUCTION)です
+
+.. [#iidockersup] supervisordを使うためのdockerのドキュメントはこちら：https://docs.docker.com/articles/using_supervisord/
 
 
-shipyard
-"""""""""""""""
+supervisordの設定ファイルである、supervisord.confはこのように記述します。Dockerfileと同じディレクトリに配置します。
 
-docker run -i -t -v /var/run/docker.sock:/docker.sock shipyard/deploy setup
+:: 
 
-数分かかる
-
-dockerを再起動してしまったので再起動。最後のはdocker ps -a でNameをさがしてください。
-
-root@hanayo:~# docker restart shipyard shipyard_db shipyard_lb shipyard_redis shipyard_router determined_tesla 
-
-ブラウザでアクセス。　http://128.199.140.147:8000　
-
-Server Error (500) と表示されてしまった。かなしい。
+   [supervisord]
+   nodaemon=true
+   
+   [program:httpd]
+   command=/usr/local/apache2/bin/httpd -DFOREGROUND
+   
+   [program:sshd]
+   command=/usr/sbin/sshd -D
 
 
-作ったdockerをpushする
+redisのコンテナのIPアドレスを置換する前のredis.php.templateを作ります。
 
-pullもしたいな
+:: 
+
+   <?php
+   $ip = '172.0.0.1';
+   $redis = new Redis();
+   $redis->connect($ip, 6379);
+   $redis->set('hanayo', '白いご飯が足りません');
+   var_dump($redis->get('hanayo'));
+
+ビルドして、イメージを作り、コンテナを起動します。
+
+.. code-block:: sh
+
+   root@hanayo:~/docker-centos# IP=$(docker inspect $(docker ps -a | awk /redis-server/'{print $1}') | awk -F \" /IPAddress/'{print $4}')
+   root@hanayo:~/docker-centos# sed -e "s/127.0.0.1/"$IP"/" redis.php.template > redis.php
+   root@hanayo:~/docker-centos# docker build -t centos:ap .
+   root@hanayo:~/docker-centos# docker run -d -p 10022:22 -p 80:80 centos:ap
+   root@hanayo:~/docker-centos# docker ps -a
+   CONTAINER ID IMAGE     COMMAND              CREATED       STATUS        PORTS                                     NAMES
+   042bce159434 centos:ap /usr/bin/supervisord 5 seconds ago Up 5 seconds  0.0.0.0:80->80/tcp, 0.0.0.0:10022->22/tcp nostalgic_shockley   
+   e6df5aeac928 redis:2.8 redis-server --bind  10 days ago   Up 12 minutes 0.0.0.0:6379->6379/tcp                    loving_lumiere  
+   root@hanayo:~/docker-centos# curl localhost/redis.php
+   string(30) "白いご飯が足りません"
+
+一行目で、redisが立ち上がっているコンテナのIPを取得しています。コンテナ間同士は、相手のIPを知らないと通信できないからです。 ``doker inspect NAME`` でも、コンテナの詳細な情報をjson形式で取得することができます。
+
+docker build -t centos:ap .
+  Dockerfileをもとに、イメージを作ります。今回はcentosというイメージでTAGをapとしました
+
+docker run -d -p 10022:22 -p 80:80 centos:ap
+  コンテナのポート番号10022をホストOSのポート番号22へ、コンテナのポート番号80をホストOSのポート番号80にバインドしています。指定していない場合、たとえば ``run -d -p :22 -p :80 centos:ap`` とすると、ホストOSの49100-49199のポート番号へ自動的にバインドされます
 
 
-さっくりしててよい
-http://qiita.com/curseoff/items/a9e64ad01d673abb6866
+.. tip:: このDockerfileができるまで
 
-containerを全部消す
+   Dockerfileの中で、 ``yum install httpd`` ができません。こちらのバグを踏みます。Bug 1012952 - docker: error: unpacking of archive failed on file /usr/sbin/suexec: cpio: cap_set_file [#]_ 。apacheをソースからインストールすることになりました。
 
- docker rm `docker ps -aq`
- docker rm `docker ps -a | awk '/iranai/ {print $1}'` 
+   .. [#] https://bugzilla.redhat.com/show_bug.cgi?id=1012952
+
+   centosイメージを使うと、CentOS 7となるため、サービスの起動はsystemdになります。systemd経由で、例えばapacheを起動しようとするとこのバグを踏みます：Bug 1033604 - Unable to start systemd service in Docker container [#]_ 。「dockerはアプリケーションコンテナモデルである。systemdで起動してはいけない。デーモンで直接起動しよう」という回答がありました。
+
+   sshでのログインでは、mizzyさんの記事「Dockerコンテナに入るなら SSH より nsinit が良さそう」[#]_ を見つけたのですが、実際にやってみるとgo getのところで詰まり、断念。「RHEL/CentOS 6で Docker に nsinit/nsenter する」 [#]_ の記事を見つけたのですが、手順が煩雑なので諦めました。結局、supervisordに落ち着きました。また、PAMをoffにしていないとログインできなかったりと、様々な罠がありました。
+   
+   .. [#] https://bugzilla.redhat.com/show_bug.cgi?id=1033604
+   .. [#] http://mizzy.org/blog/2014/06/22/1/
+   .. [#] http://qiita.com/comutt/items/2f873a0e7eaddd3f647e
+
+   phpのビルドを行ったとき、 ``make -j2`` (2つのjobを同時に実行)したところ「virtual memory exhausted: Cannot allocate memory」と言われてしまいました。コンテナの中では、ビルドするものではありません。なお、DigitalOceanの最小インスタンスで実行していました。
 
 
+補足
+^^^^^^
+
+Dockerは新しいツールのため、枯れているという感じがありませんでした。このあともかなりの頻度でアップデートされることが予想されるので、この内容は役に立たないかもしれません。そのときはPull reqいただければありがたいです。
+
+ここで触れていない内容として、コンテナのデータの永続化があります。mopemopeさんの「Docker でデータのポータビリティをあげ永続化しよう」 [#]_ が参考になります。また、dockerはhostsが書き換えられないため、工夫が必要になります。JAGAxIMOさんの「Dockerで/etc/hostsファイルが操作出来ない対策」 [#]_ を参考にしてください。
+コマンドのチュートリアルは、curseoffさんの「Dockerコマンドメモ」が手堅くまとまっています。Vagrantを使って少し進んだチュートリアルはdeeeetさんの「実例で学ぶDockerコマンド」が有用です。
+
+docker runをしすぎて、コンテナがたくさん出来てしまった時は、 ``docker rm `docker ps -aq` `` で消えます。
 
 
-TODO
-sshで入れる方法を示す。commitしてpushして環境を保存する感じで流れる。
-yum updateしていても、bashから抜けると変更が消えてしまうことについて触れる
+VagrantでCoreOSの仮想マシンを立ち上げて、そこでDockerを使ってアプリケーションの開発を行うという手法が主流になっているそうです [#]_ 。
 
-TODO
-hostsが書き換えられない
-永続化する方法
-dockerfileの書き方
-肝は docker ps と docker images な感じがする。指定の仕方、何が指定できるかがわかればマスターできそう
-
-VMより良いと書いてあるがどういうことか。
-さっくり感想としては、localhostのディレクトリを汚さず、アプリケーションを立ち上げることができるという感じ
-
-ssh で入れるようにするとき
-http://mizzy.org/blog/2014/06/22/1/　＜＝これが最新の流れぽい。
-http://shibayu36.hatenablog.com/entry/2013/12/07/233510
-http://d.hatena.ne.jp/naoya/20130621/
-http://www.nerdstacks.net/2014/03/ssh-ready-centos-dockerfile/ sshのキーをつけたしたdockerfile
-
-データ永続化の話
-http://qiita.com/mopemope/items/b05ff7f603a5ad74bf55
-
-虎の巻
-http://qiita.com/deeeet/items/ed2246497cd6fcfe4104
-
-使えそう？
-http://coreos.com/docs/launching-containers/building/getting-started-with-docker/
-
-DockerのOS準備しなくてもオンラインチュートリアルがある　https://www.docker.com/tryit/
-と思ったけどあんま使えない印象
-
-なんで今まで使わなかったのか悔やまれる
-
-* inspectコマンド
-
-inspectコマンドあります。Ansibleでいう ``-m setup`` みたいなところ。
-コンテナ名(下記でいうところのsick_davinci)は、タブを押すと保管されるので便利といえば便利。ただコンテナをたくさん上げると、候補が沢山出てきて大変になる
-
-root@hanayo:~# docker ps -l
-CONTAINER ID        IMAGE                    COMMAND             CREATED             STATUS              PORTS                     NAMES
-37179ec8e0bd        training/webapp:latest   python app.py       3 hours ago         Up 3 hours          0.0.0.0:49153->5000/tcp   sick_davinci        
-root@hanayo:~# docker inspect sick_davinci 
-[{
-    "Args": [
-        "app.py"
-    ],
-    "Config": {
-        "AttachStderr": false,
-        "AttachStdin": false,
-        "AttachStdout": false,
-        "Cmd": [
-            "python",
-            "app.py"
-        ],
-(略)
-
-一部のキーを取り出すにはこんな感じ
-
-root@hanayo:~# docker inspect -f '{{ .NetworkSettings.IPAddress }}' sick_davinci 
-172.17.0.9
+.. [#] http://qiita.com/mopemope/items/b05ff7f603a5ad74bf55
+.. [#] http://qiita.com/curseoff/items/a9e64ad01d673abb6866
+.. [#] http://qiita.com/JAGAxIMO/items/6b71a03518bbd53d4de6
+.. [#] http://coreos.com/docs/launching-containers/building/getting-started-with-docker/
+.. [#] http://qiita.com/deeeet/items/ed2246497cd6fcfe4104
 
 
 関連書籍・URL
-"""""""""""""
+^^^^^^^^^^^^^^
 
 
 Cobbler
@@ -1792,6 +1777,13 @@ CI as a Service
 * プログラミングしている側からの便利さ。すぐに環境が作れる。テストの自動化。本番でのバグが少なくなる
 * 開発環境DevOps
 * 本番環境DevOps
+
+スペシャルサンクス
+-----------------
+
+@eigo_s
+@JAGAxIMO
+@ringohub
 
 
 注目すべきトレンド
