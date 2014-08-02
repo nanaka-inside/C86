@@ -13,8 +13,12 @@
 ^^^^^^^^^^^^^^^^^
 ところで「バランスWiiボード」は皆さんご存知でしょうか。Wii/WiiUとつないで使える板状のコントローラです。
 
-[このへんにバランスボードのしゃしん]
+.. figure:: img/barance_wii_board.eps
+    :scale: 50%
+    :align: center
 
+   ホコリ被ってたバランスWiiボード
+            
 現在（2014年現在）だと「WiiFit U」とセットで販売されていて、遊ぶときもWiiFit Uで遊びます。
 WiiFit UではバランスWiiボードの上に乗ることで体重を測ったり、ランニングっぽい何かをしたり、Wiiリモコンを持ってボクササイズ的なことができるのです。
 さらに「WiiFitメーター」という万歩計的なものを使うことで「一日どれくらいの運動量があったか」を計測できるのです！
@@ -46,6 +50,12 @@ WiiFit UではバランスWiiボードの上に乗ることで体重を測った
 今回はMac-バランスwiiボード間の通信に"OpenSound Control（以下OSC）"を使うことにしました。Mac用アプリケーションであるOSCulator [#osculator]_ を利用し、OSCulatorで一旦バランスwiiボードの信号を受け、そこからOSCプロトコルで今回作るアプリケーションにデータをルーティングします。OSCulatorはWii系コントローラーとの接続に対応しており、特に何もせずにWii系コントローラーと接続して、コントローラーからのデータを受け取ることが可能です。
 そしてアプリケーションではデータを受け取った後、体重を測定し、その結果を今回はFitbit.com [#fitbit]_ に送信します。Fitbit.comをつかうのはWeb上で記録したものが見られるというのと、筆者がFitbitZipを持っているというのが主な理由です。FitbitZipかわいいよFitbitZip。目標は毎日1万歩 [#ichiman]_ です。
 
+.. figure:: img/osculator.eps
+    :scale: 50%
+    :align: center
+
+   OSCulator
+   
 .. [#osculator] http://www.osculator.net/
 .. [#fitbit] https://www.fitbit.com/                
 .. [#ichiman] 一日中座ってるような仕事なので一万歩は結構きついんですよね
@@ -66,10 +76,33 @@ OSCプロトコルは大きく分けて以下の2つのパートに分かれま�
   * 実際に送られる値
   * 様々な型を送信できる。また、複数の値を同時に送受信することも可能
 
-[このへんにバランスWiiボードのOSCメッセージの例をあげる]
+実際にOSCulator経由で送られてくるメッセージはこんな感じです。
+.. code-block:: javascript
+   
+   { address: '/wii/1/balance/0',
+     args: [ { type: 'float', value: 0.028555890545248985 } ],
+     oscType: 'message' }  // bottom left
+   { address: '/wii/1/balance/1',
+     args: [ { type: 'float', value: 0.0472947433590889 } ],
+     oscType: 'message' }  // bottom right
+   { address: '/wii/1/balance/2',
+     args: [ { type: 'float', value: 0.02895377203822136 } ],
+     oscType: 'message' }  // top left
+   { address: '/wii/1/balance/3',
+     args: [ { type: 'float', value: 0.041941456496715546 } ],
+     oscType: 'message' }  // top right
+   { address: '/wii/1/balance/4',
+     args: [ { type: 'float', value: 0.004130267538130283 } ],
+     oscType: 'message' }  // sum 
+   { address: '/wii/1/balance/5',
+     args: [ { type: 'float', value: 0.49813568592071533 } ],
+     oscType: 'message' }  // virtual x
+   { address: '/wii/1/balance/6',
+     args: [ { type: 'float', value: 0.5018643140792847 } ],
+     oscType: 'message' }  // virtual y
 
-* バランスWiiボードで利用できるOSC Messageの例を挙げる
-
+OSCulatorは何もせずともWiiリモコンデバイスに対応しているため、OSCulator上では各メッセージにラベルをつけてくれています。
+バランスWiiボードには4つのバランスセンサー（ひずみゲージ）が内蔵されている [#barance_sensor]_  [#barance_hizumi]_ とのことなので、0番から3番は各センサの値だと考えられます。4番はsumの名前の通り、4つのセンサの合計値だと思われます。5番と6番は、各センサにかかる力から計算した仮想の重心位置だろうと思われます。今回は4番の"sum"の値を使うことにします。
 
 .. [#osc] http://opensoundcontrol.org/
   
@@ -249,7 +282,7 @@ node-oauth [#node-oauth]_ をつかいます。CONSUMER_KEY/CONSUMER_SECRETは�
 
 他にやってみたこと
 ^^^^^^^^^^^^^^^^^^^^^
-記録するだけでは過去の状態を確認することしかできません。実は本格的に記録をつけはじめたのは7月に入ってからだったのですが、はじめの一週間については多少は意識していたものの思った以上の効果が出なかったので、改めて記録を見てちょっと反省して、以下のルールを決めました。
+記録するだけでは過去の状態を確認することしかできません。実は本格的に記録をつけはじめたのは7月に入ってからだったのですが、はじめの一週間については多少は意識していたものの思った以上の効果が出なかったので、改めて記録を見てちょっと反省して、以下のことを意識するようにしました。
 
 * 炭水化物の量を減らす
 
