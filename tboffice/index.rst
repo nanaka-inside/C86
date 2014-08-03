@@ -1,5 +1,5 @@
 
-Immutable Infrastructureの最適解を探る
+Immutable Infrastructureの最適解を探る 
 =====================================
 
 筆者の@tbofficeです。某webサービス的な会社でインフラ的なお仕事をやりつつ、裏では同人誌を書いています。
@@ -18,8 +18,6 @@ Immutable Infrastructureの最適解を探る
 
   やめて！！(https://twitter.com/skoji/status/392588415473963008)
 
-心臓に何かが刺さった音がしましたか？
-
 
 次にこちらをご覧ください
 ----------------------
@@ -37,7 +35,7 @@ Immutable Infrastructureの最適解を探る
    ＞　いつまで手動でデプロイしているんですか？　＜
    ￣Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y^Y￣
 
-マサカリが投げられましたね。この本については、後ほど触れることにしましょう。
+この本については、後ほど触れることにしましょう。
 
 
 あわせて読みたい
@@ -381,6 +379,16 @@ Ansibleは、Python 2.4以上で動作し、Python 2.6以上の環境が推奨�
 Ansibleを実行するサーバ(CM)は、お名前.comのVPS(CentOS 6.5)を、リモートマシン(MN)は DigitalOcean を使って、2つのDroplets [#]_ を作ります。
 リモートマシンを作る前に、sshの公開鍵をDigitalOceanに登録しておきましょう。
 
+.. figure:: img/an-do-dl.eps
+  :scale: 90%
+  :alt: an-do-dl
+  :align: center
+
+  nozomiとeriのDroplets
+
+nozomiはUbuntu 14.04 x86、eriはCentOS 6.5 x86を選択しました。nozomiにログインしてみましょう。
+
+
 .. [#] DigitalOceanでのインスタンスの呼称です。仮想サーバ1つのことを指します
 
 .. topic:: DigitalOceanとは
@@ -400,16 +408,7 @@ Ansibleを実行するサーバ(CM)は、お名前.comのVPS(CentOS 6.5)を、�
    Dropletを作成すると、Global IPアドレスが1つ払いだされます。あらかじめダッシュボードからSSHの公開鍵を登録しておくと、rootユーザでsshログインできます。
 
    ネットの記事をあさったところ、DigitalOceanはデータセンターを借りて自社でサーバを持っているようです。なぜこんなに安いのかは謎です。
-   
 
-.. figure:: img/an-do-dl.eps
-  :scale: 90%
-  :alt: an-do-dl
-  :align: center
-
-  nozomiとeriのDroplets
-
-nozomiはUbuntu 14.04 x86、eriはCentOS 6.5 x86を選択しました。nozomiにログインしてみましょう。
 
 .. code-block:: bash
    
@@ -446,7 +445,7 @@ nozomiはUbuntu 14.04 x86、eriはCentOS 6.5 x86を選択しました。nozomi�
      User ayase
 
 
-CMサーバから ``$ ssh nozomi`` でログインできることを確認します。 ``sudo ls -la /root/`` で、怒られなければ完了です。
+CMサーバから ``ssh nozomi`` でログインできることを確認します。 ``sudo ls -la /root/`` の結果が返ってくれば成功です。
 ここからは、CMサーバの構築です。プロジェクト用のディレクトリをつくり、設定ファイルを置いていきます。
 
 .. code-block:: sh
@@ -460,7 +459,7 @@ CMサーバから ``$ ssh nozomi`` でログインできることを確認しま
    nozomi
    eri
 
-Ansibeの設定ファイルを書きます。``ansible.cfg`` に下記を設定します。MNのサーバが CentOS 6.5 だと、OpenSSHのバージョンが5.3と古く、ControlPersistオプションが処理できないためエラーになります。OpenSSH 5.6以降であればこの設定は不要です。 
+Ansibeの設定ファイルを書きます。``ansible.cfg`` に下記を設定します。MNサーバが CentOS 6.5 だと、OpenSSHのバージョンが5.3と古く、ControlPersistオプションが処理できないためエラーになります。MNサーバがOpenSSH 5.6以降であればこの設定は不要です。 
 
 :: 
 
@@ -481,7 +480,7 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
        "ping": "pong"
    }
 
-失敗しましたね。eriサーバはセットアップしていませんでしたね。セットアップしてしまいましょう。 ``ssh root@eri`` でログインしてセットアップ開始。今度はCentOSです。
+失敗しましたね。eriサーバはセットアップしていませんでしたね。セットアップしてしまいましょう。 ``ssh root@eri`` でログインしてコマンドを打ちます。今度はCentOSです。
 
 .. code-block:: bash
 
@@ -507,14 +506,14 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
        "ping": "pong"
    }
 
-``-i hosts`` は、対象のサーバが書かれたhostsファイルを指定しています。 ``-m ping`` はpingモジュールを使うことを示しています。その他のモジュールについてはあとで説明します。 最後の ``all`` は、hostsファイルの全てのMNサーバを対象にします。今回、pingに対してpongが帰ってきました。成功です。うまくいかない時は、ansibleのコマンドに ``-vvv`` オプションをつけると、詳細な動作が見えます。
+``-i hosts`` は、対象のサーバが書かれたhostsファイルを指定しています。 ``-m ping`` はpingモジュールを使うことを示しています。その他のモジュールについてはあとで説明します。 最後の ``all`` は、hostsファイルの全てのMNサーバを対象にします。今回、pingに対してpongが帰ってきました。成功です。うまくいかない時は、ansibleのコマンドに ``-vvvv`` オプションをつけると、詳細な動作が見えます。
 
 .. topic:: known_hostsを無視する方法
 
    DigitalOceanの接続先のホストを何度も作りなおしていると、前回使ったGlobal IPアドレスが使いまわされます。
    当然のことながら ``.ssh/known_hosts`` ファイルのキーを消さないとsshのログインに失敗します。そのときは、あらかじめ ``ansible.cfg`` に下記を書いておくと良いです。
    
-   .. code-blcok:: conf
+   .. code-blcok:: ini
 
       [defaults]
       host_key_checking=False
@@ -588,7 +587,7 @@ Ansibleの引数に、コマンドを指定することができます。これ�
 Playbook
 """""""""
 
-Playbookとは、MNに対してどのような設定するかを書いたAnsibleの設定ファイルです。中身はYAML [#iiasnayaml]_ です。Chefでいうところのレシピに当たります。
+Playbookとは、MNに対してどのような変更を加えるかを記述したファイルです。中身はYAML [#iiasnayaml]_ です。Chefでいうところのレシピに当たります。
 Playbookを作成しましょう。まずは ``playbook.yml`` というファイルに下記のように書きます。
 
 .. [#iiasnayaml] YAMLの書き方はこちらを参照。jsonよりマシ(脳内調べ) http://docs.ansible.com/YAMLSyntax.html
@@ -607,7 +606,7 @@ Playbookを作成しましょう。まずは ``playbook.yml`` というファイ
          apt: name=php5 state=latest
          when: ansible_os_family == 'Debian'
 
-hostファイルに書かれたホストで、rootユーザで、tasksを実行します。RedHatのシステム(今回CentOS)では、yumモジュールでphpをインストールします。Debian(今回はUbuntu)では、aptモジュールでphp5をインストールしています。
+hostファイルに書かれたホスト(今回は全てのホストで行う)に対して、rootユーザで、tasksを実行します。RedHatのシステム(今回CentOS)では、yumモジュールでphpをインストールします。Debian(今回はUbuntu)では、aptモジュールでphp5をインストールしています。
 CentOSとUbuntuでパッケージ管理システムに違いがあるため、whenで場合分けしています。ここまで作成したファイルの一覧はこのようになっていると思います。
 
 .. code-block:: sh
@@ -1005,7 +1004,7 @@ hosts ファイルに、仮想マシンのホスト名を書きます。
    honoka ansible_connection=ssh 
    rin ansible_connection=ssh 
 
-CentOS 6系では、``~./.ssh/config`` を読んでくれない問題の回避をするため、ansible.cfgに下記を書きます。
+CentOS 6系では、``~/.ssh/config`` を読んでくれない問題の回避をするため、ansible.cfgに下記を書きます。
 
 ::
    
@@ -1142,7 +1141,7 @@ token を取得します。tokenを作るときに、Write権限の設定にチ�
   tokenの管理上の名前を入力。そして、Writeにチェックを入れましょう
 
 DigitalOceanにSSH Keysの名前を登録していない場合はホストOSの公開鍵を登録します。登録した鍵の名前が必要です。ここではpublickeyとしています。
-ここまでできたら、適当なディレクトリにVafrantfileを作りましょう。取得したClient IDとAPI KEY、tokenを入力します。512MBの最小インスタンスで、Ubuntu 14.04 x64のイメージを使ってシンガポールリージョン(sgp1)にDropletを作成します。
+ここまでできたら、適当なディレクトリにVafrantfileを作りましょう。取得したClient IDとAPI KEY、tokenを入力します。メモリ512MBの最小インスタンスで、Ubuntu 14.04 x64のイメージを使ってシンガポールリージョン(sgp1)にDropletを作成します。
 
 :: 
 
@@ -1239,8 +1238,8 @@ playbook.ymlの内容は、apacheをインストールして、起動、ホス�
   Dockerのロゴ
 
 Dockerとは、たいそう面白いギャグを連発して観客を "どっかーどっかー" 沸かすツールです。そういう冗談はおいといて、Dockerのgithubによると「Docker: the Linux container engine」とあります。
-DockerはホストOSのカーネルを共有し、AUFSというファイルシステムを使って仮想化しています。
-予めインターネット上に用意されているDockerのイメージを元に、コンテナと呼ばれる仮想マシンを起動します。1つのコンテナには、1つのプロセスを起動するのが基本的な使い方です。
+DockerはホストOSのカーネルを共有し、AUFSというファイルシステムを使って仮想化を実現しています。
+あらかじめインターネット上に用意されているDockerのイメージを元に、コンテナと呼ばれる仮想マシンを起動します。1つのコンテナには、1つのプロセスを起動するのが基本的な使い方です。
 
 
 インストール
@@ -1322,8 +1321,8 @@ ifconfigを打つと、ローカルIPがふられています。ホストOSか�
    # docker run -d ubuntu:14.04 ping www.lovelive-anime.jp
    d7168d2c3b421192a49dc15927b6a1466ab73424bda94e11679af9f8509f369c
    # docker ps 
-   CONTAINER ID IMAGE        COMMAND          CREATED        STATUS        PORTS NAMES
-   d7168d2c3b42 ubuntu:14.04 ping www.loveliv 18 seconds ago Up 18 seconds       happy_meitner    
+   CONTAINER ID IMAGE        COMMAND CREATED        STATUS        NAMES
+   d7168d2c3b42 ubuntu:14.04 ping ww 18 seconds ago Up 18 seconds happy_meitner    
    
    # docker logs happy_meitner  | head
    PING www.lovelive-anime.jp (210.138.156.25) 56(84) bytes of data.
@@ -1435,9 +1434,14 @@ Dockerのイメージファイルは https://hub.docker.com/ にあります。s
 .. code-block:: sh
 
    root@hanayo:~# docker ps -a
-   CONTAINER ID IMAGE          COMMAND   CREATED        STATUS                     PORTS NAMES
-   0ab61f52d310 centos:centos7 /bin/bash 8 minutes ago  Exited (130) 4 seconds ago       furious_mayer       
-   31318abf2f23 centos:centos7 /bin/bash 11 minutes ago Exited (130) 9 minutes ago       prickly_bardeen     
+   CONTAINER ID IMAGE          COMMAND   CREATED        (STATUSに続く)
+   0ab61f52d310 centos:centos7 /bin/bash 8 minutes ago  (Exitedに続く)
+   31318abf2f23 centos:centos7 /bin/bash 11 minutes ago (Exitedに続く)
+
+   STATUS                     PORTS NAMES
+   Exited (130) 4 seconds ago       furious_mayer    
+   Exited (130) 9 minutes ago       prickly_bardeen  
+
 
 STATUSがExitedとなっていますね。bashプロセスから抜けると、コンテナは起動をやめてしまうのです。では、このコンテナを起動させてみましょう。
 その前に、便利な ``dl`` コマンドを作りましょう [#iidocdl]_ 。一番直近に作られたコンテナの名前を返してくれるコマンドです。
@@ -1468,9 +1472,13 @@ STATUSがExitedとなっていますね。bashプロセスから抜けると、�
 
 .. code-block:: sh
 
-   CONTAINER ID IMAGE          COMMAND   CREATED        STATUS                PORTS NAMES
-   0ab61f52d310 centos:centos7 /bin/bash 20 minutes ago Up 5 minutes                furious_mayer       
-   31318abf2f23 centos:centos7 /bin/bash 23 minutes ago Exited (130) 21 minutes ago prickly_bardeen     
+   CONTAINER ID IMAGE          COMMAND   CREATED        STATUS       (PORTSに続く)
+   0ab61f52d310 centos:centos7 /bin/bash 20 minutes ago Up 5 minutes (furious_mayerに続く)
+   31318abf2f23 centos:centos7 /bin/bash 23 minutes ago Exited (130) (21に続く)
+   
+            PORTS NAMES
+                  furious_mayer       
+   21 minutes ago prickly_bardeen 
 
 今度は、STATUSがUPになってますね。これで起動中のコンテナが出来ました！あとはいらないコンテナを削除しましょう。
 
@@ -1492,8 +1500,12 @@ redisのコンテナと、apache+phpが入ったコンテナを作って、redis
    root@hanayo:~# docker pull redis
    root@hanayo:~# docker run -d -p 6379:6379 redis
    root@hanayo:~# docker ps -a
-   CONTAINER ID IMAGE     COMMAND      CREATED        STATUS        PORTS                  NAMES
-   ccb90d29d571 redis:2.8 redis-server 13 seconds ago Up 12 seconds 0.0.0.0:6379->6379/tcp drunk_pike
+   CONTAINER ID IMAGE     COMMAND      CREATED        STATUS        (PORTSに続く)
+   ccb90d29d571 redis:2.8 redis-server 13 seconds ago Up 12 seconds (0.0.0.0に続く)
+  
+   PORTS                  NAMES
+   0.0.0.0:6379->6379/tcp drunk_pike
+
 
 ``-p`` オプションはホストOSと、コンテナのポートマッピングを指定しています。 ``docker ps -a`` で、redisのコンテナが起動したことが確認できました。
 ホストOSにredisのインスタンスが起動している感覚で、実はそのインスタンスは仮想マシンの中で起動しているというイメージです。
@@ -1532,29 +1544,31 @@ Dockerfileのサンプルは、https://github.com/docker/docker/blob/master/Dock
    
    # apache
    RUN cd /tmp && wget http://ftp.kddilabs.jp/infosystems/apache//httpd
-                                                  /httpd-2.4.10.tar.bz2
+       /httpd-2.4.10.tar.bz2
    RUN cd /tmp && tar jxvf httpd-2.4.10.tar.bz2
    RUN cd /tmp/httpd-2.4.10 && ./configure --enable-so && make &&make install 
    RUN echo "みんなーっ！ご飯炊けたよっ♪" > /usr/local/apache2/htdocs/index.html
    RUN echo "AddType application/x-httpd-php .php" >> 
-   /usr/local/apache2/conf/httpd.conf 
+       /usr/local/apache2/conf/httpd.conf 
    RUN echo "LoadModule php5_module modules/libphp5.so" >> 
-   /usr/local/apache2/conf/httpd.conf
+       /usr/local/apache2/conf/httpd.conf
    ADD redis.php /usr/local/apache2/htdocs/redis.php
    
    # php 
    RUN cd /tmp && wget http://jp2.php.net/distributions/php-5.5.15.tar.gz &&
-   tar zvxf php-5.5.15.tar.gz && cd php-5.5.15/ && 
-   ./configure  --with-apxs2=/usr/local/apache2/bin/apxs && make && make install
+       tar zvxf php-5.5.15.tar.gz && cd php-5.5.15/ && 
+       ./configure  --with-apxs2=/usr/local/apache2/bin/apxs && make &&
+       make install
    
    # phpredis
-   RUN cd /tmp && wget https://github.com/nicolasff/phpredis/archive/master.zip
+   RUN cd /tmp && wget ¥
+       https://github.com/nicolasff/phpredis/archive/master.zip
    RUN cd /tmp && unzip master.zip
    RUN cd /tmp/phpredis-master && phpize && ./configure && make &&
-                                                                 make install
+       make install
    RUN echo "extension=redis.so" >> /usr/local/lib/php.ini
    RUN sed -i -e "s|;date.timezone =|date.timezone = Asia/Tokyo|"
-                                                        /usr/local/lib/php.ini
+       /usr/local/lib/php.ini
    
    # SSH
    ADD id_rsa.pub /root/id_rsa.pub
@@ -1627,11 +1641,11 @@ redisのコンテナのIPアドレスを置換する前のredis.php.templateを�
 
 .. code-block:: sh
 
-   root@hanayo:~/docker-centos# IP=$(docker inspect $(docker ps -a | awk /redis-server/'{print $1}') | awk -F \" /IPAddress/'{print $4}')
-   root@hanayo:~/docker-centos# sed -e "s/127.0.0.1/"$IP"/" redis.php.template > redis.php
-   root@hanayo:~/docker-centos# docker build -t centos:ap .
-   root@hanayo:~/docker-centos# docker run -d -p 10022:22 -p 80:80 centos:ap
-   root@hanayo:~/docker-centos# docker ps -a
+   root@hanayo:# IP=$(docker inspect $(docker ps -a | awk /redis-server/'{print $1}') | awk -F \" /IPAddress/'{print $4}')
+   root@hanayo:# sed -e "s/127.0.0.1/"$IP"/" redis.php.template > redis.php
+   root@hanayo:# docker build -t centos:ap .
+   root@hanayo:# docker run -d -p 10022:22 -p 80:80 centos:ap
+   root@hanayo:# docker ps -a
    CONTAINER ID IMAGE     COMMAND              CREATED       STATUS        PORTS                                     NAMES
    042bce159434 centos:ap /usr/bin/supervisord 5 seconds ago Up 5 seconds  0.0.0.0:80->80/tcp, 0.0.0.0:10022->22/tcp nostalgic_shockley   
    e6df5aeac928 redis:2.8 redis-server --bind  10 days ago   Up 12 minutes 0.0.0.0:6379->6379/tcp                    loving_lumiere  
@@ -1653,11 +1667,11 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 
    .. [#] https://bugzilla.redhat.com/show_bug.cgi?id=1012952
 
-   centosイメージを使うと、CentOS 7となるため、サービスの起動はsystemdになります。systemd経由で、例えばapacheを起動しようとするとこのバグを踏みます：Bug 1033604 - Unable to start systemd service in Docker container [#]_ 。「dockerはアプリケーションコンテナモデルである。systemdで起動してはいけない。デーモンで直接起動しよう」という回答がありました。
+   centosイメージを使うと、CentOS 7となるため、サービスの起動はsystemdになります。systemd経由で、例えばapacheを起動しようとするとこのバグを踏みます：Bug 1033604 - Unable to start systemd service in Docker container [#iibug1]_ 。「dockerはアプリケーションコンテナモデルである。systemdで起動してはいけない。デーモンで直接起動しよう」という回答がありました。
 
    sshでのログインでは、mizzyさんの記事「Dockerコンテナに入るなら SSH より nsinit が良さそう」 [#]_ を見つけました。やってみたところ、go getのところで詰まり、断念。「RHEL/CentOS 6で Docker に nsinit/nsenter する」 [#]_ の記事を見つけたものの、手順が煩雑なので諦めました。結局、supervisordに落ち着きました。PAMをoffにしていないとログインできなかったりと、様々な罠がありました。
    
-   .. [#] https://bugzilla.redhat.com/show_bug.cgi?id=1033604
+   .. [#iibug1] https://bugzilla.redhat.com/show_bug.cgi?id=1033604
    .. [#] http://mizzy.org/blog/2014/06/22/1/
    .. [#] http://qiita.com/comutt/items/2f873a0e7eaddd3f647e
 
@@ -1672,8 +1686,6 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 * ここで触れていない内容として、コンテナのデータの永続化があります。mopemopeさんの「Docker でデータのポータビリティをあげ永続化しよう」 [#]_ が参考になります。また、dockerはhostsが書き換えられないため、工夫が必要になります。JAGAxIMOさんの「Dockerで/etc/hostsファイルが操作出来ない対策」 [#]_ を参考にしてください
 
 * コマンドのチュートリアルは、curseoffさんの「Dockerコマンドメモ」が手堅くまとまっています。Vagrantを使って少し進んだチュートリアルはdeeeetさんの「実例で学ぶDockerコマンド」 [#]_が有用です
-
-* docker runをしすぎて、コンテナがたくさん出来てしまった時は、 ``docker rm ¥`docker ps -aq¥` `` で消えます
 
 * VagrantでCoreOSの仮想マシンを立ち上げて、そこでDockerを使ってアプリケーションの開発を行うという手法が主流になっているそうです [#]_ 
 
@@ -1735,7 +1747,8 @@ Serverと next_server の設定をします。ここではテストのためデ�
 .. code-block:: sh
 
    # cobbler import ¥ 
-   --path=rsync://ftp.jaist.ac.jp/pub/Linux/scientific/6.5/x86_64/os/ --name=SL6.5-x86_64
+   --path=rsync://ftp.jaist.ac.jp/pub/Linux/scientific/6.5/x86_64/os/ ¥
+   --name=SL6.5-x86_64
 
 ダウンロードした中身は ``/var/www/cobbler/ks_mirror/SL6.5-x86_64/`` に置かれました。
 
@@ -1786,12 +1799,12 @@ Serverと next_server の設定をします。ここではテストのためデ�
 Surf
 ^^^^^^
 
-Surf [#]_ は、クラスタ管理を行うツールです。ゴシッププロトコル [#]_ で通信します。クラスタ管理は分散型なので、障害に強いです。
+Surf [#serfdom]_ は、クラスタ管理を行うツールです。ゴシッププロトコル [#iigos]_ で通信します。クラスタ管理は分散型なので、障害に強いです。
 IIの世界での使い方としては、新しいサーバが追加されたとき、他のサーバに自分が参加したことを伝えたり、不調で切り離されたサーバをほかのサーバが検知してクラスタから切り離されたりします。
 カスタムイベントを発行できるため、新しいサーバが加わったときに、hostsファイルの更新を行ったり、ロードバランサに追加したりすることができます。
 
-.. [#] http://www.serfdom.io/
-.. [#] http://en.wikipedia.org/wiki/Gossip_protocol
+.. [#serfdom] http://www.serfdom.io/
+.. [#iigos] http://en.wikipedia.org/wiki/Gossip_protocol
 
 インストールしてみましょう。各ディストリビューション向けに、パッケージが用意されています。今回はlinux amd64をダウンロード。zipを解凍すると、そこには ``serf`` のバイナリが入っていました。
 実験する環境は、毎度おなじみDigitalOceanの最小構成のDropletです。Dropletを(sachiko, nana)用意して、Private Networkを有効にしています。
@@ -1806,7 +1819,9 @@ sachikoでagentを立ち上げます。
    0.6.3_linux_amd64.zip serf
    sudo cp serf /usr/local/bin/
 
-Agentを起動
+Agentを起動します [#iiserfagent]_ 。
+
+.. [#iiserfagent] この状態で、0.0.0.0を7946portでLISTEN、localhostを7373portでLISTENしています
 
 .. code-block:: sh
 
@@ -1828,10 +1843,10 @@ Agentを起動
        2014/08/03 03:55:25 [INFO] agent: Received event: member-join
 
 
-この状態で、0.0.0.0を7946portでLISTEN、localhostを7373portでLISTENしています。
-端末が返ってこないのでctrl+cでserf agentが終了します。initスクリプト [#]_ があるので、そちらを使ったほうが楽です。
 
-.. [#] http://pocketstudio.jp/log3/2013/11/25/sysv_init_script_for_serf/
+端末が返ってこないのでctrl+cでserf agentが終了します。initスクリプト [#iiserfini]_ があるので、そちらを使ったほうが楽です。
+
+.. [#iiserfini] http://pocketstudio.jp/log3/2013/11/25/sysv_init_script_for_serf/
 
 sachikoのプライベートネットワークのIPアドレスをメモ(今回は10.130.215.135)して、nanaへ移ります。nanaでもserfをインストールしてagentを立ち上げます。バックグラウンドで立ち上げます。
 
@@ -1864,9 +1879,9 @@ join完了しました。membersで一覧が出ます。
    [abe@nana ~]$ serf event '自称・17さい'
    2014/08/03 04:15:03 [INFO] agent: Received event: user-event: 自称・17さい
 
-sachiko [#]_ のログにも、出ています。
+sachiko [#iikousiki]_ のログにも、出ています。
 
-.. [#] 公式プロフィールでは14さいです
+.. [#iikousiki] 公式プロフィールでは14さいです
 
 :: 
 
@@ -1878,7 +1893,7 @@ sachiko [#]_ のログにも、出ています。
 
    [abe@nana ~]$ serf leave
 
-   [koshimizu@sachiko ~]# serf members
+   [koshimizu@sachiko ~]$ serf members
        2014/08/03 04:50:55 [INFO] agent.ipc: Accepted client: 127.0.0.1:41356
    sachiko  10.130.215.135:7946  alive  
    nana     10.130.215.141:7946  left
@@ -1890,7 +1905,7 @@ sachiko [#]_ のログにも、出ています。
    [abe@nana ~]$ serf agent &
    [abe@nana ~]$ serf join 10.130.215.135
 
-   [koshimizu@sachiko ~]# serf members
+   [koshimizu@sachiko ~]$ serf members
        2014/08/03 04:53:24 [INFO] agent.ipc: Accepted client: 127.0.0.1:41362
    sachiko  10.130.215.135:7946  alive  
    nana     10.130.215.141:7946  alive
@@ -1910,7 +1925,8 @@ agentを終了して、イベントハンドラにスクリプトファイルを
 
    [abe@nana ~]$ serf agent -log-level=debug -event-handler=./script.sh
    (略)
-       2014/08/03 05:39:27 [DEBUG] agent: Event 'member-join' script output: ウサミンパワーでカラフルメイドにメルヘンチェンジ！
+       2014/08/03 05:39:27 [DEBUG] agent: Event 'member-join' script output: 
+       ウサミンパワーでカラフルメイドにメルヘンチェンジ！
 
 実行できました。次はイベントに名前を作ってそれを実行してみましょう。プロディーサーさんがお部屋に訪問した時のセリフを出してみましょう [#iitekitou]_ 。
 各Dropletでスクリプトを作り、serf agentを実行するときに指定します。visitというイベント名として登録し、visitイベントを呼び出すとスクリプトが実行されます。
@@ -1925,7 +1941,7 @@ agentを終了して、イベントハンドラにスクリプトファイルを
 
    [abe@nana ~]$ chmod +x usamin.sh ; cat usamin.sh 
    #!/bin/bash
-   echo "はーい今出ま…って、プロデューサーさん!？えっ、ま、まぁ汚い部屋ですがどうぞ！あっ、こ、この制服は…久しぶりにお掃除したら出てきて…あっ、いや、17歳なので毎日着てました!着てます!"
+   echo "はーい今出ま…って、プロデューサーさん!？えっ、ま、まぁ汚い部屋ですがどうぞ！あっ、こ、
 
    [koshimizu@sachiko ~]$ serf agent -log-level=debug -event-handler ¥
                         > user:visit=./sachiko.sh &
@@ -2009,10 +2025,10 @@ Orchestration、Configuration、Bootstrapping、Agent、Testで使われるツ�
 スペシャルサンクス
 -----------------
 
-* @eigo_s (https://twitter.com/eigo_s | Vagrantでお世話になりました)
-* @ringohub (https://twitter.com/ringohub | Vagrantでお世話になりました)
-* @JAGAxIMO (https://twitter.com/JAGAxIMO | Dockerでお世話になりました)
-* @r_rudi (https://twitter.com/r_rudi | Ansibleでお世話になりました)
+* @eigo_s (https://twitter.com/eigo_s | Vagrant,Packerでアドバイスいただきました)
+* @ringohub (https://twitter.com/ringohub | Vagrantでアドバイスいただきました)
+* @JAGAxIMO (https://twitter.com/JAGAxIMO | Dockerで困った時助けていただきました)
+* @r_rudi (https://twitter.com/r_rudi | Ansibleでツッコミ頂きました)
 * @mtgto (https://twitter.com/mtgto | 査読していただきました)
 * 先人のblogの記事(各ツールの最後にURLを載せています)
 
@@ -2029,9 +2045,9 @@ Orchestration、Configuration、Bootstrapping、Agent、Testで使われるツ�
 
 英語ですが、翻訳すれば雰囲気はつかめます。
 
-* 今さら聞けない Immutable Infrastructure - 昼メシ物語 / http://blog.mirakui.com/entry/2013/11/26/231658
+* 今さら聞けない Immutable Infrastructure - 昼メシ物語 : http://blog.mirakui.com/entry/2013/11/26/231658
 
-  - IIについての話題をコンパクトにまとめている記事です。ただしIIはここで出てこないトピックもたくさんあります
+  - IIについての話題をコンパクトにまとめている記事です。ここで出てこないトピックもたくさんあります
 
 
 参考文献
@@ -2039,3 +2055,4 @@ Orchestration、Configuration、Bootstrapping、Agent、Testで使われるツ�
 「継続的デリバリー 信頼できるソフトウェアリリースのためのビルド・テスト・デプロイメントの自動化」アスキー・メディアワークス,2012
 「入門Ansible」(http://www.amazon.co.jp/dp/B00MALTGDY/),2014
 「WEB+DB PRESS vol.81」技術評論社,2014
+
