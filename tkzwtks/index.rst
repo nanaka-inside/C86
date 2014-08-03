@@ -13,8 +13,9 @@
 ^^^^^^^^^^^^^^^^^
 ところで「バランスWiiボード」は皆さんご存知でしょうか。Wii/WiiUとつないで使える板状のコントローラです。
 
-.. figure:: img/barance_wii_board.eps
-  :scale: 60%
+.. figure:: img/wii_board.eps
+   :scale: 70%
+   :align: center
 
   ホコリかぶってたバランスWiiボード
           
@@ -309,7 +310,7 @@ node-oauth [#node-oauth]_ をつかいます。CONSUMER_KEY/CONSUMER_SECRETは�
 多少短いような気もしますが、7月1日から7月19日までの約三週間での結果はこんな感じです。
 
 .. figure:: img/fitbit_weight.eps
-    :scale: 50%
+    :scale: 70%
     :align: center
 
     体重の変化
