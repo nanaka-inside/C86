@@ -193,6 +193,7 @@ latex_elements = {
 # Additional stuff for the LaTeX preamble.
 #'preamble': '',
 'preamble': ur"""
+\AtBeginDvi{\special{papersize=182mm,257mm}}
 \fancypagestyle{normal}{
 \fancyhf{}
 \fancyhead[LE,RO]{\nouppercase{\rightmark}}
