@@ -7,10 +7,10 @@ Immutable Infrastructureの最適解を探る(chapter用)
 Immutable Infrastructureの最適解を探る
 =====================================
 
-筆者の@tbofficeです。某webサービス的な会社でインフラ的なお仕事をやりつつ、裏では同人誌を書いています。本業が同人誌を書くことではないのかというツッコミを、最近受けるようになりました。おそらくそうなんじゃないでしょうか。それにしても、印刷代ってバカにならないですよね。何を言っているんでしょうかこの人は。
+筆者の@tbofficeです。某webサービス的な会社でインフラ的なお仕事をやりつつ、裏では同人誌を書いています。
 
-さて、本特集では、2014年のインフラ界のバズワードである「Immutable Infrastructure」(以下、IIと略します)について取り上げます。IIの由来や、動向とそれにまつわるソフトウエアを実際に使ってみたいと思います。
-
+さて、本記事では、2014年のインフラ界のバズワードである「Immutable Infrastructure」(以下、IIと略します)を取り上げます。
+まずは、IIが生まれた背景と思想について、もう一つは、IIを実現するために使えるツールについて実際に使うことでIIの限界を探ります。
 
 まず、こちらをご覧ください
 -------------------------------
@@ -69,12 +69,7 @@ CHad Fowler氏 [#iichad]_ の「サーバを捨てて、コードを焼き付け
 継続的デリバリー
 ---------------
 
-先ほど、「いつまで手動でデプロイしているんですか？」というマサカリを投げてきた本は「継続的デリバリー 信頼できるソフトウェアリリースのためのビルド・テスト・デプロイメントの自動化」 [#iikz]_ (以下、「継続的デリバリー」と略します)です。この本は、ソフトウエアをユーザにできるだけ早く届ける方法が書かれています。つまり書いたコードのテストを自動で行うための手法から、本番環境への安全で素早いデプロイ方法などについて書かれています。
-
-* 手動で変更を加えていったサーバのプログラムのアップデートを行うために、なぜ毎週、戦々恐々としなくてはならないのか？
-* バグを出してしまったが、来週のアップデートまで待たせるのか？
-
-本来は、バグを潰したコードを、すぐにでも安全に、本番サーバにデプロイしたい、と思っているんじゃないでしょうか。
+先ほど、「いつまで手動でデプロイしているんですか？」というマサカリを投げてきた本は「継続的デリバリー 信頼できるソフトウェアリリースのためのビルド・テスト・デプロイメントの自動化」 [#iikz]_ (以下、「継続的デリバリー」と略します)です。この本は、ソフトウエアをユーザにできるだけ早く届ける方法が書かれています。つまり、コードの自動テストの手法から、安全で素早いデプロイ方法などについて書かれています。
 
 .. [#iikz] http://www.amazon.co.jp/dp/4048707876
 
@@ -89,36 +84,23 @@ Martin Fowler氏のブログに、PhoenixServer [#iifs]_ という記事があ�
 .. [#iifs] http://martinfowler.com/bliki/PhoenixServer.html
 .. [#iisfs] そんなサーバのことを SnowflakeServer(雪の欠片サーバ) という http://martinfowler.com/bliki/SnowflakeServer.html
 
-あるいは、実験環境をいじくりまくって、やっぱりもとの綺麗さっぱりした状態にもどしたい、なんて経験は一回や二回、いやもっとあったかな？
-そんなときに、もし作りなおすことが簡単にできたらどうでしょう。
-
-ここで、先ほどでてきた「継続的デリバリー」の中でも重要な事として **自動化** が何度も登場します。
-自動化を推し進めると、コードのテストから、バグの修正や機能の拡張を本番サーバにデプロイするまでがほぼ自動となり、デプロイの回数を安全に増やすことができます。
+「継続的デリバリー」の中でも重要な事として **自動化** が何度も登場します。自動化すれば作り直しが簡単にできます。
+また、自動化を推し進めると、コードのテストから、バグの修正や機能の拡張を本番サーバにデプロイするまでがほぼ自動となり、デプロイの回数を増やすことができます。
 
 2012年に行われたカンファレンス、AWS re:Inventにて「Amazonは1時間に最大1000回もデプロイする」 [#iideploy]_ という講演がありました。
 そのなかで、「Amazon.comでは11秒ごとに新しいコードがデプロイされている。そして最も多いときで1時間に1079回デプロイが行われた。
 これには機能追加だけでなくバグフィクスなども含まれるが。平均で1万、最大で3万ものホストがデプロイを受け取る」とあります。
 これは、バグはすぐに潰され、機能の追加の恩恵も受けられることを示します。このサイクルを行うために、継続的デリバリーでも強調されている **自動化** が必須となります。
 
-例えば、この本の原稿の生成も自動化されています [#iikonohon]_ 。
-githubにReST形式の原稿をpushすると、それを検知したjenkinsがsphinx [#iisphinx]_ のコマンドを実行し、入稿用のPDFが生成されます。
-
-自動化の最先端として、githubにpull requestを行うとテストが実行され、そのあと本番環境へデプロイされる仕組みが@naoya氏のブログで紹介されています [#iighedep]_ 。
-pull requiestをIRCなどのツールで自動化して作成し、Pull Request内容を確認、mergeするとそのままテストが走り、そして本番環境へコードが入ります。
-自動化できるところは自動化しましょう。人的ミスがなくなります。
-
 .. [#iideploy] http://www.publickey1.jp/blog/12/amazon11000_aws_reinventday2_am.html
-.. [#iisphinx] ドキュメントビルダーのsphinxです。http://sphinx-users.jp/
 .. [#iighedep] GitHub 時代のデプロイ戦略 http://d.hatena.ne.jp/naoya/20140502/1399027655
-.. [#iikonohon] ななかInsidePRESS vol.1では原稿はGitHubにあり、PDFは手動でビルドしていました 
-.. [#iivps] Virtual Private Server。仮想専用サーバのことです。この原稿PDFはさくらのVPSでビルドされています
 
 
 そうはいっても
 ^^^^^^^^^^^^^^
 
 確かに壊して作りなおすと言っても、いまさらできないよ・・・時間があればできるけど、それをやっている隙がないということもあるでしょう。
-そいういう場合は、人間が毎回ルーチンで行っていることを自動化しましょう。たとえばコードのテストの自動化であったり、デプロイの準備などです。
+そいういう場合は、ルーチンで行っていることを自動化しましょう。たとえばコードのテストの自動化であったり、デプロイの準備などです。
 いつか来る、すべてのシステムの作り直しの時がくるまでに準備しておきましょう [#souhaittemo]_ 。
 
 .. [#souhaittemo] 作り直しの時がこないって？そんなシステムは老朽化がきて、サービスをやめようという判断になるので、そのまま捨てましょう（ぇー
@@ -140,7 +122,8 @@ IIの説明をするまえに、我々は何を自動化したいのかを明確
 
 .. [#iisetup] Serf という Orchestration ツール #immutableinfra http://www.slideshare.net/sonots/serf-iiconf-20140325 の14ページを参考にしました
 .. [#iigoldenimage] ゴールデンイメージってやつもあるけど各自ぐぐってね！
-.. [#iicable] 自動化無理
+.. [#iicable] 自動化無理。でもできると嬉しい
+
 
 Immutable Infrastructure を導入
 -------------------------------
@@ -197,7 +180,6 @@ IIの三層
 
   * デプロイされたプログラムの動作を確認
   * 使われるツールやソフトウエア：Serverspec
-
 
 
 どうでしょうか [#ii]_ 。ここまでくると、先ほどの「サーバのセットアップの一般的手順」を網羅できましたね！ [#iitaechan]_ [#iiyarukoto]_
@@ -402,7 +384,7 @@ Ansibleを実行するサーバ(CM)は、お名前.comのVPS(CentOS 6.5)で、�
 
    DigitalOceanとは、1時間1円くらいで使えるVPSです。最小構成では、1CPU(2-3GHz) メモリ512MB SSDのディスク20GB 転送量1GB です。そのプランでは、1時間0.007ドル(約0.7円) [#]_ 、1ヶ月立ち上げっぱなしだと月5ドル(約500円)かかります。検証環境や、静的なコンテンツを配信するサイトであれば十分なスペックです。課金対象は、電源が入っているか入っていないかにかかわらずDropletが存在している時です。Dropletの電源を落としてイメージのスナップショットをとってからDropletを削除すると課金されなくなります。
 
-   リージョンは、ロンドンや、ニューヨーク、アムステルダムがあります。最近シンガポールができました。sshの遅延は気にならないので、私はもっぱらシンガポールを使っています。
+   リージョンは、ロンドンや、ニューヨーク、アムステルダムなどがあります。最近シンガポールができました。sshの遅延は気にならないので、私はもっぱらシンガポールを使っています。
 
    選択できるOSはUbuntu、Fedora、Debian、CentOSです。この他に、LAMPなどのアプリケーションがインストール済みのイメージもあります。
 
@@ -412,9 +394,9 @@ Ansibleを実行するサーバ(CM)は、お名前.comのVPS(CentOS 6.5)で、�
    .. [#] 艦これのことらしい
    .. [#] モバマスの道場のこと
 
-   Dropletを作成すると、Global IPアドレスが1つ払いだされます。あらかじめダッシュボードからSSHの公開鍵を登録しておくと、rootユーザでsshのログインできます。
+   Dropletを作成すると、Global IPアドレスが1つ払いだされます。あらかじめダッシュボードからSSHの公開鍵を登録しておくと、rootユーザでsshログインできます。
 
-   設備はネットの記事をあさったところ、DigitalOceanはデータセンターを借りて自社でサーバを持っているようです。
+   ネットの記事をあさったところ、DigitalOceanはデータセンターを借りて自社でサーバを持っているようです。なぜこんなに安いのかは謎です。
    
 
 .. figure:: img/an-do-dl.eps
@@ -516,7 +498,6 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
 .. code-block:: bash
 
    [root@eri ~]# useradd -G wheel ayase
-   [root@eri ~]# yum install -y python-simplejson # やらなくてもいいかもTODO
    [root@eri ~]# visudo
    %wheel  ALL=(ALL)       NOPASSWD: ALL # コメントになっているので有効化
    [root@eri ~]# cp -a .ssh/ /home/ayase/
@@ -541,7 +522,7 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
 
 .. topic:: known_hostsを無視する方法
 
-   筆者がハマったところは、DigitalOceanの接続先のホストを何度も作りなおしていました。同じ Region でホストを作ると、前回使ったGlobal IPアドレスが使いまわされます。
+   DigitalOceanの接続先のホストを何度も作りなおしていました。同じ Region でホストを作ると、前回使ったGlobal IPアドレスが使いまわされます。
    当然のことながら ``.ssh/known_hosts`` ファイルのキーを消さないとsshのログインに失敗します。そのときは、あらかじめ ``ansible.cfg`` に下記を書いておくと良いです。
    
    .. code-blcok:: conf
@@ -900,8 +881,9 @@ vagrant upして仮想マシンを起動
 
 ここで、vagrantのコマンドを見ていきます。vagrantコマンドを単体で打つとヘルプが表示されます。仮想マシンの様子を見てみます。
 
-.. code-block:: sh
 
+.. code-block:: sh
+   
    $ vagrant status
    Current machine states:
    
@@ -911,6 +893,7 @@ vagrant upして仮想マシンを起動
    shut it down forcefully, or you can run `vagrant suspend` to simply
    suspend the virtual machine. In either case, to restart it again,
    simply run `vagrant up`.
+
 
 ``vagrant box list`` で仮想マシンのBoxのリストが表示されます。 ``vagrant halt`` で仮想マシンの電源を切ります。 ``vagrant suspend`` というコマンドもあり、その名の通り仮想マシンがsuspend状態になります。destroyで仮想マシンの削除です。これらのコマンドは、Vagrantfileがあるディレクトリで実行しないと怒られます。激おこです。
 
@@ -1682,7 +1665,7 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 
 
 補足
-^^^^^^
+""""""
 
 * Dockerは新しいツールのため、枯れているという感じがありませんでした。このあともかなりの頻度でアップデートされることが予想されるので、この内容は役に立たないかもしれません。そのときはPull reqいただければありがたいです。
 
@@ -1703,111 +1686,332 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 .. [#] http://qiita.com/deeeet/items/ed2246497cd6fcfe4104
 
 
-関連書籍・URL
-^^^^^^^^^^^^^^
-
-
 Cobbler
 ^^^^^^^^^
 
-* kickstartはわかっている！環境つくるのめんどいんだよねー向けな人
+Bootstrappingの層に入っていきます。今回はCobblerを取り上げます。
+
+Cobbler [#]_ は、PXE Bootサーバをつくるとき、煩わしい部分をやってくれるツールです。DHCPサーバ、tftpサーバ、pxelinux.0の設定や、OSのインポートを一手に引き受けてくれます。
+PXE Bootの仕組みは分かっているけど、いざ作ろうとするとやっぱり面倒という方向けです。
+
+.. [#] http://www.cobblerd.org/
+
+digitalOceanのcentos6.5にて実施しました。PXE bootはサポートされていませんが、LABELの追加までやってみます。yumでcobblerをインストールすると、httpdなどがインストールされます。pxelinux.0を持ってくるために、syslinuxパッケージも必要でした。なお、yumでインストールすると、Cobblerのバージョンは1.2.2でした。バージョン2.6系がリリースされているので古いです。
+
+.. code-block:: sh
+
+   yum install http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+   yum install cobbler syslinux  
 
 
-flynn
-^^^^^^
+必要に応じて、 ``/etc/cobbler/settings`` の下記の部分を書き換えます。
+
+dhcpの設定をcobbler行う場合は、manage_dhcpを1にします。
+
+::
+
+   manage_dhcp: 1
+
+Serverと next_server の設定をします。ここではテストのためデフォルト。
+
+:: 
+
+   server: 127.0.0.1
+   next_server: 127.0.0.1
+
+``/etc/cobbler/dhcp.template`` にdhcpd.confのテンプレートファイルがあるので、所属しているネットワークに合わせて編集します
+
+.. code-block:: sh
+
+   # service httpd start
+   # service cobblerd start
+   # cobbler check # 設定のチェックをします
+   # cobbler sync # 設定ファイルを作ります
+
+次に、OSの中身のインポートを行います。実際にPXE Bootサーバを作るとき一番面倒なところです。コマンド一発でできて素敵です。
+
+.. code-block:: sh
+
+   cobbler import --path=rsync://ftp.jaist.ac.jp/pub/Linux/scientific/6.5/x86_64/os/ --name=SL6.5-x86_64
+
+ダウンロードした中身は ``/var/www/cobbler/ks_mirror/SL6.5-x86_64/`` に置かれました。
+
+.. code-block:: sh
+
+   #  cobbler distro report --name SL6.5-x86_64
+   Name                           : SL6.5-x86_64
+   Architecture                   : x86_64
+   TFTP Boot Files                : {}
+   Breed                          : redhat
+   Comment                        : 
+   Fetchable Files                : {}
+   Initrd                         : /var/www/cobbler/ks_mirror/SL6.5-x86_64/images/pxeboot/initrd.img
+   Kernel                         : /var/www/cobbler/ks_mirror/SL6.5-x86_64/images/pxeboot/vmlinuz
+   Kernel Options                 : {}
+   Kernel Options (Post Install)  : {}
+   Kickstart Metadata             : {'tree': 'http://@@http_server@@/cblr/links/SL6.5-x86_64'}
+   Management Classes             : []
+   OS Version                     : generic26
+   Owners                         : ['admin']
+   Red Hat Management Key         : <<inherit>>
+   Red Hat Management Server      : <<inherit>>
+   Template Files                 : {}
+
+``/tftpboot/pxelinux.cfg/default`` を見てみると、LABELが追加されています。
+
+:: 
+
+   LABEL SL6.5-x86_64
+           kernel /images/SL6.5-x86_64/vmlinuz
+           MENU LABEL SL6.5-x86_64
+           append initrd=/images/SL6.5-x86_64/initrd.img ksdevice=bootif lang=  kssendmac text 
+           ipappend 2
+
+
+手元の環境では、実際にPXE Boot出来る環境がないのでここまでです。
+デフォルトのPXE Bootの画面よりもCobblerのPXE Bootの画面の方が使いやすくなっています。
+
+
+参考
+""""""
+
+* CobblerでScientific Linux 6.1を導入 : http://blog.glidenote.com/blog/2012/02/03/cobbler-scientific-linux-6.1/
+* cobbler を使ってみた : http://www.sssg.org/blogs/naoya/archives/855
+
 
 Surf
 ^^^^^^
 
+Surf [#]_ は、クラスタ管理を行うツールです。ゴシッププロトコル [#]_ で通信します。クラスタ管理は分散型なので、障害に強いです。
+IIの世界での使い方としては、新しいサーバが追加されたとき、他のサーバに自分が参加したことを伝えたり、不調で切り離されたサーバをほかのサーバが検知してクラスタから切り離されたりします。
+カスタムイベントを発行できるため、新しいサーバが加わったときに、hostsファイルの更新を行ったり、ロードバランサに追加したりすることができます。
+
+.. [#] http://www.serfdom.io/
+.. [#] http://en.wikipedia.org/wiki/Gossip_protocol
+
+インストールしてみましょう。各ディストリビューション向けに、パッケージが用意されています。今回はlinux amd64をダウンロード。zipを解凍すると、そこには ``serf`` のバイナリが入っていました。
+実験する環境は、毎度おなじみDigitalOceanの最小構成のDropletです。Dropletを(sachiko, nana)用意して、Private Networkを有効にしています。
+
+sachikoでagentを立ち上げます。
+
+wget https://dl.bintray.com/mitchellh/serf/0.6.3_linux_amd64.zip
+unzip 0.6.3_linux_amd64.zip
+ls 
+0.6.3_linux_amd64.zip serf
+sudo cp serf /usr/local/bin/
+
+Agentを起動
+
+$ serf agent 
+==> Starting Serf agent...
+==> Starting Serf agent RPC...
+==> Serf agent running!
+         Node name: 'sachiko'
+         Bind addr: '0.0.0.0:7946'
+          RPC addr: '127.0.0.1:7373'
+         Encrypted: false
+          Snapshot: false
+           Profile: lan
+
+==> Log data will now stream in as it occurs:
+
+    2014/08/03 03:55:24 [INFO] agent: Serf agent starting
+    2014/08/03 03:55:24 [INFO] serf: EventMemberJoin: sachiko 10.130.215.135
+    2014/08/03 03:55:25 [INFO] agent: Received event: member-join
+
+
+この状態で、0.0.0.0を7946portでLISTEN、localhostを7373portでLISTENしています。
+端末が返ってこないのでctrl+cでserf agentが終了します。initスクリプト [#]_ があるので、そちらを使ったほうが楽です。
+
+.. [#] http://pocketstudio.jp/log3/2013/11/25/sysv_init_script_for_serf/
+
+sachikoのプライベートネットワークのIPアドレスをメモ(今回は10.130.215.135)して、nanaへ移ります。
+
+nanaでもserfをインストールしてagentを立ち上げます。バックグラウンドで立ち上げます。
+
+serf agent &
+serf join 10.130.215.135
+
+sachikoのログ曰く
+
+    2014/08/03 04:09:43 [INFO] serf: EventMemberJoin: nana 10.130.215.141
+    2014/08/03 04:09:44 [INFO] agent: Received event: member-join
+
+さそうです。join完了しました。membersで一覧が出ます。
+
+$ serf members
+    2014/08/03 04:13:41 [INFO] agent.ipc: Accepted client: 127.0.0.1:59989
+nana     10.130.215.141:7946  alive  
+sachiko  10.130.215.135:7946  alive
+
+イベントを発行してみます。
+
+[abe@nana ~]$ serf event '自称・17さい'
+2014/08/03 04:15:03 [INFO] agent: Received event: user-event: 自称・17さい
+
+sachiko [#]_ のログにも、出ています。
+
+.. [#] 公式プロフィールでは14さいです
+
+:: 
+
+   2014/08/03 04:15:03 [INFO] agent: Received event: user-event: 自称・17さい
+
+イベントを実行してみます。nanaをクラスタから外してみます。
+
+[abe@nana ~]$ serf leave
+
+[koshimizu@sachiko ~]# serf members
+    2014/08/03 04:50:55 [INFO] agent.ipc: Accepted client: 127.0.0.1:41356
+sachiko  10.130.215.135:7946  alive  
+nana     10.130.215.141:7946  left
+
+復帰させてみます。
+
+[abe@nana ~]$ serf agent &
+[abe@nana ~]$ serf join 10.130.215.135
+
+[koshimizu@sachiko ~]# serf members
+    2014/08/03 04:53:24 [INFO] agent.ipc: Accepted client: 127.0.0.1:41362
+sachiko  10.130.215.135:7946  alive  
+nana     10.130.215.141:7946  alive
+
+nanaが復帰しました。leaveはクラスタから外れるイベントです。その他にも、join,failed,update,reapなどがあります。
+
+イベントが実行された時に任意のスクリプトを実行できるようにしてみましょう。スクリプトファイルはこのような感じで作ります。
+
+:: 
+
+   #!/bin/bash
+   echo "ウサミンパワーでカラフルメイドにメルヘンチェンジ！"
+
+agentを終了して、イベントハンドラにスクリプトファイルを指定して起動します。ログレベルをdebugにしないと表示されません。
+
+.. code-block:: sh
+
+   [abe@nana ~]$ serf agent -log-level=debug -event-handler=./script.sh
+   (略)
+       2014/08/03 05:39:27 [DEBUG] agent: Event 'member-join' script output: ウサミンパワーでカラフルメイドにメルヘンチェンジ！
+
+実行できました。次はイベントに名前を作ってそれを実行してみましょう。プロディーサーさんがお部屋に訪問した時のセリフを出してみましょう [#]_ 。
+各Dropletでスクリプトを作り、serf agentを実行するときに指定します。visitというイベント名として登録し、visitイベントを呼び出すとスクリプトが実行されます。
+
+.. [#] 適当
+
+.. code-block:: sh
+
+   [koshimizu@sachiko ~]$ chmod +x sachiko.sh ; cat sachiko.sh 
+   #!/bin/sh
+   echo "プロデューサーさん、女の子の扱いを知らないなんて可哀想ですね！」"
+
+   [abe@nana ~]$ chmod +x usamin.sh ; cat usamin.sh 
+   #!/bin/bash
+   echo "はーい今出ま…って、ﾌﾟﾛﾃﾞｭｰｻｰさん!？えっ、ま、まぁ汚い部屋ですがどうぞ！あっ、こ、この制服は…久しぶりにお掃除したら出てきて…あっ、いや、17歳なので毎日着てました!着てます!"
+
+   [koshimizu@sachiko ~]$ serf agent -log-level=debug -event-handler user:visit=./sachiko.sh &
+
+   [abe@nana ~]$ serf agent -log-level=debug -event-handler user:visit=./usamin.sh &
+
+   [abe@nana ~]$ serf join 10.130.215.135
+
+   [koshimizu@sachiko ~]$ serf event visit
+       2014/08/03 06:08:41 [DEBUG] agent: Event 'user' script output: プロデューサーさん、女の子の扱いを知らないなんて可哀想ですね！」
+
+   [abe@nana ~]$ # 標準出力に表示されます
+   2014/08/03 06:08:42 [DEBUG] agent: Event 'user' script output: はーい今出ま…って、ﾌﾟﾛﾃﾞｭｰｻｰさん!？えっ、ま、まぁ汚い部屋ですがどうぞ！あっ、こ、この制服は…久しぶりにお掃除したら出てきて…あっ、いや、17歳なので毎日着てました!着てます!
+
+eventは全てのクラスタで実行されるため、usaminで、 ``serf event visit`` を実行しても同じ結果になります。
+
+
+参考
+"""""
+
+* 正月休みだし Serf 触ってみた : http://blog.livedoor.jp/sonots/archives/35397486.html
+* Serfが面白いと俺の中で話題にwwwwww : http://www.slideshare.net/zembutsu/serf-the-liberator
+* Serf 虎の巻 : http://deeeet.com/writing/2014/03/23/serf-basic/
+* Serf Demo: Web Servers + Load Balancer : https://github.com/hashicorp/serf/tree/master/demo/web-load-balancer
 
 
 その他の問題
 ------------
 
+IIを使っていく上で避けては通れない問題について触れていきます。
 
-ログの管理どうする？
+ログの管理
 ^^^^^^^^^^^^^^^^^^^
 
-* fluentdを使って収集しましょう。いつでもサーバを壊せる状態にしておきましょう。
-* Elasticsearch + kibanaでログを可視化できてはっぴー☆
+本番環境で動作しているサーバは、日々、ログが蓄積されていきます。インスタンスを作って壊すことが簡単になると、保存しておくべきログはどうやって残しておくか、ということが問題になります。
+解決策としては、Fluentd [#]_ を使うのが主流です。リアルタイムに収集できますし、取得したログをElasticsearch [#]_ と kibana [#]_ で可視化している、というところも多いのではないでしょうか。
 
-
-DBどうするよ？
-^^^^^^^^^^^^^^
-
-* 気軽に壊せないので、こわさない。以上解散！
+.. [#] http://www.fluentd.org/
+.. [#] http://www.elasticsearch.org/
+.. [#] http://www.elasticsearch.org/overview/kibana/
 
 
 サーバの監視
 ^^^^^^^^^^^^^^^^^^^^
 
-* 気軽にこわせて気軽に立ち上がるサーバに名前をつけると大変なことに！！！
-* サーバに名前を付けることは悪であるという議論
-* hobbitとかzabbixとかそういうツールだと登録してるホストがなくなるとデータがなくなっちゃうんだよねー過去のトレンドが消えてしまうことが問題
-* mackerelを取り上げる。
+インスタンスを作って壊すことが多くなると、サーバのモニタリングツールに登録しているホストが消えることがあります。すると、過去のトレンドが見えなくなってしまいます。
+従来、ホストをモニタリングツールに登録するところですが、ホストを役割としてグルーピングしてモニタできる mackerel(マカレル) [#]_ があります。途中でノードが無くなっても、モニタリングを継続できる監視ツールです。
 
+.. [#] https://mackerel.io/ mackerelの意味は鯖
 
-CI as a Service
------------------
+nanaとsachikoのサーバにインストールしていました。このような感じでモニタリングできました。
 
-* まだよくわかってない
+.. figure:: img/nana-sachiko.eps
+  :scale: 70%
+  :alt: nana-sachiko
+  :align: center
+
+  nanaとsachikoの通信量のモニタリング
+
+mackerel のサイトに登録して、RPMなどのパッケージがあるのでモニタ対象のサーバにインストール。設定ファイルをコピペで貼付け、サービスを起動すればモニタリングが始まります。
 
 
 まとめ
 -------
 
-* 本当にやりたいことは何だ？
+Orchestration、Configuration、Bootstrapping、Agent、Testで使われるツールをひと通り触ってきました。
+取り上げたツールをうまく組み合わせると、本番のデプロイや、アプリケーションの開発が便利になるかもしれません。
+例えば、 mackerel をインストールするAnsibleのplaybookを書いて、それをVagrantのプロビジョンとして指定、そのVagrantのプロバイダーをDigitalOceanにすれば1つシステムができあがります。
 
-  * 実際には運用に入ったサーバを作って壊す富豪的な環境ってあんまりないよね　お金もかかるし。オンプレミスだったらそんな余裕はないはず
-  * 運用に入ったサーバの変更を安全にやるためにはどうする
-  
-* 現在進行形でみんな手探り状態
-* おじさんのchef疲れ
-* やりたいことを実現するためのツールが乱立している
-* 新旧ツールをうまく組み合わせて事故のないデプロイをしていこう！
+そもそもIIで本当にやりたかったことってなんでしょう。本番環境と実験環境の差異の吸収？ビルドの自動化？本番環境のサーバの即時追加？いろいろあります。
+それに伴って、いろいろなツールが出てきて乱立しています。Configrationのツールの決定版はこれだ！というものもなく、現在進行形でやりたいことを実現するためにはどうするか手探り状態です。
+新しい技術もそうですが、古い技術も組み合わせて、事故のないデプロイをしていきましょう。
 
-* インフラでの旨味。構築がミスなく簡単にできる。最初に乗り越えるハードルが高い。よく考えていないとハードルだらけになる。導入コスト
-* プログラミングしている側からの便利さ。すぐに環境が作れる。テストの自動化。本番でのバグが少なくなる
-* 開発環境DevOps
-* 本番環境DevOps
 
 スペシャルサンクス
 -----------------
 
-@eigo_s
-@JAGAxIMO
-@ringohub
+いずれもtwitter idです。
+
+* @eigo_s (Vagrantでお世話になりました)
+* @ringohub (Vagrantでお世話になりました)
+* @JAGAxIMO (Dockerでお世話になりました)
+* @r_rudi (Ansibleでお世話になりました)
+* @mtgto (査読していただきました)
+blogの記事
 
 
-注目すべきトレンド
+おまけ
 -----------------
 
-* どくだんとへんけん
+トレンドを追いかけるために見ておいたほうが良い文献
+
 * hashicorp http://www.hashicorp.com/blog
 * kief morris http://kief.com/
 * Martin Fowler http://martinfowler.com/
 * chad fowler http://chadfowler.com/
-* 英語だけど翻訳すればよめなくはない。雰囲気をつかもう
 
-
-参考文献
---------
-「継続的デリバリー 信頼できるソフトウェアリリースのためのビルド・テスト・デプロイメントの自動化」アスキー・メディアワークス,2012
-「WEB+DB PRESS vol.81」技術評論社,2014
-
-
-IIやる人はこれだけは最低限みておけリンク
-------------------------------------
+英語ですけど翻訳すれば雰囲気はつかめます。
 
 * 今さら聞けない Immutable Infrastructure - 昼メシ物語 / http://blog.mirakui.com/entry/2013/11/26/231658
 
   - IIについての話題をコンパクトにまとめている良記事。ただしIIはここで出てこないトピックもたくさんある
 
 
-
-とりまとめついてない
-------------------
-
-* 必要なければdevopsに触れなくていっかなー
-* 設定が漂流する。そこにIIを導入していくコスト。cultureは？
-* IIが出てきた根源的な点はどこか？メリットが上回るものなのか？現状維持ではダメなのか？何故ダメになったのか？
+参考文献
+--------
+「継続的デリバリー 信頼できるソフトウェアリリースのためのビルド・テスト・デプロイメントの自動化」アスキー・メディアワークス,2012
+「入門Ansible」(http://www.amazon.co.jp/dp/B00MALTGDY/),2014
+「WEB+DB PRESS vol.81」技術評論社,2014
