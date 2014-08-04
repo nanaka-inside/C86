@@ -118,7 +118,7 @@ SetExpressCheckoutとかDoExpressCheckoutでWeb検索すれば辿り着く。
 
 * APIを利用するための情報（ID、パスワード、言語など）
 * 購入商品に関する情報（商品名、単価、数量など）
-* 客情報（名前、住所、電話番号など）
+* 顧客情報（名前、住所、電話番号など）
 
 そして、実際の使用例を知りたくばCGI/PAYPAY1.CGI、CGI/PAYPAY2.CGIを飽きるまで見るがいい。
 
