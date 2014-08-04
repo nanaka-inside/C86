@@ -4,7 +4,7 @@
 
 .. figure:: images/shellshoccar_logo.eps
    :width: 141mm
-   :scale: 60
+   :scale: 55
 
 全世界70億の人間どもよ、ごきげんよう。
 私は秘密結社シェルショッカー [#about_shellshoccar]_ 日本支部のリッチー大佐である。
