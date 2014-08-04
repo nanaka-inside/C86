@@ -73,8 +73,8 @@ gotoを使わなくたって、こういう記述を使ったら同じことだ�
 
 .. code-block:: bash
 
-	seq 0 99               |
-	awk '{printf("%02d")}' |
+	seq 0 99                    |
+	awk '{printf("%02d\n",$0)}' |
 	xargs mkdir
 
 
