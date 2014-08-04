@@ -1,26 +1,6 @@
 最初にログインしておく
 docker login
 
-https://registry.hub.docker.com/_/redis/
-
-docker pull redis
-root@hanayo:~# docker run -d -p 6379:6379 redis 
-e6df5aeac92800f2494dd1977f93d3b0141b5b20ffb29016d398b207c4b2151f
-
-
-root@hanayo:~# docker ps -l
-root@hanayo:~# docker ps -a 
-CONTAINER ID        IMAGE               COMMAND                CREATED              STATUS                      PORTS                    NAMES
-e6df5aeac928        redis:2.8           redis-server --bind    About a minute ago   Up About a minute           0.0.0.0:6379->6379/tcp   loving_lumiere   
-
-telnet localhost 6379
-なんかでてくればおｋ
-
-quitを打ってEnterを押して抜ける。quitコマンドを送信した
-
-
-なお、redisのDockerfileがある。
-https://github.com/dockerfile/redis/blob/master/Dockerfile
 
 
 apache+php+sshのDockerfileを書く
@@ -42,7 +22,6 @@ vim Dockerfile
 
 FROM centos
 RUN yum update -y
-# RUN yum install -y nginx openssh-server php-fpm php-cli php-devel wget unzip gcc make python-setuptools
 RUN yum install -y openssh-server wget unzip gcc make python-setuptools vim pcre-devel libxml2-devel autoconf
 RUN yum install -y tar bzip2 apr-devel apr-util-devel ; true
 RUN yum clean all
@@ -177,7 +156,7 @@ https://bugzilla.redhat.com/show_bug.cgi?id=1012952
 centos7になってsysmtedになった。systemctlでアプリケーションが動かない
 Bug 1033604 - Unable to start systemd service in Docker container
 https://bugzilla.redhat.com/show_bug.cgi?id=1033604
-コンテナやからサービスで動かさないものである。直接起動せよ！といっている。あるいは単純なデーモン化にしよう。とある。うーむ。ただしみある。
+コンテナの中でサービスで動かさないものである。デーモンで起動せよ！といっている。あるいは単純なデーモン化にしよう。とある。うーむ。ただしみある。
 「There are basically two ways to go.
 
 First, the "application container" model. Here, you don't use systemctl to launch the service -- you just run it directly. This works very well for relatively simple daemons.」
@@ -200,4 +179,116 @@ root@hanayo:~# dl
 0866d11c7932
 
 
+
+
+ーーーーー
+まずはじめに、docker hubにログインするためのアカウントを作ります。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker login
+   Username: user
+   Password: # 表示されません
+   Email: user@example.com
+   Account created. Please use the confirmation link we sent to your e-mail 
+   to activate it.
+
+メールが届くので、そこに書かれているURLをクリックして登録します。webサイト(https://hub.docker.com/account/signup/)であれば、githubのアカウントでアカウントを作ることもできます。
+ーーー
+
+
+Pythonのアプリケーションが入っているイメージを立ち上げてみます。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker run -d -P training/webapp python app.py
+   root@hanayo:~# docker ps -l
+   CONTAINER ID        IMAGE                    COMMAND             CREATED             STATUS              PORTS                     NAMES
+   37179ec8e0bd        training/webapp:latest   python app.py       54 seconds ago      Up 53 seconds       0.0.0.0:49153->5000/tcp   sick_davinci     
+
+
+41953ポートで待ち受けているのでアクセスしてみしょう [#iidoc49]_ 。
+
+.. [#iidoc49] dockerで起動したアプリケーションは、49000から49900の間のポートを使います。
+
+.. code-block:: sh
+
+   root@hanayo:~# curl localhost:49153
+   Hello world!root@hanayo:~# 
+   root@hanayo:~# curl -I localhost:49153
+   HTTP/1.0 200 OK
+   Content-Type: text/html; charset=utf-8
+   Content-Length: 12
+   Server: Werkzeug/0.8.3 Python/2.7.3
+   Date: Mon, 21 Jul 2014 11:47:21 GMT
+
+HTTPサーバが応答していますね。それでは、アプリケーションを止めます。 ``stop`` してからアプリケーションを ``rm`` しましょう。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker stop sick_davinci 
+   sick_davinci
+   root@hanayo:~# docker rm sick_davinci 
+   sick_davinci
+   root@hanayo:~# docker ps 
+   CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
+
+病気のダビンチさんはいなくなりました。なお、イメージは残っています。
+
+.. code-block:: sh
+
+   root@hanayo:~# docker images
+   REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+   ubuntu              14.04               e54ca5efa2e9        4 weeks ago         276.5 MB
+   training/webapp     latest              31fa814ba25a        7 weeks ago         278.8 MB
+
+さてさて、ここまではubuntu:14:04を使っていました。ほかのOSも試してみましょう。
+
+ーーーーー
+
+
+
+http://mizzy.org/blog/2014/06/22/1/ を見ながら。
+
+Goが入っていなかったのでインストール。いまさらですけど、DockerはGo製です。
+
+.. code-block:: sh
+
+   root@hanayo:~# apt-get install gccgo-go golang
+   root@hanayo:~# export GOPATH=$HOME/_go
+   root@hanayo:~# export PATH=$PATH:$GOPATH/bin
+   root@hanayo:~# go get github.com/docker/libcontainer/nsinit
+   docker-attach()
+   {
+     id=`sudo docker ps -q --no-trunc $1`
+     root=/var/lib/docker/execdriver/native/$id
+     sudo sh -c "cd $root && $GOPATH/bin/nsinit exec $2"
+   }
+
+
+nsinitのバイナリができてなくてうまくいかなかった。
+どうもパッチ当てないと行けない模様 http://qiita.com/comutt/items/2f873a0e7eaddd3f647e
+nsenterでやってみる。gettextが0.18.3でぴったりだった。
+ーーーーー
+
+shipyard
+"""""""""""""""
+
+docker run -i -t -v /var/run/docker.sock:/docker.sock shipyard/deploy setup
+
+数分かかる
+
+dockerを再起動してしまったので再起動。最後のはdocker ps -a でNameをさがしてください。
+
+root@hanayo:~# docker restart shipyard shipyard_db shipyard_lb shipyard_redis shipyard_router determined_tesla 
+
+ブラウザでアクセス。　http://128.199.140.147:8000　
+
+Server Error (500) と表示されてしまった。かなしい。
+
+
+作ったdockerをpushする
+
+pullもしたいな
 
