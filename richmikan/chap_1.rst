@@ -54,14 +54,14 @@ gotoを使わなくたって、こういう記述を使ったら同じことだ�
 
 例えば、お前たちはこういう作業をどうやってこなす?
 
-	01から99までのディレクトリーを作れ。
+	00から99までのディレクトリーを作れ。
 
 恐らくこんな感じではあるまいか?
 
 .. code-block:: bash
 
-	i=1
-	while [ $i -le 100 ]; do
+	i=0
+	while [ $i -le 99 ]; do
 	  filename=$(printf '%02d' $i)
 	  mkdir $filename
 	  i=$((i+1))
@@ -73,8 +73,8 @@ gotoを使わなくたって、こういう記述を使ったら同じことだ�
 
 .. code-block:: bash
 
-	seq 0 99               |
-	awk '{printf("%02d")}' |
+	seq 0 99                    |
+	awk '{printf("%02d\n",$0)}' |
 	xargs mkdir
 
 

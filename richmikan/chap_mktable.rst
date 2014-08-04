@@ -108,13 +108,13 @@ JOINを18行目でやっているのは見ての通り。
 
 	   :
 	cat /etc/passwd             |
-	grep -E '^(root|myuser):'   | # 自分とroot以外の行だけにする
+	grep -E '^(root|myuser):'   | # 自分とrootの行だけにする
 	awk -F: '{print $1,$3}'     |
 	# 1:ユーザー名 2:ユーザーID     #
 	sort -k1,1                  |
 	cat                         > $usermaster
 
-このように改造したうえで、先程の解答コードを動かすと、
+このように改造したうえで先程の解答コードを動かすと、
 INNER JOINなので、自分とroot以外が所有者のプロセスは全て非表示になる。
 
 では、この場合でも他のユーザー番号にとりあえず ``*`` を埋めるようにして
@@ -135,7 +135,7 @@ OUTER JOINをするために修正したコード
 	
 	# === ユーザー名とユーザーIDの変換表として/etc/passwdを利用する ======
 	cat /etc/passwd             |
-	grep -E '^(root|myuser):'   | # 自分とroot以外の行だけにする
+	grep -E '^(root|myuser):'   | # 自分とrootの行だけにする
 	awk -F: '{print $1,$3}'     |
 	# 1:ユーザー名 2:ユーザーID     #
 	sort -k1,1                  |
