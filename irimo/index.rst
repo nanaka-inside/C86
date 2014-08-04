@@ -99,8 +99,8 @@ mac なら何もしなくても zsh が入っていました。
 
 .. code-block:: sh
 
-$ which zsh
-$ chsh -s /path/to/zsh
+   $ which zsh
+   $ chsh -s /path/to/zsh
 
 ここでコンソールを一度開き直します。zsh が適用されましたか？
 
@@ -108,7 +108,7 @@ $ chsh -s /path/to/zsh
 
 .. code-block:: sh
 
-$ vi ~/.zshrc
+   $ vi ~/.zshrc
 
 新規ファイルが作られます。
 
@@ -116,13 +116,13 @@ $ vi ~/.zshrc
 
 .. code-block:: vim
 
-RPROMPT='%F{green}S%f'
+   RPROMPT='%F{green}S%f'
 
 保存して閉じたら、設定を適用させます。
 
 .. code-block:: sh
 
-$ source ~/.zshrc
+   $ source ~/.zshrc
 
 ドラゴン、出ましたか？
 
