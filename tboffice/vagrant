@@ -5,8 +5,7 @@
   * Linuxなどの仮想環境を起動することができる
   * Rubyで実装されている。Mac OS、Linuxで動作する
   * Windowsでは制限あり（用調査
-  * MacOS
-    だとインストーラがある
+  * MacOSだとインストーラがある
   * 今回
     はVagrant 1.6.3
   * 
