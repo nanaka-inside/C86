@@ -97,7 +97,7 @@
 bash プロンプトは右に表示が出来ないので、まず zsh の設定をします。
 mac なら何もしなくても zsh が入っていました。
 
-::
+.. code-block:: sh
 
 $ which zsh
 $ chsh -s /path/to/zsh
@@ -106,7 +106,7 @@ $ chsh -s /path/to/zsh
 
 次に、zsh の設定をします。
 
-::
+.. code-block:: sh
 
 $ vi ~/.zshrc
 
@@ -114,13 +114,13 @@ $ vi ~/.zshrc
 
 ドラゴンを設置するだけなら、以下の一行を記述します。
 
-::
+.. code-block:: vim
 
 RPROMPT='%F{green}S%f'
 
 保存して閉じたら、設定を適用させます。
 
-::
+.. code-block:: sh
 
 $ source ~/.zshrc
 
