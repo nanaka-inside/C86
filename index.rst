@@ -13,11 +13,3 @@ Welcome to Nanaka-Inside-PRESS vol.5's documentation!
    first.rst
    second.rst
 
-
-Indices and tables
-==================
-
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`
-
