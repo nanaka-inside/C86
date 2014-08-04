@@ -14,7 +14,7 @@
 ところで「バランスWiiボード」は皆さんご存知でしょうか。Wii/WiiUとつないで使える板状のコントローラです。
 
 .. figure:: img/wii_board.eps
-   :scale: 70%
+   :width: 70%
    :align: center
 
    ホコリかぶってたバランスWiiボード
