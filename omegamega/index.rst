@@ -35,6 +35,7 @@ FDM式(=熱溶解式積層法/Fused Deposition Modeling)はその名の通り、
 
 .. figure:: img/FDM_by_Zureks.eps
    :align: center
+   :scale: 30%
 
    だいたいケーキデコレーションと同じ by Zureks(CC by-sa)
 
@@ -43,6 +44,7 @@ FDM式(=熱溶解式積層法/Fused Deposition Modeling)はその名の通り、
 
 .. figure:: img/DSC00054.eps
    :align: center
+   :scale: 30%
 
    Up!Plus2(Afinia H480)のエクストルーダ。半田ゴテの先端のような部分からアツアツのフィラメントが出てきて造形される
 
@@ -53,6 +55,7 @@ FDM式(=熱溶解式積層法/Fused Deposition Modeling)はその名の通り、
 
 .. figure:: img/DSC00055.eps
    :align: center
+   :scale: 30%
 
    Up!Plus2(Afinia H480)のステージ。!マークのついたフレームが上下Z軸方向へ動き、ステージ自体は前後Y軸方向へ動く
 
@@ -65,6 +68,7 @@ FDM式(=熱溶解式積層法/Fused Deposition Modeling)はその名の通り、
 
 .. figure:: img/DSC00057.eps
    :align: center
+   :scale: 30%
 
    ABS/PLAフィラメント。ひと巻き700gのスプールタイプ
 
@@ -88,6 +92,7 @@ FDM式(=熱溶解式積層法/Fused Deposition Modeling)はその名の通り、
 
 .. figure:: img/IMAG0244.eps
    :align: center
+   :scale: 30%
 
    透明PLAフィラメントの実験。ラフトやサポートの固着が強く、普通のPLAより数段階クオリティが低い出来となった
 
@@ -100,6 +105,7 @@ FDM式(=熱溶解式積層法/Fused Deposition Modeling)はその名の通り、
 
 .. figure:: img/slic3r_setting.eps
    :align: center
+   :scale: 30%
 
    Reprap系の有名なスライサー"Slic3r"のドキュメント。この英語ドキュメントを読みつつ、フィラメントに合わせた設定を探る必要がある
 
@@ -133,6 +139,7 @@ Reprap系とその他の3Dプリンタ
 
 .. figure:: img/DSC00059.eps
    :align: center
+   :scale: 30%
 
    やたらとバリエーションがあるように見えるFDM式3Dプリンタだが、実は大半がReprapの兄弟機なのだ
 
@@ -145,6 +152,7 @@ DIYの力と情報収集力が要求されるタイプとも言えます。3Dプ
 
 .. figure:: img/Bo76Kk-IUAA7Ii7.eps
    :align: center
+   :scale: 30%
 
    Up!Plus2が吐くサポート材は広い面に張り付いていても手でパリパリ取れる。独自3Dプリンタ故にできる品質
 
@@ -180,6 +188,7 @@ FDM式3Dプリンタはケーキデコレーションに例えられるように
 
 .. figure:: img/DSC00058.eps
    :align: center
+   :scale: 30%
 
    Up!Plus2のステージ調整ネジ(3本)。オートキャリブレーション機能を有するプリンタでも、ネジを手で回す調整は必要
 
@@ -196,6 +205,7 @@ SOZAI、原料。前述の通り、クオリティを左右するものであり
 
 .. figure:: img/rook_print.eps
    :align: center
+   :scale: 30%
 
    同じみのRook by seechlessモデル(http://www.thingiverse.com/thing:99028)。サポート材ない出力が推奨。逆テーパーや中空構造などベンチマーク的な形状も含んでいる
 
@@ -208,11 +218,13 @@ SOZAI、原料。前述の通り、クオリティを左右するものであり
 
 .. figure:: img/DSC00053.eps
    :align: center
+   :scale: 30%
 
    Up!Plus2のセルボードと固定テープ、造形物を剥がすためのスクレイパー、ニッパー。スクレイパーは思いのほか手に刺さる(痛い)
 
 .. figure:: img/IMG_20131220_183657.eps
    :align: center
+   :scale: 30%
 
    SCOOVO C170は固定テープ方式。エクストルーダ高さを低くしすぎると、テープごとステージに固着してしまい剥がせなくなる！コワイ！
 
@@ -254,6 +266,7 @@ ABSのような熱収縮が大きい素材でもっとも起きるトラブル�
 
 .. figure:: img/BsM8VTcCEAAZHhp.eps
    :align: center
+   :scale: 30%
 
    途中で剥離してしまい、もじゃもじゃに成りかけた例。早く気づいてよかった
 
@@ -274,6 +287,7 @@ XY軸報告にディテイルがつぶれるのは、3Dプリンタのフレー�
 
 .. figure:: img/DSCF0064.eps
    :align: center
+   :scale: 30%
 
    うちのUp!Plus2周辺。温度管理のために奥まった冷蔵庫に設置。なお、このようかんマンは100gほどあって、材料代だけで600円ほど掛かっている計算
 

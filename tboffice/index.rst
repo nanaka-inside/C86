@@ -1966,10 +1966,7 @@ eventは全てのクラスタで実行されるため、usaminで、 ``serf even
 参考
 """""
 
-* 正月休みだし Serf 触ってみた
-
-  * http://blog.livedoor.jp/sonots/archives/35397486.html
-
+* 正月休みだし Serf 触ってみた(http://blog.livedoor.jp/sonots/archives/35397486.html)
 * Serfが面白いと俺の中で話題にwwwwww
 
   * http://www.slideshare.net/zembutsu/serf-the-liberator
@@ -1994,7 +1991,7 @@ IIを使っていく上で避けては通れない問題について触れてい
 本番環境で動作しているサーバは、日々、ログが蓄積されていきます。インスタンスを作って壊すことが簡単になると、保存しておくべきログはどうやって残しておくか、ということが問題になります。
 解決策としては、Fluentd [#flu]_ を使う方法があります。リアルタイムにログ収集できます。取得したログをElasticsearch [#es]_ と kibana [#kibana]_ で可視化している、というところもあるのではないでしょうか。
 
-.. [#flu] http://www.fluentd.org/
+.. [#flu  ] http://www.fluentd.org/
 .. [#es] http://www.elasticsearch.org/
 .. [#kibana] http://www.elasticsearch.org/overview/kibana/
 
