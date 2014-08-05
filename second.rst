@@ -4,15 +4,14 @@
 
    richmikan/index.rst
    clearpage.rst
-   omegamega/index.rst
+   44_10/index.rst
    clearpage.rst
    tkzwtks/index.rst
    clearpage.rst
-   rosylilly/index.rst
+   syucream/index.rst
    clearpage.rst
    irimo/index.rst
    clearpage.rst
-   44_10/index.rst
+   rosylilly/index.rst
    clearpage.rst
-   syucream/index.rst
-   
+   omegamega/index.rst
