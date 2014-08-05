@@ -1659,7 +1659,7 @@ redisのコンテナのIPアドレスを置換する前のredis.php.templateを�
    root@hanayo:~/docker-centos# curl localhost/redis.php
    string(30) "白いご飯が足りません"
 
-一行目で、redisが立ち上がっているコンテナのIPを取得しています。コンテナ間同士は、相手のIPを知らないと通信できないからです。 ``doker inspect NAME`` でも、コンテナの詳細な情報をjson形式で取得することができます。
+一行目で、redisが立ち上がっているコンテナのIPを取得しています。コンテナ間同士は、相手のIPを知らないと通信できないからです。
 
 docker build -t centos:ap .
   Dockerfileをもとに、イメージを作ります。今回はcentosというイメージでTAGをapとしました。TAGとは、同じイメージでもバージョンや中身が違うときに付けます。dockerhubの例だと、centos:centos7やcentos:centos6のようになります
@@ -1689,19 +1689,19 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 
 * Dockerは新しいツールのため、枯れているという感じがありませんでした。このあともかなりの頻度でアップデートされることが予想されるので、この内容は役に立たないかもしれません。そのときはPull reqいただければありがたいです
 
-* ここで触れていない内容として、コンテナのデータの永続化があります。mopemopeさんの「Docker でデータのポータビリティをあげ永続化しよう」 [#]_ が参考になります。また、dockerはhostsが書き換えられないため、工夫が必要になります。JAGAxIMOさんの「Dockerで/etc/hostsファイルが操作出来ない対策」 [#]_ を参考にしてください
+* ここで触れていない内容として、コンテナのデータの永続化があります。mopemopeさんの「Docker でデータのポータビリティをあげ永続化しよう」 [#const]_ が参考になります。また、dockerはhostsが書き換えられないため、工夫が必要になります。JAGAxIMOさんの「Dockerで/etc/hostsファイルが操作出来ない対策」 [#jaga]_ を参考にしてください
 
-* コマンドのチュートリアルは、curseoffさんの「Dockerコマンドメモ」 [#]_ が手堅くまとまっています。Vagrantを使って少し進んだチュートリアルはdeeeetさんの「実例で学ぶDockerコマンド」 [#]_ が有用です
+* コマンドのチュートリアルは、curseoffさんの「Dockerコマンドメモ」 [#dmemo]_ が手堅くまとまっています。Vagrantを使って少し進んだチュートリアルはdeeeetさんの「実例で学ぶDockerコマンド」 [#dco]_ が有用です
 
 * VagrantでCoreOSの仮想マシンを立ち上げて、そこでDockerを使ってアプリケーションの開発を行うという手法が主流になっているそうです [#vd]_ 
 
 * DaaS(Docker as a Service)の会社がでてきました。例えば、Orchard、Stackdock、tutumです
 
 
-.. [#] http://qiita.com/mopemope/items/b05ff7f603a5ad74bf55
-.. [#] http://qiita.com/JAGAxIMO/items/6b71a03518bbd53d4de6
-.. [#] http://qiita.com/curseoff/items/a9e64ad01d673abb6866
-.. [#] http://qiita.com/deeeet/items/ed2246497cd6fcfe4104
+.. [#const] http://qiita.com/mopemope/items/b05ff7f603a5ad74bf55
+.. [#jaga] http://qiita.com/JAGAxIMO/items/6b71a03518bbd53d4de6
+.. [#dmemo] http://qiita.com/curseoff/items/a9e64ad01d673abb6866
+.. [#dco] http://qiita.com/deeeet/items/ed2246497cd6fcfe4104
 .. [#vd] http://coreos.com/docs/launching-containers/building/getting-started-with-docker/
 
 
@@ -1797,8 +1797,8 @@ Serverと next_server の設定をします。ここではテストのためデ�
 参考
 """"""
 
-* CobblerでScientific Linux 6.1を導入 : http://blog.glidenote.com/blog/2012/02/03/cobbler-scientific-linux-6.1/
-* cobbler を使ってみた : http://www.sssg.org/blogs/naoya/archives/855
+* CobblerでScientific Linux 6.1を導入 (http://blog.glidenote.com/blog/2012/02/03/cobbler-scientific-linux-6.1/)
+* cobbler を使ってみた (http://www.sssg.org/blogs/naoya/archives/855a)
 
 
 Surf
