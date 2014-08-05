@@ -1681,7 +1681,7 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
    .. [#nsinit] http://mizzy.org/blog/2014/06/22/1/
    .. [#nsenter] http://qiita.com/comutt/items/2f873a0e7eaddd3f647e
 
-   phpのビルドを行ったとき、 ``make -j2`` (2つのjobを同時に実行)したところ「virtual memory exhausted: Cannot allocate memory」と言われてしまいました。コンテナの中では、ビルドするものではありません。単に ``make`` だとOK。実行環境はDigitalOceanの最小インスタンス(512MBメモリ)でした。
+   phpのビルドを行ったとき、 ``make -j2`` (2つのjobを同時に実行)したところ「virtual memory exhausted: Cannot allocate memory」と言われてしまいました。単に ``make`` だとOK。実行環境はDigitalOceanの最小インスタンス(512MBメモリ)でした。
 
 
 補足
