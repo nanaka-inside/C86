@@ -1221,13 +1221,13 @@ playbook.ymlの内容は、apacheをインストールして、起動、ホス�
 参考
 """"""
 
-* 仮想環境構築ツール「Vagrant」で開発環境を仮想マシン上に自動作成する : http://knowledge.sakura.ad.jp/tech/1552/
-* Windows7にVirtualBoxとVagrantをインストールしたメモ : http://k-holy.hatenablog.com/entry/2013/08/30/192243
-* 1円クラウド・ホスティングDigitalOceanを、Vagrantから使ってみる : http://d.hatena.ne.jp/m-hiyama/20140301/1393669079
-* VagrantとSSDなVPS(Digital Ocean)で1時間1円の使い捨て高速サーバ環境を構築する : http://blog.glidenote.com/blog/2013/12/05/digital-ocean-with-vagrant/
-* Vagrant ShareでVagrant環境をインターネット上へ公開する : http://qiita.com/y-mori/items/1f70e7c9d8771f0d939a
-* Vagrant超入門：Vagrant初心者向けの解説だよ！ : https://github.com/tmknom/study-vagrant
-* smdahlen/vagrant-digitalocean : https://github.com/smdahlen/vagrant-digitalocean
+* 仮想環境構築ツール「Vagrant」で開発環境を仮想マシン上に自動作成する(http://knowledge.sakura.ad.jp/tech/1552/)
+* Windows7にVirtualBoxとVagrantをインストールしたメモ(http://k-holy.hatenablog.com/entry/2013/08/30/192243)
+* 1円クラウド・ホスティングDigitalOceanを、Vagrantから使ってみる(http://d.hatena.ne.jp/m-hiyama/20140301/1393669079)
+* VagrantとSSDなVPS(Digital Ocean)で1時間1円の使い捨て高速サーバ環境を構築する(http://blog.glidenote.com/blog/2013/12/05/digital-ocean-with-vagrant/)
+* Vagrant ShareでVagrant環境をインターネット上へ公開する(http://qiita.com/y-mori/items/1f70e7c9d8771f0d939a)
+* Vagrant超入門：Vagrant初心者向けの解説だよ！(https://github.com/tmknom/study-vagrant)
+* smdahlen/vagrant-digitalocean(https://github.com/smdahlen/vagrant-digitalocean)
 
 
 仮想化・その2 docker
@@ -1430,18 +1430,20 @@ Dockerのイメージファイルは https://hub.docker.com/ にあります。s
    なんと ``ps`` コマンドを打つと、bashのプロセスと自身の ps プロセスしかいないのだ。プロセスのおかわりはいただけないのだろうか。いただけないのである。
    何故、こんなことを書いているかというと、コンテナには1つのプロセスしか起動しないのが基本的な使い方だからである。topを打つともちろん、bashとtopのプロセスしかないのだ！！！な、なんだって！！ ``ΩΩ Ω``
 
-いったんbashを抜けて、コンテナをすべて表示してみます。centos:centos7というイメージを使って、2つのコンテナがあることが分かります。
+いったんbashを抜けて、コンテナをすべて表示してみます。centos:centos7というイメージを使って、2つのコンテナがあることが分かります。なお、誌面の関係上、出力を折り返しています。「>>>」は次の行に続いていることを表します。以降の表記も同じです。
+
+.. [#kaigyou] 
 
 .. code-block:: sh
 
    root@hanayo:~# docker ps -a
-   CONTAINER ID IMAGE          COMMAND   CREATED        (STATUSに続く)
-   0ab61f52d310 centos:centos7 /bin/bash 8 minutes ago  (Exitedに続く)
-   31318abf2f23 centos:centos7 /bin/bash 11 minutes ago (Exitedに続く)
+   CONTAINER ID IMAGE          COMMAND   CREATED        >>>
+   0ab61f52d310 centos:centos7 /bin/bash 8 minutes ago  >>>
+   31318abf2f23 centos:centos7 /bin/bash 11 minutes ago >>>
 
-   STATUS                     PORTS NAMES
-   Exited (130) 4 seconds ago       furious_mayer    
-   Exited (130) 9 minutes ago       prickly_bardeen  
+   >>> STATUS                     PORTS NAMES
+   >>> Exited (130) 4 seconds ago       furious_mayer    
+   >>> Exited (130) 9 minutes ago       prickly_bardeen  
 
 
 STATUSがExitedとなっていますね。bashプロセスから抜けると、コンテナは起動をやめてしまうのです。では、このコンテナを起動させてみましょう。
@@ -1473,13 +1475,13 @@ STATUSがExitedとなっていますね。bashプロセスから抜けると、�
 
 .. code-block:: sh
 
-   CONTAINER ID IMAGE          COMMAND   CREATED        STATUS       (PORTSに続く)
-   0ab61f52d310 centos:centos7 /bin/bash 20 minutes ago Up 5 minutes (furious_mayerに続く)
-   31318abf2f23 centos:centos7 /bin/bash 23 minutes ago Exited (130) (21に続く)
+   CONTAINER ID IMAGE          COMMAND   CREATED        STATUS       >>>
+   0ab61f52d310 centos:centos7 /bin/bash 20 minutes ago Up 5 minutes >>>
+   31318abf2f23 centos:centos7 /bin/bash 23 minutes ago Exited (130) >>>
    
-            PORTS NAMES
-                  furious_mayer       
-   21 minutes ago prickly_bardeen 
+   >>>                PORTS NAMES
+   >>>                      furious_mayer       
+   >>> 21 minutes ago       prickly_bardeen 
 
 今度は、STATUSがUPになってますね。これで起動中のコンテナが出来ました！あとはいらないコンテナを削除しましょう。
 
@@ -1501,11 +1503,11 @@ redisのコンテナと、apache+phpが入ったコンテナを作って、redis
    root@hanayo:~# docker pull redis
    root@hanayo:~# docker run -d -p 6379:6379 redis
    root@hanayo:~# docker ps -a
-   CONTAINER ID IMAGE     COMMAND      CREATED        STATUS        (PORTSに続く)
-   ccb90d29d571 redis:2.8 redis-server 13 seconds ago Up 12 seconds (0.0.0.0に続く)
+   CONTAINER ID IMAGE     COMMAND      CREATED        STATUS        >>>
+   ccb90d29d571 redis:2.8 redis-server 13 seconds ago Up 12 seconds >>>
   
-   PORTS                  NAMES
-   0.0.0.0:6379->6379/tcp drunk_pike
+   >>> PORTS                  NAMES
+   >>> 0.0.0.0:6379->6379/tcp drunk_pike
 
 
 ``-p`` オプションはホストOSと、コンテナのポートマッピングを指定しています。 ``docker ps -a`` で、redisのコンテナが起動したことが確認できました。
@@ -1673,11 +1675,11 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 
    centosイメージを使うと、CentOS 7となるため、サービスの起動はsystemdになります。systemd経由でapacheを起動しようとすると、こちらのバグを踏みます：Bug 1033604 - Unable to start systemd service in Docker container [#iibug1]_ 。「dockerはアプリケーションコンテナモデルである。systemdで起動してはいけない。デーモンで直接起動しよう」という回答がありました。
 
-   sshでのログインでは、mizzyさんの記事「Dockerコンテナに入るなら SSH より nsinit が良さそう」 [#]_ を見つけました。やってみたところ、go getのところで詰まり、断念。「RHEL/CentOS 6で Docker に nsinit/nsenter する」 [#]_ の記事を見つけたものの、手順が煩雑なので諦めました。結局、supervisordに落ち着きました。PAMをoffにしていないとログインできなかったりと、様々な罠がありました。
+   sshでのログインでは、mizzyさんの記事「Dockerコンテナに入るなら SSH より nsinit が良さそう」 [#nsinit]_ を見つけました。やってみたところ、go getのところで詰まり、断念。「RHEL/CentOS 6で Docker に nsinit/nsenter する」 [#nsenter]_ の記事を見つけたものの、手順が煩雑なので諦めました。結局、supervisordに落ち着きました。PAMをoffにしていないとログインできなかったりと、様々な罠がありました。
    
    .. [#iibug1] https://bugzilla.redhat.com/show_bug.cgi?id=1033604
-   .. [#] http://mizzy.org/blog/2014/06/22/1/
-   .. [#] http://qiita.com/comutt/items/2f873a0e7eaddd3f647e
+   .. [#nsinit] http://mizzy.org/blog/2014/06/22/1/
+   .. [#nsenter] http://qiita.com/comutt/items/2f873a0e7eaddd3f647e
 
    phpのビルドを行ったとき、 ``make -j2`` (2つのjobを同時に実行)したところ「virtual memory exhausted: Cannot allocate memory」と言われてしまいました。コンテナの中では、ビルドするものではありません。単に ``make`` だとOK。実行環境はDigitalOceanの最小インスタンス(512MBメモリ)でした。
 
@@ -1708,10 +1710,10 @@ Cobbler
 
 Bootstrappingの層に入っていきます。今回はCobblerを取り上げます。
 
-Cobbler [#]_ は、PXE Bootサーバをつくるとき、煩わしい部分をやってくれるツールです。DHCPサーバ、tftpサーバ、pxelinux.0の設定や、OSのインポートを一手に引き受けてくれます。
+Cobbler [#cobbler]_ は、PXE Bootサーバをつくるとき、煩わしい部分をやってくれるツールです。DHCPサーバ、tftpサーバ、pxelinux.0の設定や、OSのインポートを一手に引き受けてくれます。
 PXE Bootの仕組みは分かっているけど、いざ作ろうとするとやっぱり面倒という方向けです。
 
-.. [#] http://www.cobblerd.org/
+.. [#cobbler] http://www.cobblerd.org/
 
 digitalOceanのcentos6.5にて実施しました。PXE bootはサポートされていませんが、LABELの追加までやってみます。yumでcobblerをインストールすると、httpdなどがインストールされます。pxelinux.0を持ってくるために、syslinuxパッケージも必要でした。なお、yumでインストールすると、Cobblerのバージョンは1.2.2でした。バージョン2.6系がリリースされているので古いです。
 
@@ -1722,9 +1724,7 @@ digitalOceanのcentos6.5にて実施しました。PXE bootはサポートされ
    yum install cobbler syslinux  
 
 
-必要に応じて、 ``/etc/cobbler/settings`` の下記の部分を書き換えます。
-
-dhcpの設定をcobbler行う場合は、manage_dhcpを1にします。
+必要に応じて、 ``/etc/cobbler/settings`` の下記の部分を書き換えます。dhcpの設定をcobbler行う場合は、manage_dhcpを1にします。
 
 ::
 
@@ -1795,11 +1795,8 @@ Serverと next_server の設定をします。ここではテストのためデ�
 参考
 """"""
 
-* CobblerでScientific Linux 6.1を導入 [#csaq]_   
-* cobbler を使ってみた [#mita]_ 
-
-.. [#csaq] http://blog.glidenote.com/blog/2012/02/03/cobbler-scientific-linux-6.1/
-.. [#mita] http://www.sssg.org/blogs/naoya/archives/855
+* CobblerでScientific Linux 6.1を導入 (http://blog.glidenote.com/blog/2012/02/03/cobbler-scientific-linux-6.1/)
+* cobbler を使ってみた (http://www.sssg.org/blogs/naoya/archives/855)
 
 
 Surf
@@ -1967,17 +1964,9 @@ eventは全てのクラスタで実行されるため、usaminで、 ``serf even
 """""
 
 * 正月休みだし Serf 触ってみた(http://blog.livedoor.jp/sonots/archives/35397486.html)
-* Serfが面白いと俺の中で話題にwwwwww
-
-  * http://www.slideshare.net/zembutsu/serf-the-liberator
-
-* Serf 虎の巻
-
-  * http://deeeet.com/writing/2014/03/23/serf-basic/
-
-* Serf Demo: Web Servers + Load Balancer
-
-  * https://github.com/hashicorp/serf/tree/master/demo/web-load-balancer
+* Serfが面白いと俺の中で話題にwwwwww(http://www.slideshare.net/zembutsu/serf-the-liberator)
+* Serf 虎の巻(http://deeeet.com/writing/2014/03/23/serf-basic/)
+* Serf Demo: Web Servers + Load Balancer(https://github.com/hashicorp/serf/tree/master/demo/web-load-balancer)
 
 
 その他の問題
