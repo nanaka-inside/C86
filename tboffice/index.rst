@@ -1,13 +1,13 @@
 
 Immutable Infrastructureの最適解を探る 
-=====================================
+=======================================
 
 筆者の@tboffice [#tboffice]_ です。よろしくお願いします。普段は、Webサービスを運営している会社で商用インフラまわりをやっております。
 
 .. [#tboffice] https://twitter.com/tboffice
 
 本記事では、2014年のインフラ界のバズワードである「Immutable Infrastructure」(以下、IIと略します)を取り上げます。
-IIが生まれた背景と思想について、もう一つは、IIを実現するために使えるツール(Ansible, Vagrant, Docker, Surfなど)を実際に使ってみて、最適解を探ります。
+IIが生まれた背景と思想について、もう一つは、IIを実現するために使えるツール(Ansible, Vagrant, Docker, Surfなど)を実際に使ってみて、最適解を探っていきましょう。
 
 
 まず、こちらをご覧ください
@@ -95,7 +95,7 @@ Martin Fowler氏のブログに、PhoenixServer [#iifs]_ という記事があ�
 そうはいっても
 ^^^^^^^^^^^^^^
 
-確かに壊して作りなおすと言っても、いまさらできないよ・・・時間があればできるけど、それをやっている隙がないということもあるでしょう。
+確かに壊して作りなおすと言っても、いまさらできないよ……時間があればできるけど、それをやっている隙がないということもあるでしょう。
 そいういう場合は、ルーチンで行っていることを自動化しましょう。たとえばコードのテストの自動化であったり、デプロイの準備などです。
 いつか来る、すべてのシステムの作り直しの時がくるまでに準備しておきましょう [#souhaittemo]_ 。
 
@@ -115,6 +115,8 @@ IIの説明をするまえに、我々は何を自動化したいのかを明確
 * 監視ツールに登録
 * DNSに登録
 * LBに登録
+
+OSのインストール以下を自動化していきましょう。
 
 .. [#iisetup] Serf という Orchestration ツール #immutableinfra http://www.slideshare.net/sonots/serf-iiconf-20140325 の14ページを参考にしました
 .. [#iigoldenimage] ゴールデンイメージってやつもあるけど各自ぐぐってね！
@@ -165,7 +167,7 @@ IIの三層
 
 .. [#iisurf00] Orchestrationからしれっと Surf を消してますが、まあ無視しましょう
 
-以上は三層で終わっていますが、本誌ではそれに付け加えて２つの層を設定します。
+本誌では三層の上にさらに2つの層を設定します。
 
 * Agent
   
@@ -185,15 +187,16 @@ IIの三層
 
 
 早速実践してみよう
-----------------
+-------------------
 
-IIの三層+二層をひと通り実践してみましょう。まずはServerspecから始めていきます。
-Serverspecから始める理由は、手始めにやるにはうってつけだからです。サーバのデプロイはchefでもAnsibleでもシェルスクリプトでも手動でコマンドを打てば構築できます。
+IIの三層+二層をひと通り実践してみましょう。まずはServerspecから始めていきます。同様のツールにinfratasterがあります [#testar]_ 。
+Serverspecである理由は、手始めにやるにはうってつけだからです。サーバのデプロイはchefでもAnsibleでもシェルスクリプトでも手動でコマンドを打てば構築できます。
 問題はそのあとです。誰がどうやって、そのサーバが正しくセットアップできているか調べるのか？そこを担保するため、Serverspecを使います。
 
+.. [#infrataster] Serverspecをあらかた触ったあとに知ったので今回は私が慣れているServerspecを使っています
 
 動作確認するためにServerspec
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Serverspec [#iiscurl]_ とは、ruby製のツールで、Rspec [#iirspec]_ を拡張したものです。ssh経由でOSの内部の状態をチェックすることができます。インストールは、ruby, gem, bundler [#iirsa]_ がインストールされている環境で、serverspec用の適当なディレクトリを作ります。その中にGemfileという名前のファイルを置きます。
 
@@ -295,7 +298,7 @@ Serverspecで重要なのは、何をテストするかということです。�
 具体的には、Jenkins [#iijenkins]_ おじさんを使って1日1回程度テストを回して、入ってはいけないパッケージを見つけたり、別のサーバへの疎通ができているかをチェックしましょう [#iiscn]_ 。
 テストを書くのはだるいですが、一度やっておけば、バグや障害を検出することができます。
 
-.. [#iiscd] https://github.com/dwango/serverspecd 「d」とついているからといって、デーモンではありません
+.. [#iiscd] https://github.com/dwango/serverspecd 「d」とついているからといって、デーモンではありません。紛らわしいですね
 .. [#iiscdbun] bundleコマンドがなければ、``gem install bundler`` でインストールして下さい。``gem`` がなかったらrubyをインストールして下さい
 .. [#iisstest] 細かくすれば、テスト＝解決する問題となってわかりやすいんですけどね。テスト増えると管理が大変になると思う。でもテスト項目が多いと、テスト中の「....」が増えるので、見ていて面白い
 .. [#iijenkins] http://jenkins-ci.org/ Jenkins CI。継続的デリバリーには必須のアイテム。トリガーを設定してテストなどを実行できるソフトウエアです。実行の結果がわかりやすいです
@@ -303,9 +306,9 @@ Serverspecで重要なのは、何をテストするかということです。�
 
 
 構築にはAnsible
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
-今回、構築にはAnsible [#iiansible]_ を使ってみます。IIの三層の図の「Configuration」の部分のソフトウエアです。
+今回、構築にはAnsible [#iiansible]_ を使ってみます。IIの三層の図の「Configuration」の部分のソフトウエアです。Chefについては、弊サークルが前回発行した「ななかInside PRESS vol.4」で特集しているので、そちらをご覧ください。
 
 .. topic:: Configuration界隈の動向
 
@@ -316,13 +319,13 @@ Serverspecで重要なのは、何をテストするかということです。�
 
 .. [#iiansible] http://www.ansible.com/home
 .. [#iisalt] http://www.saltstack.com/
-.. [#iijuju] https://juju.ubuntu.com/
+.. [#iijuju] https://juju.ubuntu.com/ , https://github.com/juju/juju Go製です
 .. [#iipcas] http://www.infoworld.com/d/data-center/review-puppet-vs-chef-vs-ansible-vs-salt-231308?page=0,3
 .. [#iipca] http://probably.co.uk/puppet-vs-chef-vs-ansible.html
 
 
 Ansibleとは
-""""""""""""""""""""
+""""""""""""
 
 Michael DeHaan [#iiansmpd]_ 氏が作ったソフトウエアです [#iiansgithub]_ 。
 
@@ -375,8 +378,10 @@ Ansibleは、Python 2.4以上で動作し、Python 2.6以上の環境が推奨�
 つかう
 """"""""""
 
-今回、Ansibleを実行する環境は、CMにお名前.comのVPS(CentOS 6.5)を、MNには DigitalOcean を使って、2つのDroplets [#dlt]_ を作ります。
+今回、Ansibleを実行する環境は、CMにお名前.comのVPS(CentOS 6.5)を、MNには DigitalOcean を使って、2つのDroplets [#dlt]_ (nozomi, eri) を作ります。
 リモートマシンを作る前に、sshの公開鍵をDigitalOceanに登録しておきましょう。
+
+.. [#dlt] DigitalOceanでのインスタンスの呼称です。仮想サーバ1つのことを指します
 
 .. figure:: img/an-do-dl.eps
   :scale: 90%
@@ -387,12 +392,9 @@ Ansibleは、Python 2.4以上で動作し、Python 2.6以上の環境が推奨�
 
 nozomiはUbuntu 14.04 x86、eriはCentOS 6.5 x86を選択しました。nozomiにログインしてみましょう。
 
-
-.. [#dlt] DigitalOceanでのインスタンスの呼称です。仮想サーバ1つのことを指します
-
 .. topic:: DigitalOceanとは
 
-   1時間1円くらいで使えるVPSです。最小構成では、1CPU(2-3GHz) メモリ512MB SSDのディスク20GB 転送量1GB です。そのプランでは、1時間0.007ドル(約0.7円) [#]_ 、1ヶ月立ち上げっぱなしだと月5ドル(約500円)かかります。検証環境や、静的なコンテンツを配信するサイトであれば十分なスペックです。電源が入っているか入っていないかにかかわらずDropletが存在している時にお金がかかります。Dropletの電源を落としてイメージのスナップショットをとってからDropletを削除すると課金されなくなります。デフォルトでは10個までのDropletsを作ることが出来ます。オプションでプライベートアドレスも付けることができます。
+   1時間1円くらいで使えるVPSです。最小構成では、1CPU(2-3GHz) メモリ512MB SSDのディスク20GB 転送量1GB です。その場合、1時間0.007ドル(約0.7円) [#]_ 、1ヶ月立ち上げっぱなしだと月5ドル(約500円)かかります。検証環境や、静的なコンテンツを配信するサイトであれば十分なスペックです。電源が入っているか入っていないかにかかわらずDroplet(バーチャルサーバのこと)が存在している時にお金がかかります。Dropletの電源を落としてイメージのスナップショットをとってからDropletを削除すると課金されません。デフォルトでは10個までのDropletsを作ることが出来ます。オプションでプライベートアドレスも付けることができます。
 
    リージョンは、ロンドンや、ニューヨークなどがあります。今年2月にシンガポールができました。sshの遅延は気にならないので、私はもっぱらシンガポールリージョンを使っています。
 
@@ -402,9 +404,7 @@ nozomiはUbuntu 14.04 x86、eriはCentOS 6.5 x86を選択しました。nozomi�
 
    .. [#] 2014年8月現在
 
-   Dropletを作成すると、Global IPアドレスが1つ払いだされます。あらかじめダッシュボードからSSHの公開鍵を登録しておくと、rootユーザでsshログインできます。
-
-   ネットの記事をあさったところ、DigitalOceanはデータセンターを借りて自社でサーバを持っているようです。なぜこんなに安いのかは謎です。
+   Dropletに対し、Global IPアドレスが1つ払いだされます。あらかじめダッシュボードからSSHの公開鍵を登録しておくと、rootユーザでsshログインできます。
 
 
 .. code-block:: bash
@@ -477,7 +477,7 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
        "ping": "pong"
    }
 
-失敗しましたね。eriサーバはセットアップしていませんでしたね。セットアップしてしまいましょう。 ``ssh root@eri`` でログインしてコマンドを打ちます。今度はCentOSです。
+失敗しましたね。eriサーバはセットアップしていませんでした。セットアップしてしまいましょう。 ``ssh root@eri`` でログインしてコマンドを打ちます。今度はCentOSです。
 
 .. code-block:: bash
 
@@ -487,7 +487,7 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
    [root@eri ~]# cp -a .ssh/ /home/ayase/
    [root@eri ~]# chown -R ayase. /home/ayase/.ssh
 
-ここまでやればCMサーバで ``ssh eri`` でログイン可能になります。再度 ansible コマンドを実行します。デフォルトではsshのクライアントにparamiko [#paramiko]_ を使いますが、 ``~/.ssh/config`` を読んでくれません。 ``-c ssh`` オプションをつけて、OpenSSHを使ってsshの接続を行います。
+ここまでやればCMサーバで ``ssh eri`` でログイン可能になります。再度 ansible コマンドを実行します。デフォルトではsshのクライアントにparamiko [#paramiko]_ を使います。OpenSSHを使って ``~/.ssh/config`` を読んでsshの接続を行うため、 ``-c ssh`` オプションをつけます。
 
 .. [#paramiko] Python製のSSHv2プロトコルライブラリです https://github.com/paramiko/paramiko
 
@@ -511,6 +511,7 @@ ansibleコマンドを実行してみましょう [#iianssshyes]_ 。
    当然のことながら ``.ssh/known_hosts`` ファイルのキーを消さないとsshのログインに失敗します。そのときは、あらかじめ ``ansible.cfg`` に下記を書いておくと良いです。
    
       [defaults]
+
       host_key_checking=False
 
 
@@ -540,7 +541,7 @@ Ansibleの引数に、コマンドを指定することができます。これ�
    total 4
    -rw-r--r-- 1 root root 401 Aug  2 17:17 authorized_keys
 
-ファイルをコピーしてみます。``copy`` というモジュールがあるので、それを使います。今回はeriに対して実行してみます。
+ファイルをコピーしてみます。``copy`` というモジュールがあるので、それを使います。eriに対して実行してみます。
 
 .. code-block:: sh
   
@@ -666,9 +667,9 @@ CentOSとUbuntuでパッケージ管理システムに違いがあるため、wh
 
    デプロイされているプログラムのアップデートにともなって、ミドルウエアのモジュールを追加したい場合があります。手順書をコード化してサーバで実行すれば、構築完了です。
    ただし、本番環境に対して変更を加える事はストレスになります。一方、本記事の冒頭にでてきた「作って壊す」という環境があれば、冪等性について考える必要はないかもしれません。
-   そんな時はBlue-Green Deployment [#bgd]_ で切り替えましょう。といっても、そんな富豪的に使えるところってあるんですかねえ・・・
+   そんな時はBlue-Green Deployment [#bgd]_ で切り替えましょう。といっても、そんな富豪的に使えるところってあるんですかねえ……
 
-   .. [#bgd] 本番サーバ同じ構成のサーバの組をもう一つ作っておいて、アクセスをルータで切り替えてデプロイしていく方法
+   .. [#bgd] 本番サーバ同じ構成のサーバの組をもう一つ作っておいて、やってくるアクセスをルータで切り替えてデプロイしていく方法
 
 
 過去の遺産 Playback
@@ -756,13 +757,13 @@ Ansible Galaxy [#iiansag]_ を参照すると、様々なPlaybookを探するこ
 
 
 仮想化・その1 Vagrant編
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 仮想化のツールとして、HashiCorp [#iihashi]_ が提供しているVagrant [#iiveg]_ を取り上げます。Vagrantとは、ホストOS上に独立した仮想マシンを立ち上げることができるツールです。
 Vagrantの仮想マシンは、Boxというファイルに保存することができます。
 Vagrantがインストールされているマシンに、Boxファイルを読み込ませれば、保存されたマシンが起動します。仮想マシンを気軽に作ったり壊したりできます。
 
-Vagrantはruby [#iivaggh]_ で書かれています。ホストOSとして使えるOSは、Max OS X、主要なLinuxのディストリビューション、Windowsです。設定ファイルは、Vagrantfileというファイルに記述します。
+Vagrantはruby [#iivaggh]_ で書かれています。ホストOSとして、Max OS X、主要なLinuxのディストリビューションと、Windowsが使えます。設定ファイルは、Vagrantfileというファイルに記述します。
 仮想マシンは、デフォルトではVirtualBox上で起動します。それ以外にも、VMwareやAWS、DigitalOceanにも仮想マシンを立てることができます。仮想マシンを立てられるプラットフォームをプロバイダーと呼びます。
 
 .. [#iihashi] http://www.hashicorp.com/
@@ -798,7 +799,7 @@ Vagrant [#iivagmacin]_ , VirtualBox [#iivagvbin]_ とも、公式サイトでMac
 
 * CentOS 6.5にインストール
 
-Vagrant は RPM でリリースされています。ホストOSのカーネルバージョンに依存します。起動しているカーネルと同じバージョンの ``kernel-devel`` ``kernerl-headers`` がインストールされていないとVirtualBoxが起動しません。もしなければ、RPMを探してインストールしましょう [#iivagker]_ 。
+Vagrant は RPM でリリースされています。一方、VirtualBoxは、ホストOSのカーネルバージョンに依存します。起動しているカーネルと同じバージョンの kernel-develaとkernerl-headers がインストールされていないと起動しません。もしなければ、RPMを探してインストールしましょう [#iivagker]_ 。
 
 .. [#iivagker] DigitalOceanのDropletsでやってみたところ、起動しているカーネルとインストールされているkernel-develなどのバージョンが違い、ハマる
 
@@ -849,7 +850,7 @@ vagrant upして仮想マシンを起動
 
 これだけで仮想マシンの準備ができました。
 
-``vagrant up`` を実行すると、vagrantcloud.comからboxのダウンロードが始まります。vagrantcloud.comには様々なOS, アプリケーションがインストール済みのBoxファイルがあるので、目的に合わせたものを選択して使うことができます。
+``vagrant up`` を実行すると、vagrantcloud.comからboxのダウンロードが始まります。vagrantcloud.comには様々なOS, アプリケーションがインストール済みのBoxファイルがあるので、目的に合わせたものを使うことができます。
 
 コマンドの実行に若干時間がかかりますが、これらのコマンドでUbuntu 12.04 LTSの仮想マシンがVirtualBox上で立ち上がります。 ``vagrant ssh`` で、その仮想マシンにsshでログインできます。
 ホストOSの下記のディレクトリに、VirtualBoxのvmdkなどのファイルがおいてあります。
@@ -948,7 +949,7 @@ provisoning - ansible編
 """"""""""""""""""""""""
 
 プロビジョニングの例では、コマンド呼び出しやシェルスクリプトの実行を行いました。その他に、ChefやPuppet、Ansibleも呼び出すことができます。
-Ansibleに触れたところなので、今回はプロビジョニングにAnsibleを使ってみます。仮想マシンは2台立ち上げて、ホストOSのVagrantfileからAnsibleを実行してみます。
+Ansibleに触れたところなので、プロビジョニングにAnsibleを使ってみます。仮想マシンは2台立ち上げて、ホストOSのVagrantfileからAnsibleを実行してみます。
 
 Vagrantfileの設定です。下記のようにします。
 
@@ -1319,13 +1320,13 @@ ifconfigを打つと、ローカルIPがふられています。ホストOSか�
 
 .. code-block:: sh
 
-   # docker run -d ubuntu:14.04 ping www.lovelive-anime.jp
+   root@hanayo:~# docker run -d ubuntu:14.04 ping www.lovelive-anime.jp
    d7168d2c3b421192a49dc15927b6a1466ab73424bda94e11679af9f8509f369c
-   # docker ps 
+   root@hanayo:~# docker ps 
    CONTAINER ID IMAGE        COMMAND CREATED        STATUS        NAMES
-   d7168d2c3b42 ubuntu:14.04 ping ww 18 seconds ago Up 18 seconds happy_meitner    
+   d7168d2c3b42 ubuntu:14.04 ping ww 18 seconds ago Up 18 seconds happy_meitn
    
-   # docker logs happy_meitner  | head
+   root@hanayo:~# docker logs happy_meitner  | head
    PING www.lovelive-anime.jp (210.138.156.25) 56(84) bytes of data.
    64 bytes from 25.156.138.210.rev.iijgio.jp (210.138.156.25): icmp_seq=1 tt
    64 bytes from 25.156.138.210.rev.iijgio.jp (210.138.156.25): icmp_seq=2 tt
@@ -1335,10 +1336,10 @@ ifconfigを打つと、ローカルIPがふられています。ホストOSか�
 
 .. code-block:: sh
 
-   root@hanayo:~# sudo docker stop happy_meitner 
+   root@hanayo:~# docker stop happy_meitner 
    happy_meitner
 
-タスクの名前は、命名規則は「形容詞_人の名前」になってるみたいです。ここまで、dockerのコンテナの立ち上げと削除を行いました。別のOSも使ってみましょう。
+コンテナの名前は、命名規則は「形容詞_人の名前」になっています。ここまで、dockerのコンテナの立ち上げと削除を行いました。別のOSも使ってみましょう。
 
 .. code-block:: sh
 
@@ -1408,7 +1409,7 @@ Dockerのイメージファイルは https://hub.docker.com/ にあります。s
 
 .. [#iidocsb] stackbrew(https://github.com/dotcloud/stackbrew)というのが公式イメージの一つです。 ``NAME`` は、 ``username/imagename`` と付けるのが流儀。
 
-再度、実行してみましょう。ついでに ``gcc`` をインストールをインストールしてみましょう。CentOSなので、もれなく ``yum install -y gcc`` が打てます。応募者全員サービスです。
+再度、実行してみましょう。ついでに ``gcc`` をインストールしてみましょう。CentOSなので、もれなく ``yum install -y gcc`` が打てます。応募者全員サービスです。
 
 .. code-block:: sh
 
@@ -1511,7 +1512,7 @@ redisのコンテナと、apache+phpが入ったコンテナを作って、redis
 
 
 ``-p`` オプションはホストOSと、コンテナのポートマッピングを指定しています。 ``docker ps -a`` で、redisのコンテナが起動したことが確認できました。
-ホストOSにredisのインスタンスが起動している感覚で、実はそのインスタンスは仮想マシンの中で起動しているというイメージです。
+ホストOSにredisのインスタンスが起動しているようにみえて、実はそのインスタンスは仮想マシンの中で起動しているというイメージです。
 ホストOSで、 ``telnet localhost 6379`` を打ってから info を打つと、redisの情報が返ってきます。なお、quitを打つと抜けられます。
 
 つぎに、apacheとphpの入ったコンテナを作ります。redisのような、ちょうどよいイメージが無いため自分で作ります。このようなコンテナを作ります：
@@ -1669,11 +1670,11 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 
 .. topic:: このDockerfileができるまで
 
-   Dockerfileの中で、 ``yum install httpd`` ができません。こちらのバグを踏みます。Bug 1012952 - docker: error: unpacking of archive failed on file /usr/sbin/suexec: cpio: cap_set_file [#iibug2]_ 。apacheをソースからインストールすることになりました。また、aprの依存パッケージをインストールするところで同じように失敗します。パッケージがインストールできなくても問題ありませんが、exit statusが0以外だとDockerfileのビルドが止まるため、 `` ; true `` で応急処置をしています。
+   Dockerfileの中で、 ``yum install httpd`` ができません。こちらのバグを踏みます。Bug 1012952 - docker: error: unpacking of archive failed on file /usr/sbin/suexec: cpio: cap_set_file [#iibug2]_ 。apacheをソースからインストールすることになりました。また、aprの依存パッケージをインストールするところで同じように失敗します。パッケージがインストールできなくても問題ありませんが、exit statusが0以外だとDockerfileのビルドが止まるため、 `` ; true `` で応急処置をしています。ひどいですね。
 
-   centosイメージを使うと、CentOS 7となるため、サービスの起動はsystemdになります。systemd経由でapacheを起動しようとすると、こちらのバグを踏みます：Bug 1033604 - Unable to start systemd service in Docker container [#iibug1]_ 。「dockerはアプリケーションコンテナモデルである。systemdで起動してはいけない。デーモンで直接起動しよう」という回答がありました。
+   centosイメージを使うと、CentOS 7となるため、サービスの起動はsystemdになります。systemd経由でapacheを起動しようとすると、こちらのバグを踏みます：Bug 1033604 - Unable to start systemd service in Docker container [#iibug1]_ 。「dockerはアプリケーションコンテナモデルである。systemdで起動してはいけない。デーモンで直接起動しよう」という回答があります。
 
-   sshでのログインでは、mizzyさんの記事「Dockerコンテナに入るなら SSH より nsinit が良さそう」 [#nsinit]_ を見つけました。やってみたところ、go getのところで詰まり、断念。「RHEL/CentOS 6で Docker に nsinit/nsenter する」 [#nsenter]_ の記事を見つけたものの、手順が煩雑なので諦めました。結局、supervisordに落ち着きました。PAMをoffにしていないとログインできなかったりと、様々な罠がありました。
+   sshでのログインでは、mizzyさんの記事「Dockerコンテナに入るなら SSH より nsinit が良さそう」 [#nsinit]_ を見つけました。やってみたところ、go getのところで詰まり、断念。「RHEL/CentOS 6で Docker に nsinit/nsenter する」 [#nsenter]_ の記事を見つけたものの、手順が煩雑なので諦めました。結局、supervisordに落ち着きました。PAMをoffにしていないとsshログインできなかったりと、様々な罠がありました。
 
    .. [#iibug2] https://bugzilla.redhat.com/show_bug.cgi?id=1012952
    .. [#iibug1] https://bugzilla.redhat.com/show_bug.cgi?id=1033604
@@ -1692,7 +1693,7 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 
 * コマンドのチュートリアルは、curseoffさんの「Dockerコマンドメモ」 [#]_ が手堅くまとまっています。Vagrantを使って少し進んだチュートリアルはdeeeetさんの「実例で学ぶDockerコマンド」 [#]_ が有用です
 
-* VagrantでCoreOSの仮想マシンを立ち上げて、そこでDockerを使ってアプリケーションの開発を行うという手法が主流になっているそうです [#]_ 
+* VagrantでCoreOSの仮想マシンを立ち上げて、そこでDockerを使ってアプリケーションの開発を行うという手法が主流になっているそうです [#vd]_ 
 
 * DaaS(Docker as a Service)の会社がでてきました。例えば、Orchard、Stackdock、tutumです
 
@@ -1701,7 +1702,7 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 .. [#] http://qiita.com/JAGAxIMO/items/6b71a03518bbd53d4de6
 .. [#] http://qiita.com/curseoff/items/a9e64ad01d673abb6866
 .. [#] http://qiita.com/deeeet/items/ed2246497cd6fcfe4104
-.. [#] http://coreos.com/docs/launching-containers/building/getting-started-with-docker/
+.. [#vd] http://coreos.com/docs/launching-containers/building/getting-started-with-docker/
 
 
 Cobbler
@@ -1714,13 +1715,15 @@ PXE Bootの仕組みは分かっているけど、いざ作ろうとするとや
 
 .. [#cobbler] http://www.cobblerd.org/
 
-digitalOceanのcentos6.5にて実施しました。PXE bootはサポートされていませんが、LABELの追加までやってみます。yumでcobblerをインストールすると、httpdなどがインストールされます。pxelinux.0を持ってくるために、syslinuxパッケージも必要でした。なお、yumでインストールすると、Cobblerのバージョンは1.2.2でした。バージョン2.6系がリリースされているので古いです。
+digitalOceanのcentos6.5にて実施しました。PXE bootはサポートされていませんが、LABELの追加までやってみます [#cob]_ 。yumでcobblerをインストールすると、httpdなどがインストールされます。pxelinux.0を持ってくるために、syslinuxパッケージも必要でした。なお、yumでインストールすると、Cobblerのバージョンは1.2.2でした。バージョン2.6系がリリースされているので古いです。
+
+.. [#cob] ちゃんと動くところまでできなくてごめんなさい
 
 .. code-block:: sh
 
-   yum install http://pkgs.repoforge.org/rpmforge-release/¥
-   rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
-   yum install cobbler syslinux  
+   # yum install http://pkgs.repoforge.org/rpmforge-release/¥
+   > rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+   # yum install cobbler syslinux  
 
 
 必要に応じて、 ``/etc/cobbler/settings`` の下記の部分を書き換えます。dhcpの設定をcobbler行う場合は、manage_dhcpを1にします。
@@ -1809,9 +1812,9 @@ IIの世界での使い方としては、新しいサーバがクラスタに追
 .. [#iigos] http://en.wikipedia.org/wiki/Gossip_protocol
 
 インストールしてみましょう。各ディストリビューション向けに、パッケージが用意されています。今回はlinux amd64をダウンロード。zipを解凍すると、そこには ``serf`` のバイナリだけが入っていました。
-実験する環境は、毎度おなじみDigitalOceanの最小構成のDropletです。Dropletを2つ(sachiko, nana)用意して、Private Networkを有効にしています。
+実験する環境は、毎度おなじみDigitalOceanの最小構成のDropletです。Dropletを2つ(sachiko, nana)用意して、プライベートアドレスを有効にしています。
 
-sachikoでagentを立ち上げます。
+sachiko, nanaでSerfをインストールします。
 
 .. code-block:: sh
 
@@ -1821,7 +1824,7 @@ sachikoでagentを立ち上げます。
    0.6.3_linux_amd64.zip serf
    $ sudo cp serf /usr/local/bin/
 
-Agentを起動します [#iiserfagent]_ 。
+sachikoでagentを立ち上げます。Agentを起動します [#iiserfagent]_ 。
 
 .. [#iiserfagent] この状態で、0.0.0.0を7946portでLISTEN、localhostを7373portでLISTENしています
 
@@ -1845,11 +1848,11 @@ Agentを起動します [#iiserfagent]_ 。
      2014/08/03 03:55:25 [INFO] agent: Received event: member-join
 
 
-``&`` をつけないとバックグラウンドで起動してくれません。この場合は、ctrl+cを打つと ``serf agent`` が終了します。initスクリプト [#iiserfini]_ があるので、そちらを使ったほうが楽です。
+``&`` をつけないとバックグラウンドで起動してくれません。このまま、ctrl+cを打つと ``serf agent`` が終了します。initスクリプト [#iiserfini]_ があるので、そちらを使ったほうがよいでしょう。
 
 .. [#iiserfini] http://pocketstudio.jp/log3/2013/11/25/sysv_init_script_for_serf/
 
-sachikoのプライベートネットワークのIPアドレスをメモ(今回は10.130.215.135)して、nanaへ移ります。nanaでもserfをインストールしてagentを立ち上げます。バックグラウンドで立ち上げます。
+sachikoのプライベートネットワークのIPアドレスをメモ(今回は10.130.215.135)して、nanaへ移ります。nanaでもagentを立ち上げます。バックグラウンドで立ち上げます。
 
 .. code-block:: sh
 
@@ -1898,7 +1901,7 @@ sachiko [#iikousiki]_ のログにも、出ています。
    sachiko  10.130.215.135:7946  alive  
    nana     10.130.215.141:7946  left
 
-復帰させてみます。
+leaveすると、agentが終了するので、agentを起動してからjoinさせてみます。
 
 .. code-block:: sh
 
@@ -1910,7 +1913,7 @@ sachiko [#iikousiki]_ のログにも、出ています。
    sachiko  10.130.215.135:7946  alive  
    nana     10.130.215.141:7946  alive
 
-nanaが復帰しました。leaveはクラスタから外れるイベントです。その他にも、join,failed,update,reapなどがあります。
+nanaが復帰しました。leaveはクラスタから外れるイベントです。その他にも、failed,update,reapなどがあります。
 イベントが実行された時に任意のスクリプトを実行できるようにしてみましょう。スクリプトファイルはこのような感じで作ります。
 
 :: 
@@ -1956,16 +1959,16 @@ agentを終了して、イベントハンドラにスクリプトファイルを
    [abe@nana ~]$ # 標準出力に表示されます
    2014/08/03 06:08:42 [DEBUG] agent: Event 'user' script output: はーい今出ま…
 
-eventは全てのクラスタで実行されるため、usaminで、 ``serf event visit`` を実行しても同じ結果になります。
+eventは全てのクラスタで実行されるため、nanaで、 ``serf event visit`` を実行しても同じ結果になります。
 
 
 参考
 """""
 
-* 正月休みだし Serf 触ってみた : http://blog.livedoor.jp/sonots/archives/35397486.html
-* Serfが面白いと俺の中で話題にwwwwww : http://www.slideshare.net/zembutsu/serf-the-liberator
-* Serf 虎の巻 : http://deeeet.com/writing/2014/03/23/serf-basic/
-* Serf Demo: Web Servers + Load Balancer : https://github.com/hashicorp/serf/tree/master/demo/web-load-balancer
+* 正月休みだし Serf 触ってみた (http://blog.livedoor.jp/sonots/archives/35397486.html)
+* Serfが面白いと俺の中で話題にwwwwww (http://www.slideshare.net/zembutsu/serf-the-liberator)
+* Serf 虎の巻 (http://deeeet.com/writing/2014/03/23/serf-basic/)
+* Serf Demo: Web Servers + Load Balancer (https://github.com/hashicorp/serf/tree/master/demo/web-load-balancer)
 
 
 その他の問題
@@ -2026,7 +2029,7 @@ Orchestration、Configuration、Bootstrapping、Agent、Testで使われるツ�
 * @ringohub (https://twitter.com/ringohub | Vagrantでアドバイスいただきました)
 * @JAGAxIMO (https://twitter.com/JAGAxIMO | Dockerで困った時助けていただきました)
 * @r_rudi (https://twitter.com/r_rudi | Ansibleでツッコミ頂きました)
-* @mtgto (https://twitter.com/mtgto | 査読していただきました)
+* @mtgto (https://twitter.com/mtgto | 本記事を査読していただきました)
 * 先人のblogの記事(各ツールの最後にURLを載せています)
 
 
@@ -2050,7 +2053,8 @@ Orchestration、Configuration、Bootstrapping、Agent、Testで使われるツ�
 
 参考文献
 --------
-「継続的デリバリー 信頼できるソフトウェアリリースのためのビルド・テスト・デプロイメントの自動化」アスキー・メディアワークス,2012
-「入門Ansible」(http://www.amazon.co.jp/dp/B00MALTGDY/),2014
-「WEB+DB PRESS vol.81」技術評論社,2014
+
+* 「継続的デリバリー 信頼できるソフトウェアリリースのためのビルド・テスト・デプロイメントの自動化」アスキー・メディアワークス,2012
+* 「入門Ansible」(http://www.amazon.co.jp/dp/B00MALTGDY/),2014
+* 「WEB+DB PRESS vol.81」技術評論社,2014
 
