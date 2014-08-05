@@ -337,6 +337,7 @@ HTTP/2 通信できているか確認するには、 Firebug の Net タブか�
 X-Firefox-Spdy ヘッダの内容に下図のような "h2-<ドラフト番号>" が含まれていれば HTTP/2 通信ができています。
 
 .. figure:: img/x_firefox_spdy.eps
+   :scale: 50%
 
    X-Firefox-Spdy ヘッダの内容の例
 

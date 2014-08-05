@@ -1669,14 +1669,13 @@ docker run -d -p 10022:22 -p 80:80 centos:ap
 
 .. topic:: このDockerfileができるまで
 
-   Dockerfileの中で、 ``yum install httpd`` ができません。こちらのバグを踏みます。Bug 1012952 - docker: error: unpacking of archive failed on file /usr/sbin/suexec: cpio: cap_set_file [#]_ 。apacheをソースからインストールすることになりました。また、aprの依存パッケージをインストールするところで同じように失敗します。パッケージがインストールできなくても問題ありませんが、exit statusが0以外だとDockerfileのビルドが止まるため、 `` ; true `` で応急処置をしています。
-
-   .. [#] https://bugzilla.redhat.com/show_bug.cgi?id=1012952
+   Dockerfileの中で、 ``yum install httpd`` ができません。こちらのバグを踏みます。Bug 1012952 - docker: error: unpacking of archive failed on file /usr/sbin/suexec: cpio: cap_set_file [#iibug2]_ 。apacheをソースからインストールすることになりました。また、aprの依存パッケージをインストールするところで同じように失敗します。パッケージがインストールできなくても問題ありませんが、exit statusが0以外だとDockerfileのビルドが止まるため、 `` ; true `` で応急処置をしています。
 
    centosイメージを使うと、CentOS 7となるため、サービスの起動はsystemdになります。systemd経由でapacheを起動しようとすると、こちらのバグを踏みます：Bug 1033604 - Unable to start systemd service in Docker container [#iibug1]_ 。「dockerはアプリケーションコンテナモデルである。systemdで起動してはいけない。デーモンで直接起動しよう」という回答がありました。
 
    sshでのログインでは、mizzyさんの記事「Dockerコンテナに入るなら SSH より nsinit が良さそう」 [#nsinit]_ を見つけました。やってみたところ、go getのところで詰まり、断念。「RHEL/CentOS 6で Docker に nsinit/nsenter する」 [#nsenter]_ の記事を見つけたものの、手順が煩雑なので諦めました。結局、supervisordに落ち着きました。PAMをoffにしていないとログインできなかったりと、様々な罠がありました。
-   
+
+   .. [#iibug2] https://bugzilla.redhat.com/show_bug.cgi?id=1012952
    .. [#iibug1] https://bugzilla.redhat.com/show_bug.cgi?id=1033604
    .. [#nsinit] http://mizzy.org/blog/2014/06/22/1/
    .. [#nsenter] http://qiita.com/comutt/items/2f873a0e7eaddd3f647e
@@ -1795,8 +1794,8 @@ Serverと next_server の設定をします。ここではテストのためデ�
 参考
 """"""
 
-* CobblerでScientific Linux 6.1を導入 (http://blog.glidenote.com/blog/2012/02/03/cobbler-scientific-linux-6.1/)
-* cobbler を使ってみた (http://www.sssg.org/blogs/naoya/archives/855)
+* CobblerでScientific Linux 6.1を導入 : http://blog.glidenote.com/blog/2012/02/03/cobbler-scientific-linux-6.1/
+* cobbler を使ってみた : http://www.sssg.org/blogs/naoya/archives/855
 
 
 Surf
@@ -1816,11 +1815,11 @@ sachikoでagentを立ち上げます。
 
 .. code-block:: sh
 
-   wget https://dl.bintray.com/mitchellh/serf/0.6.3_linux_amd64.zip
-   unzip 0.6.3_linux_amd64.zip
-   ls 
+   $ wget https://dl.bintray.com/mitchellh/serf/0.6.3_linux_amd64.zip
+   $ unzip 0.6.3_linux_amd64.zip
+   $ ls 
    0.6.3_linux_amd64.zip serf
-   sudo cp serf /usr/local/bin/
+   $ sudo cp serf /usr/local/bin/
 
 Agentを起動します [#iiserfagent]_ 。
 
@@ -1841,9 +1840,9 @@ Agentを起動します [#iiserfagent]_ 。
    
    ==> Log data will now stream in as it occurs:
    
-       2014/08/03 03:55:24 [INFO] agent: Serf agent starting
-       2014/08/03 03:55:24 [INFO] serf: EventMemberJoin: sachiko 10.130.215.135
-       2014/08/03 03:55:25 [INFO] agent: Received event: member-join
+     2014/08/03 03:55:24 [INFO] agent: Serf agent starting
+     2014/08/03 03:55:24 [INFO] serf: EventMemberJoin: sachiko 10.130.215.135
+     2014/08/03 03:55:25 [INFO] agent: Received event: member-join
 
 
 ``&`` をつけないとバックグラウンドで起動してくれません。この場合は、ctrl+cを打つと ``serf agent`` が終了します。initスクリプト [#iiserfini]_ があるので、そちらを使ったほうが楽です。
@@ -1952,7 +1951,7 @@ agentを終了して、イベントハンドラにスクリプトファイルを
    [abe@nana ~]$ serf join 10.130.215.135
 
    [koshimizu@sachiko ~]$ serf event visit
-   2014/08/03 06:08:41 [DEBUG] agent: Event 'user' script output: プロデュ
+   2014/08/03 06:08:41 [DEBUG] agent: Event 'user' script output: プロデューサー
 
    [abe@nana ~]$ # 標準出力に表示されます
    2014/08/03 06:08:42 [DEBUG] agent: Event 'user' script output: はーい今出ま…
@@ -1963,10 +1962,10 @@ eventは全てのクラスタで実行されるため、usaminで、 ``serf even
 参考
 """""
 
-* 正月休みだし Serf 触ってみた(http://blog.livedoor.jp/sonots/archives/35397486.html)
-* Serfが面白いと俺の中で話題にwwwwww(http://www.slideshare.net/zembutsu/serf-the-liberator)
-* Serf 虎の巻(http://deeeet.com/writing/2014/03/23/serf-basic/)
-* Serf Demo: Web Servers + Load Balancer(https://github.com/hashicorp/serf/tree/master/demo/web-load-balancer)
+* 正月休みだし Serf 触ってみた : http://blog.livedoor.jp/sonots/archives/35397486.html
+* Serfが面白いと俺の中で話題にwwwwww : http://www.slideshare.net/zembutsu/serf-the-liberator
+* Serf 虎の巻 : http://deeeet.com/writing/2014/03/23/serf-basic/
+* Serf Demo: Web Servers + Load Balancer : https://github.com/hashicorp/serf/tree/master/demo/web-load-balancer
 
 
 その他の問題
@@ -1980,7 +1979,7 @@ IIを使っていく上で避けては通れない問題について触れてい
 本番環境で動作しているサーバは、日々、ログが蓄積されていきます。インスタンスを作って壊すことが簡単になると、保存しておくべきログはどうやって残しておくか、ということが問題になります。
 解決策としては、Fluentd [#flu]_ を使う方法があります。リアルタイムにログ収集できます。取得したログをElasticsearch [#es]_ と kibana [#kibana]_ で可視化している、というところもあるのではないでしょうか。
 
-.. [#flu  ] http://www.fluentd.org/
+.. [#flu] http://www.fluentd.org/
 .. [#es] http://www.elasticsearch.org/
 .. [#kibana] http://www.elasticsearch.org/overview/kibana/
 
@@ -1989,7 +1988,7 @@ IIを使っていく上で避けては通れない問題について触れてい
 ^^^^^^^^^^^^^^^^^^^^
 
 インスタンスを作って壊すことが多くなると、サーバのモニタリングツールに登録しているホストが消えることがあります。すると、過去のトレンドが見えなくなってしまいます。
-ホストをグルーピングしてモニタできる mackerel(マカレル) [#mackerel]_ があります。途中でノードが無くなっても、モニタリングを継続できる監視ツールです。
+そういった問題を克服した監視ツール mackerel(マカレル) [#mackerel]_ があります。途中でノードが無くなっても、モニタリングを継続できる監視ツールです。
 
 .. [#mackerel] https://mackerel.io/ mackerelの意味は鯖
 
@@ -2002,7 +2001,7 @@ nanaとsachikoのサーバにインストールしていました。役割でま
 
   nanaとsachikoの通信量のモニタリング
 
-インストールは、mackerel のサイトに登録すると、RPMなどのパッケージがでてきます。設定ファイル(API Key)をコピペで貼付け、サービスを起動すればモニタリングが始まります。
+RPMなどのパッケージがあるので、インストールします。設定ファイル(API Key)をコピペで貼付け、サービスを起動すればモニタリングが始まります。
 
 
 まとめ
@@ -2012,12 +2011,10 @@ Orchestration、Configuration、Bootstrapping、Agent、Testで使われるツ�
 取り上げたツールをうまく組み合わせると、本番のデプロイや、アプリケーションの開発が便利になるかもしれません。
 例えば、 mackerel をインストールするAnsibleのplaybookを書いて、それをVagrantのプロビジョンとして指定、そのVagrantのプロバイダーをDigitalOceanにすれば1つシステムができあがります。
 本記事には出てきていないPacker [#iipacker]_ があります。VirtualBoxやAmazon EC2、DigitalOcean用のイメージファイルを作るためのツールです。kickstartファイルからイメージを作成し、インストールされているパッケージが本番環境と同じOSイメージを開発者に渡して、Vagrantでアプリケーションの開発を行うことができます。
-さらに、githubにpushが発生した時、jenkinsおじさんがそれを察知、イメージファイルにプログラムを流し込み、そのままServerspecでテストを走らせることも可能になります。
 
 .. [#iipacker] http://www.packer.io/
 
-ツールの組み合わせ次第で、いままで手作業だったり、手を動かいてチェックする部分を自動化することが出来ます。ただ、いろいろなツールが乱立しているので、どのツールを組み合わせるか、というのが重要になってきます。ツール自体も一長一短があります。現在進行形で、やりたいことを実現するためにはどうするか手探り状態です。
-新しい技術ももちろん重要ですが、忘れがちな古い技術も組み合わせて、事故のないデプロイをしていきましょう。
+こうして、いままで手作業だった部分を自動化することが出来ます。ただ、いろいろなツールが乱立しているので、どのツールをどうやって組み合わせるかが問題になってきます。ツールもたくさんあるため、やりたいことを実現するためにはどうするかは、まだ手探り状態です。新しい技術ももちろん重要ですが、忘れがちな古い技術も組み合わせて、事故のないデプロイをしていきましょう。
 
 今回使ったサンプルコードには、 https://github.com/tboffice/nanaka5-ii においてあります。
 
@@ -2033,8 +2030,8 @@ Orchestration、Configuration、Bootstrapping、Agent、Testで使われるツ�
 * 先人のblogの記事(各ツールの最後にURLを載せています)
 
 
-おまけ
------------------
+トレンドを追いかける
+------------------
 
 トレンドを追いかけるために見ておいたほうが良い文献です。
 
@@ -2043,11 +2040,7 @@ Orchestration、Configuration、Bootstrapping、Agent、Testで使われるツ�
 * Martin Fowler http://martinfowler.com/
 * chad fowler http://chadfowler.com/
 
-英語ですが、翻訳すれば雰囲気はつかめます。
-
-* 今さら聞けない Immutable Infrastructure - 昼メシ物語 : http://blog.mirakui.com/entry/2013/11/26/231658
-
-  - IIについての話題をコンパクトにまとめている記事です。ここで出てこないトピックもたくさんあります
+翻訳すれば雰囲気はつかめます。
 
 表紙について
 -------------
