@@ -21,6 +21,12 @@
 * AWSをコード化する(@rosylilly)
 * できね！家庭用3Dプリンタ(@Omegamega)
 
+## 紹介記事
+
+* 夏コミで出す本のご紹介「ななかInside PRESS vol.5」3日目 8/17 (Sun) き36b : http://mtgto.hatenablog.com/entry/2014/08/15/004946
+* 「今どきのWeb技術トレンド、多数知れる同人雑誌」出します: http://richlab.hatenablog.com/entry/2014/08/13/020026
+* Immutable Infrastructureの擬人化やってみた: http://tboffice.hatenablog.jp/entry/2014/08/10/014632
+* コミケ4日目は、はてブで本を買おう: http://richlab.hatenablog.com/entry/2014/08/18/135859
 
 ## あとがきからいらっしゃった方へ
 
